@@ -364,8 +364,8 @@ allows us to save repeated computation later during training.
 
  .. code-block:: none
 
-      0%|          | 0/244 [00:00<?, ?it/s]     26%|##6       | 64/244 [00:00<00:02, 89.65it/s]     79%|#######8  | 192/244 [00:00<00:00, 282.50it/s]    100%|##########| 244/244 [00:00<00:00, 282.14it/s]
-      0%|          | 0/153 [00:00<?, ?it/s]     42%|####1     | 64/153 [00:00<00:00, 109.44it/s]     84%|########3 | 128/153 [00:00<00:00, 197.75it/s]    100%|##########| 153/153 [00:00<00:00, 197.41it/s]
+      0%|          | 0/244 [00:00<?, ?it/s]     26%|##6       | 64/244 [00:00<00:02, 88.08it/s]    100%|##########| 244/244 [00:00<00:00, 297.94it/s]
+      0%|          | 0/153 [00:00<?, ?it/s]     42%|####1     | 64/153 [00:00<00:00, 122.08it/s]     84%|########3 | 128/153 [00:00<00:00, 205.83it/s]    100%|##########| 153/153 [00:00<00:00, 208.79it/s]
 
 
 
@@ -495,7 +495,7 @@ starting the dataloader can take some time).
 
  .. code-block:: none
 
-    One iteration over dataloader done! Rate: 352.4466 fps, time:  0.6242s
+    One iteration over dataloader done! Rate: 371.3786 fps, time:  0.5924s
 
 
 
@@ -531,7 +531,7 @@ transformations to the batched images.
 
  .. code-block:: none
 
-    One iteration over tensorclass dataloader done! Rate: 795.3117 fps, time:  0.2766s
+    One iteration over tensorclass dataloader done! Rate: 742.6283 fps, time:  0.2962s
 
 
 
@@ -580,8 +580,8 @@ need for additional transformations as we load from disk.
 
  .. code-block:: none
 
-    One iteration over val data done! Rate: 265.1401 fps, time:  0.4865s
-    One iteration over tensorclass val data done! Rate: 10668.3206 fps, time:  0.0121s
+    One iteration over val data done! Rate: 272.6765 fps, time:  0.4731s
+    One iteration over tensorclass val data done! Rate: 11454.5096 fps, time:  0.0113s
 
 
 
@@ -618,7 +618,7 @@ for an example of how this could work.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.701 seconds)
+   **Total running time of the script:** ( 0 minutes  3.531 seconds)
 
 
 .. _sphx_glr_download_tutorials_tensorclass_imagenet.py:
