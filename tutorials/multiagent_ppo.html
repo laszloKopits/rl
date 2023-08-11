@@ -1149,8 +1149,8 @@ The steps include:</p>
     <span class="k">with</span> <a href="https://pytorch.org/docs/stable/generated/torch.no_grad.html#torch.no_grad" title="torch.no_grad" class="sphx-glr-backref-module-torch sphx-glr-backref-type-py-class"><span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span></a><span class="p">():</span>
         <span class="n">GAE</span><span class="p">(</span>
             <a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="tensordict.TensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tensordict_data</span></a><span class="p">,</span>
-            <span class="n">params</span><span class="o">=</span><span class="n">loss_module</span><span class="o">.</span><span class="n">critic_params</span><span class="p">,</span>
-            <span class="n">target_params</span><span class="o">=</span><span class="n">loss_module</span><span class="o">.</span><span class="n">target_critic_params</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictParams.html#tensordict.nn.TensorDictParams" title="tensordict.nn.TensorDictParams" class="sphx-glr-backref-module-tensordict-nn sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">loss_module</span><span class="o">.</span><span class="n">critic_params</span></a><span class="p">,</span>
+            <span class="n">target_params</span><span class="o">=</span><a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="tensordict.TensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">loss_module</span><span class="o">.</span><span class="n">target_critic_params</span></a><span class="p">,</span>
         <span class="p">)</span>  <span class="c1"># Compute GAE and add it to the data</span>
 
     <a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="tensordict.TensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_view</span></a> <span class="o">=</span> <a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict.reshape" title="tensordict.TensorDict.reshape" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-method"><span class="n">tensordict_data</span><span class="o">.</span><span class="n">reshape</span></a><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Flatten the batch size to shuffle data</span>
@@ -1189,16 +1189,16 @@ The steps include:</p>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>episode_reward_mean = 0:   0%|          | 0/10 [00:00&lt;?, ?it/s]
-episode_reward_mean = -0.3390621244907379:  10%|#         | 1/10 [00:07&lt;01:04,  7.15s/it]
-episode_reward_mean = 0.1457589715719223:  20%|##        | 2/10 [00:14&lt;00:57,  7.16s/it]
-episode_reward_mean = 1.0210180282592773:  30%|###       | 3/10 [00:21&lt;00:50,  7.15s/it]
-episode_reward_mean = 1.5489939451217651:  40%|####      | 4/10 [00:28&lt;00:42,  7.12s/it]
+episode_reward_mean = -0.3390621244907379:  10%|#         | 1/10 [00:07&lt;01:04,  7.13s/it]
+episode_reward_mean = 0.1457589715719223:  20%|##        | 2/10 [00:14&lt;00:56,  7.11s/it]
+episode_reward_mean = 1.0210180282592773:  30%|###       | 3/10 [00:21&lt;00:49,  7.10s/it]
+episode_reward_mean = 1.5489939451217651:  40%|####      | 4/10 [00:28&lt;00:42,  7.10s/it]
 episode_reward_mean = 1.7553492784500122:  50%|#####     | 5/10 [00:35&lt;00:35,  7.10s/it]
 episode_reward_mean = 2.2441396713256836:  60%|######    | 6/10 [00:42&lt;00:28,  7.11s/it]
-episode_reward_mean = 2.5985326766967773:  70%|#######   | 7/10 [00:49&lt;00:21,  7.15s/it]
-episode_reward_mean = 2.5103886127471924:  80%|########  | 8/10 [00:57&lt;00:14,  7.21s/it]
-episode_reward_mean = 2.7321016788482666:  90%|######### | 9/10 [01:04&lt;00:07,  7.34s/it]
-episode_reward_mean = 2.9089064598083496: 100%|##########| 10/10 [01:12&lt;00:00,  7.50s/it]
+episode_reward_mean = 2.5985326766967773:  70%|#######   | 7/10 [00:49&lt;00:21,  7.14s/it]
+episode_reward_mean = 2.5103886127471924:  80%|########  | 8/10 [00:57&lt;00:14,  7.18s/it]
+episode_reward_mean = 2.7321016788482666:  90%|######### | 9/10 [01:04&lt;00:07,  7.30s/it]
+episode_reward_mean = 2.9089064598083496: 100%|##########| 10/10 [01:12&lt;00:00,  7.43s/it]
 </pre></div>
 </div>
 </section>
@@ -1287,8 +1287,8 @@ Here are a few videos of some possible scenarios you can try in VMAS.</p>
 <p><span class="caption-text">Scenarios available in <a class="reference external" href="https://github.com/proroklab/VectorizedMultiAgentSimulator">VMAS</a></span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  21.378 seconds)</p>
-<p><strong>Estimated memory usage:</strong>  12 MB</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  20.740 seconds)</p>
+<p><strong>Estimated memory usage:</strong>  25 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-multiagent-ppo-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/f40bd467562dfb87148a8df03c1efb7a/multiagent_ppo.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">multiagent_ppo.py</span></code></a></p>
