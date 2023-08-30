@@ -1312,7 +1312,7 @@ Specialized Classes
  .. code-block:: none
 
 
-    tensor([-0.0137,  0.1524, -0.0641], grad_fn=<AddBackward0>)
+    tensor([-0.0137,  0.1524, -0.0641], grad_fn=<ViewBackward0>)
 
 
 
@@ -1333,7 +1333,7 @@ Specialized Classes
  .. code-block:: none
 
 
-    tensor([-1.,  1., -1.], grad_fn=<CopyBackwards>)
+    tensor([-1.,  1., -1.], grad_fn=<AsStridedBackward0>)
 
 
 
@@ -1997,7 +1997,7 @@ The library is on PyPI: *pip install torchrl*
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 4 minutes  13.351 seconds)
+   **Total running time of the script:** (4 minutes 19.933 seconds)
 
 **Estimated memory usage:**  15 MB
 

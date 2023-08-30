@@ -390,6 +390,7 @@
 <span class="kn">from</span> <span class="nn">torch.distributions</span> <span class="kn">import</span> <span class="n">Categorical</span>
 
 <span class="kn">from</span> <span class="nn">torchrl.data.tensor_specs</span> <span class="kn">import</span> <span class="n">CompositeSpec</span><span class="p">,</span> <span class="n">TensorSpec</span>
+<span class="kn">from</span> <span class="nn">torchrl.data.utils</span> <span class="kn">import</span> <span class="n">_process_action_space_spec</span>
 <span class="kn">from</span> <span class="nn">torchrl.modules.models.models</span> <span class="kn">import</span> <span class="n">DistributionalDQNnet</span>
 <span class="kn">from</span> <span class="nn">torchrl.modules.tensordict_module.common</span> <span class="kn">import</span> <span class="n">SafeModule</span>
 <span class="kn">from</span> <span class="nn">torchrl.modules.tensordict_module.probabilistic</span> <span class="kn">import</span> <span class="p">(</span>
@@ -397,7 +398,6 @@
     <span class="n">SafeProbabilisticTensorDictSequential</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">torchrl.modules.tensordict_module.sequence</span> <span class="kn">import</span> <span class="n">SafeSequential</span>
-<span class="kn">from</span> <span class="nn">torchrl.modules.utils.utils</span> <span class="kn">import</span> <span class="n">_find_action_space</span>
 
 
 <div class="viewcode-block" id="Actor"><a class="viewcode-back" href="../../../../reference/generated/torchrl.modules.tensordict_module.Actor.html#torchrl.modules.Actor">[docs]</a><span class="k">class</span> <span class="nc">Actor</span><span class="p">(</span><span class="n">SafeModule</span><span class="p">):</span>
@@ -1050,59 +1050,6 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="s2">&quot;&#39;binary&#39; is currently not supported for DistributionalQValueModule.&quot;</span>
         <span class="p">)</span></div>
-
-
-<span class="k">def</span> <span class="nf">_process_action_space_spec</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
-    <span class="n">original_spec</span> <span class="o">=</span> <span class="n">spec</span>
-    <span class="n">composite_spec</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">CompositeSpec</span><span class="p">):</span>
-        <span class="c1"># this will break whenever our action is more complex than a single tensor</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">_key</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># the first key is the action</span>
-                <span class="k">for</span> <span class="n">_key</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_key</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
-                        <span class="k">break</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">KeyError</span>
-            <span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="n">_key</span><span class="p">]</span>
-            <span class="n">composite_spec</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                <span class="s2">&quot;action could not be found in the spec. Make sure &quot;</span>
-                <span class="s2">&quot;you pass a spec that is either a native action spec or a composite action spec &quot;</span>
-                <span class="s2">&quot;with a leaf &#39;action&#39; entry. Otherwise, simply remove the spec and use the action_space only.&quot;</span>
-            <span class="p">)</span>
-    <span class="k">if</span> <span class="n">action_space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">CompositeSpec</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;action_space cannot be of type CompositeSpec.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">TensorSpec</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="n">action_space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">spec</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Passing an action_space as a TensorSpec and a spec isn&#39;t allowed, unless they match.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">TensorSpec</span><span class="p">):</span>
-            <span class="n">spec</span> <span class="o">=</span> <span class="n">action_space</span>
-        <span class="n">action_space</span> <span class="o">=</span> <span class="n">_find_action_space</span><span class="p">(</span><span class="n">action_space</span><span class="p">)</span>
-        <span class="c1"># check that the spec and action_space match</span>
-        <span class="k">if</span> <span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_find_action_space</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="o">!=</span> <span class="n">action_space</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The action spec and the action space do not match: got action_space=</span><span class="si">{</span><span class="n">action_space</span><span class="si">}</span><span class="s2"> and spec=</span><span class="si">{</span><span class="n">spec</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">action_space</span> <span class="o">=</span> <span class="n">_find_action_space</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;Neither action_space nor spec was defined. The action space cannot be inferred.&quot;</span>
-        <span class="p">)</span>
-    <span class="k">if</span> <span class="n">composite_spec</span><span class="p">:</span>
-        <span class="n">spec</span> <span class="o">=</span> <span class="n">original_spec</span>
-    <span class="k">return</span> <span class="n">action_space</span><span class="p">,</span> <span class="n">spec</span>
 
 
 <div class="viewcode-block" id="QValueHook"><a class="viewcode-back" href="../../../../reference/generated/torchrl.modules.QValueHook.html#torchrl.modules.QValueHook">[docs]</a><span class="k">class</span> <span class="nc">QValueHook</span><span class="p">:</span>
