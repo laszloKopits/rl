@@ -506,6 +506,8 @@
 
         <span class="k">if</span> <span class="n">split_trajs</span><span class="p">:</span>
             <span class="n">dataset</span> <span class="o">=</span> <span class="n">split_trajectories</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">][:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="n">storage</span> <span class="o">=</span> <span class="n">LazyMemmapStorage</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
@@ -630,6 +632,7 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dataset</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;terminal&quot;</span><span class="p">))</span>
+
         <span class="n">dataset</span><span class="o">.</span><span class="n">rename_key</span><span class="p">(</span><span class="s2">&quot;rewards&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">rename_key</span><span class="p">(</span><span class="s2">&quot;actions&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>

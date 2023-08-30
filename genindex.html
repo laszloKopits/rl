@@ -751,6 +751,18 @@
 </li>
       <li><a href="reference/generated/torchrl.modules.DdpgMlpQNet.html#torchrl.modules.DdpgMlpQNet">DdpgMlpQNet (class in torchrl.modules)</a>
 </li>
+      <li><a href="reference/generated/torchrl.modules.DecisionTransformer.html#torchrl.modules.DecisionTransformer">DecisionTransformer (class in torchrl.modules)</a>
+</li>
+      <li><a href="reference/generated/torchrl.modules.DecisionTransformer.html#torchrl.modules.DecisionTransformer.DTConfig">DecisionTransformer.DTConfig (class in torchrl.modules)</a>
+</li>
+      <li><a href="reference/generated/torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper.html#torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper">DecisionTransformerInferenceWrapper (class in torchrl.modules.tensordict_module)</a>
+</li>
+      <li><a href="reference/generated/torchrl.modules.DTActor.html#torchrl.modules.DTActor.default_config">default_config() (torchrl.modules.DTActor class method)</a>
+
+      <ul>
+        <li><a href="reference/generated/torchrl.modules.OnlineDTActor.html#torchrl.modules.OnlineDTActor.default_config">(torchrl.modules.OnlineDTActor class method)</a>
+</li>
+      </ul></li>
       <li><a href="reference/generated/torchrl.objectives.default_value_kwargs.html#torchrl.objectives.default_value_kwargs">default_value_kwargs (class in torchrl.objectives)</a>
 </li>
       <li><a href="reference/generated/torchrl.modules.Delta.html#torchrl.modules.Delta">Delta (class in torchrl.modules)</a>
@@ -785,12 +797,12 @@
 </li>
       <li><a href="reference/generated/torchrl.modules.tensordict_module.DistributionalQValueModule.html#torchrl.modules.tensordict_module.DistributionalQValueModule">DistributionalQValueModule (class in torchrl.modules.tensordict_module)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/generated/torchrl.envs.libs.dm_control.DMControlEnv.html#torchrl.envs.libs.dm_control.DMControlEnv">DMControlEnv() (in module torchrl.envs.libs.dm_control)</a>
 </li>
       <li><a href="reference/generated/torchrl.envs.libs.dm_control.DMControlWrapper.html#torchrl.envs.libs.dm_control.DMControlWrapper">DMControlWrapper() (in module torchrl.envs.libs.dm_control)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/generated/torchrl.envs.EnvBase.html#torchrl.envs.EnvBase.done_key">done_key (torchrl.envs.EnvBase property)</a>
 
       <ul>
@@ -844,6 +856,10 @@
       <li><a href="reference/generated/torchrl.objectives.DreamerModelLoss.html#torchrl.objectives.DreamerModelLoss">DreamerModelLoss (class in torchrl.objectives)</a>
 </li>
       <li><a href="reference/generated/torchrl.objectives.DreamerValueLoss.html#torchrl.objectives.DreamerValueLoss">DreamerValueLoss (class in torchrl.objectives)</a>
+</li>
+      <li><a href="reference/generated/torchrl.modules.DTActor.html#torchrl.modules.DTActor">DTActor (class in torchrl.modules)</a>
+</li>
+      <li><a href="reference/generated/torchrl.objectives.DTLoss.html#torchrl.objectives.DTLoss">DTLoss (class in torchrl.objectives)</a>
 </li>
       <li><a href="reference/generated/torchrl.envs.transforms.DTypeCastTransform.html#torchrl.envs.transforms.DTypeCastTransform">DTypeCastTransform (class in torchrl.envs.transforms)</a>
 </li>
@@ -1098,9 +1114,13 @@
 </li>
         <li><a href="reference/generated/torchrl.modules.DdpgMlpQNet.html#torchrl.modules.DdpgMlpQNet.forward">(torchrl.modules.DdpgMlpQNet method)</a>
 </li>
+        <li><a href="reference/generated/torchrl.modules.DecisionTransformer.html#torchrl.modules.DecisionTransformer.forward">(torchrl.modules.DecisionTransformer method)</a>
+</li>
         <li><a href="reference/generated/torchrl.modules.DistributionalDQNnet.html#torchrl.modules.DistributionalDQNnet.forward">(torchrl.modules.DistributionalDQNnet method)</a>
 </li>
         <li><a href="reference/generated/torchrl.modules.DreamerActor.html#torchrl.modules.DreamerActor.forward">(torchrl.modules.DreamerActor method)</a>
+</li>
+        <li><a href="reference/generated/torchrl.modules.DTActor.html#torchrl.modules.DTActor.forward">(torchrl.modules.DTActor method)</a>
 </li>
         <li><a href="reference/generated/torchrl.modules.DuelingCnnDQNet.html#torchrl.modules.DuelingCnnDQNet.forward">(torchrl.modules.DuelingCnnDQNet method)</a>
 </li>
@@ -1120,6 +1140,8 @@
 </li>
         <li><a href="reference/generated/torchrl.modules.ObsEncoder.html#torchrl.modules.ObsEncoder.forward">(torchrl.modules.ObsEncoder method)</a>
 </li>
+        <li><a href="reference/generated/torchrl.modules.OnlineDTActor.html#torchrl.modules.OnlineDTActor.forward">(torchrl.modules.OnlineDTActor method)</a>
+</li>
         <li><a href="reference/generated/torchrl.modules.RSSMPosterior.html#torchrl.modules.RSSMPosterior.forward">(torchrl.modules.RSSMPosterior method)</a>
 </li>
         <li><a href="reference/generated/torchrl.modules.RSSMPrior.html#torchrl.modules.RSSMPrior.forward">(torchrl.modules.RSSMPrior method)</a>
@@ -1127,6 +1149,8 @@
         <li><a href="reference/generated/torchrl.modules.SqueezeLayer.html#torchrl.modules.SqueezeLayer.forward">(torchrl.modules.SqueezeLayer method)</a>
 </li>
         <li><a href="reference/generated/torchrl.modules.tensordict_module.AdditiveGaussianWrapper.html#torchrl.modules.tensordict_module.AdditiveGaussianWrapper.forward">(torchrl.modules.tensordict_module.AdditiveGaussianWrapper method)</a>
+</li>
+        <li><a href="reference/generated/torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper.html#torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper.forward">(torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper method)</a>
 </li>
         <li><a href="reference/generated/torchrl.modules.tensordict_module.DistributionalQValueModule.html#torchrl.modules.tensordict_module.DistributionalQValueModule.forward">(torchrl.modules.tensordict_module.DistributionalQValueModule method)</a>
 </li>
@@ -1162,6 +1186,8 @@
 </li>
         <li><a href="reference/generated/torchrl.objectives.DreamerValueLoss.html#torchrl.objectives.DreamerValueLoss.forward">(torchrl.objectives.DreamerValueLoss method)</a>
 </li>
+        <li><a href="reference/generated/torchrl.objectives.DTLoss.html#torchrl.objectives.DTLoss.forward">(torchrl.objectives.DTLoss method)</a>
+</li>
         <li><a href="reference/generated/torchrl.objectives.IQLLoss.html#torchrl.objectives.IQLLoss.forward">(torchrl.objectives.IQLLoss method)</a>
 </li>
         <li><a href="reference/generated/torchrl.objectives.KLPENPPOLoss.html#torchrl.objectives.KLPENPPOLoss.forward">(torchrl.objectives.KLPENPPOLoss method)</a>
@@ -1169,6 +1195,8 @@
         <li><a href="reference/generated/torchrl.objectives.LossModule.html#torchrl.objectives.LossModule.forward">(torchrl.objectives.LossModule method)</a>
 </li>
         <li><a href="reference/generated/torchrl.objectives.multiagent.QMixerLoss.html#torchrl.objectives.multiagent.QMixerLoss.forward">(torchrl.objectives.multiagent.QMixerLoss method)</a>
+</li>
+        <li><a href="reference/generated/torchrl.objectives.OnlineDTLoss.html#torchrl.objectives.OnlineDTLoss.forward">(torchrl.objectives.OnlineDTLoss method)</a>
 </li>
         <li><a href="reference/generated/torchrl.objectives.PPOLoss.html#torchrl.objectives.PPOLoss.forward">(torchrl.objectives.PPOLoss method)</a>
 </li>
@@ -1705,6 +1733,8 @@
       </ul></li>
       <li><a href="reference/generated/torchrl.modules.utils.mappings.html#torchrl.modules.utils.mappings">mappings (class in torchrl.modules.utils)</a>
 </li>
+      <li><a href="reference/generated/torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper.html#torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper.mask_context">mask_context() (torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper method)</a>
+</li>
       <li><a href="reference/generated/torchrl.modules.MaskedCategorical.html#torchrl.modules.MaskedCategorical">MaskedCategorical (class in torchrl.modules)</a>
 </li>
       <li><a href="reference/generated/torchrl.modules.Delta.html#torchrl.modules.Delta.mean">mean (torchrl.modules.Delta property)</a>
@@ -1873,9 +1903,13 @@
 </li>
       <li><a href="reference/generated/torchrl.modules.OneHotCategorical.html#torchrl.modules.OneHotCategorical">OneHotCategorical (class in torchrl.modules)</a>
 </li>
+      <li><a href="reference/generated/torchrl.data.OneHotDiscreteTensorSpec.html#torchrl.data.OneHotDiscreteTensorSpec">OneHotDiscreteTensorSpec (class in torchrl.data)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="reference/generated/torchrl.data.OneHotDiscreteTensorSpec.html#torchrl.data.OneHotDiscreteTensorSpec">OneHotDiscreteTensorSpec (class in torchrl.data)</a>
+      <li><a href="reference/generated/torchrl.modules.OnlineDTActor.html#torchrl.modules.OnlineDTActor">OnlineDTActor (class in torchrl.modules)</a>
+</li>
+      <li><a href="reference/generated/torchrl.objectives.OnlineDTLoss.html#torchrl.objectives.OnlineDTLoss">OnlineDTLoss (class in torchrl.objectives)</a>
 </li>
       <li><a href="reference/generated/torchrl.envs.libs.openml.OpenMLEnv.html#torchrl.envs.libs.openml.OpenMLEnv">OpenMLEnv() (in module torchrl.envs.libs.openml)</a>
 </li>
@@ -2504,6 +2538,8 @@
 </li>
       </ul></li>
       <li><a href="reference/generated/torchrl.modules.LSTMModule.html#torchrl.modules.LSTMModule.set_temporal_mode">set_temporal_mode() (torchrl.modules.LSTMModule method)</a>
+</li>
+      <li><a href="reference/generated/torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper.html#torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper.set_tensor_keys">set_tensor_keys() (torchrl.modules.tensordict_module.DecisionTransformerInferenceWrapper method)</a>
 </li>
       <li><a href="reference/generated/torchrl.data.MultiStep.html#torchrl.data.MultiStep.share_memory">share_memory() (torchrl.data.MultiStep method)</a>
 

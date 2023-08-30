@@ -390,15 +390,15 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>loc</strong> (<em>number</em><em> or </em><em>tensor</em>) – location of the affine transform</p></li>
 <li><p><strong>scale</strong> (<em>number</em><em> or </em><em>tensor</em>) – scale of the affine transform</p></li>
-<li><p><strong>in_keys</strong> (<em>seuqence of NestedKey</em><em>, </em><em>optional</em>) – entries to be normalized. Defaults to [“observation”, “pixels”].
+<li><p><strong>in_keys</strong> (<em>sequence of NestedKey</em><em>, </em><em>optional</em>) – entries to be normalized. Defaults to [“observation”, “pixels”].
 All entries will be normalized with the same values: if a different behaviour is desired
 (e.g. a different normalization for pixels and states) different <a class="reference internal" href="#torchrl.envs.transforms.ObservationNorm" title="torchrl.envs.transforms.ObservationNorm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ObservationNorm</span></code></a>
 objects should be used.</p></li>
-<li><p><strong>out_keys</strong> (<em>seuqence of NestedKey</em><em>, </em><em>optional</em>) – output entries. Defaults to the value of <cite>in_keys</cite>.</p></li>
-<li><p><strong>in_keys_inv</strong> (<em>seuqence of NestedKey</em><em>, </em><em>optional</em>) – ObservationNorm also supports inverse transforms. This will
+<li><p><strong>out_keys</strong> (<em>sequence of NestedKey</em><em>, </em><em>optional</em>) – output entries. Defaults to the value of <cite>in_keys</cite>.</p></li>
+<li><p><strong>in_keys_inv</strong> (<em>sequence of NestedKey</em><em>, </em><em>optional</em>) – ObservationNorm also supports inverse transforms. This will
 only occur if a list of keys is provided to <code class="xref py py-obj docutils literal notranslate"><span class="pre">in_keys_inv</span></code>. If none is provided,
 only the forward transform will be called.</p></li>
-<li><p><strong>out_keys_inv</strong> (<em>seuqence of NestedKey</em><em>, </em><em>optional</em>) – output entries for the inverse transform.
+<li><p><strong>out_keys_inv</strong> (<em>sequence of NestedKey</em><em>, </em><em>optional</em>) – output entries for the inverse transform.
 Defaults to the value of <cite>in_keys_inv</cite>.</p></li>
 <li><p><strong>standard_normal</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>if <code class="docutils literal notranslate"><span class="pre">True</span></code>, the transform will be</p>
 <div class="math notranslate nohighlight">
