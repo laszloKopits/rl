@@ -541,11 +541,14 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A storage for tensors and tensordicts.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        data (tensor or TensorDict): the data buffer to be used.</span>
+<span class="sd">        storage (tensor or TensorDict): the data buffer to be used.</span>
 <span class="sd">        max_size (int): size of the storage, i.e. maximum number of elements stored</span>
 <span class="sd">            in the buffer.</span>
 <span class="sd">        device (torch.device, optional): device where the sampled tensors will be</span>
 <span class="sd">            stored and sent. Default is :obj:`torch.device(&quot;cpu&quot;)`.</span>
+<span class="sd">            If &quot;auto&quot; is passed, the device is automatically gathered from the</span>
+<span class="sd">            first batch of data passed. This is not enabled by default to avoid</span>
+<span class="sd">            data placed on GPU by mistake, causing OOM issues.</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; data = TensorDict({</span>
@@ -600,7 +603,7 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">_storage</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storage</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="n">storage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">^</span> <span class="p">(</span><span class="n">max_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">storage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Expected storage to be non-null.&quot;</span><span class="p">)</span>
@@ -617,7 +620,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_len</span> <span class="o">=</span> <span class="n">max_size</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_len</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span> <span class="k">if</span> <span class="n">device</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">device</span> <span class="o">!=</span> <span class="s2">&quot;auto&quot;</span>
+            <span class="k">else</span> <span class="n">storage</span><span class="o">.</span><span class="n">device</span>
+            <span class="k">if</span> <span class="n">storage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="s2">&quot;auto&quot;</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span> <span class="o">=</span> <span class="n">storage</span>
 
     <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
@@ -715,6 +724,9 @@
 <span class="sd">            in the buffer.</span>
 <span class="sd">        device (torch.device, optional): device where the sampled tensors will be</span>
 <span class="sd">            stored and sent. Default is :obj:`torch.device(&quot;cpu&quot;)`.</span>
+<span class="sd">            If &quot;auto&quot; is passed, the device is automatically gathered from the</span>
+<span class="sd">            first batch of data passed. This is not enabled by default to avoid</span>
+<span class="sd">            data placed on GPU by mistake, causing OOM issues.</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; data = TensorDict({</span>
@@ -766,12 +778,14 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">storage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="n">max_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating a TensorStorage...&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">device</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
             <span class="c1"># if Tensor, we just create a MemmapTensor of the desired shape, device and dtype</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
@@ -806,6 +820,9 @@
 <span class="sd">        scratch_dir (str or path): directory where memmap-tensors will be written.</span>
 <span class="sd">        device (torch.device, optional): device where the sampled tensors will be</span>
 <span class="sd">            stored and sent. Default is :obj:`torch.device(&quot;cpu&quot;)`.</span>
+<span class="sd">            If ``None`` is provided, the device is automatically gathered from the</span>
+<span class="sd">            first batch of data passed. This is not enabled by default to avoid</span>
+<span class="sd">            data placed on GPU by mistake, causing OOM issues.</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; data = TensorDict({</span>
@@ -856,7 +873,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_size</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_size</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">max_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scratch_dir</span> <span class="o">=</span> <span class="kc">None</span>
@@ -864,7 +881,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">scratch_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">scratch_dir</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;/&quot;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">scratch_dir</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span> <span class="k">if</span> <span class="n">device</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="k">if</span> <span class="n">device</span> <span class="o">!=</span> <span class="s2">&quot;auto&quot;</span> <span class="k">else</span> <span class="n">device</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_len</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
@@ -922,6 +939,8 @@
     <span class="k">def</span> <span class="nf">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating a MemmapStorage...&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">device</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
             <span class="c1"># if Tensor, we just create a MemmapTensor of the desired shape, device and dtype</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">MemmapTensor</span><span class="p">(</span>
@@ -1052,7 +1071,7 @@
             <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_utils</span><span class="o">.</span><span class="n">collate</span><span class="o">.</span><span class="n">default_collate</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">LazyMemmapStorage</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_collate_as_tensor</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="p">(</span><span class="n">LazyTensorStorage</span><span class="p">,)):</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="p">(</span><span class="n">TensorStorage</span><span class="p">,)):</span>
         <span class="k">return</span> <span class="n">_collate_contiguous</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>

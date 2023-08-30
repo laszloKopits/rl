@@ -618,10 +618,17 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            index where the data lives in the replay buffer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">is_tensor_collection</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replay_lock</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_writer</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">index</span></div>
+        <span class="k">return</span> <span class="n">index</span>
 
     <span class="k">def</span> <span class="nf">_extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replay_lock</span><span class="p">:</span>
@@ -641,9 +648,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Indices of the data added to the replay buffer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_tensor_collection</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">is_tensor_collection</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">)</span>
+        <span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extend</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
@@ -1045,19 +1052,24 @@
         <span class="k">return</span> <span class="n">priority</span>
 
 <div class="viewcode-block" id="TensorDictReplayBuffer.add"><a class="viewcode-back" href="../../../../reference/generated/torchrl.data.TensorDictReplayBuffer.html#torchrl.data.TensorDictReplayBuffer.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">is_tensor_collection</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
             <span class="n">data_add</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">(</span>
                 <span class="p">{</span>
                     <span class="s2">&quot;_data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
                 <span class="p">},</span>
                 <span class="n">batch_size</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">device</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:</span>
                 <span class="n">data_add</span><span class="p">[</span><span class="s2">&quot;_rb_batch_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data_add</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">data_add</span><span class="p">)</span>
+
+        <span class="n">index</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_add</span><span class="p">(</span><span class="n">data_add</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">is_tensor_collection</span><span class="p">(</span><span class="n">data_add</span><span class="p">):</span>
             <span class="n">data_add</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
 
@@ -1069,7 +1081,8 @@
 <div class="viewcode-block" id="TensorDictReplayBuffer.extend"><a class="viewcode-back" href="../../../../reference/generated/torchrl.data.TensorDictReplayBuffer.html#torchrl.data.TensorDictReplayBuffer.extend">[docs]</a>    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordicts</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">TensorDictBase</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">is_tensor_collection</span><span class="p">(</span><span class="n">tensordicts</span><span class="p">):</span>
             <span class="n">tensordicts</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">(</span>
-                <span class="p">{</span><span class="s2">&quot;_data&quot;</span><span class="p">:</span> <span class="n">tensordicts</span><span class="p">},</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">tensordicts</span><span class="o">.</span><span class="n">batch_size</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+                <span class="p">{</span><span class="s2">&quot;_data&quot;</span><span class="p">:</span> <span class="n">tensordicts</span><span class="p">},</span>
+                <span class="n">batch_size</span><span class="o">=</span><span class="n">tensordicts</span><span class="o">.</span><span class="n">batch_size</span><span class="p">[:</span><span class="mi">1</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">tensordicts</span><span class="o">.</span><span class="n">batch_dims</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># we want the tensordict to have one dimension only. The batch size</span>
@@ -1100,14 +1113,12 @@
             <span class="n">stacked_td</span> <span class="o">=</span> <span class="n">tensordicts</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">stacked_td</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;_data&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">stacked_td</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_data&quot;</span><span class="p">)))</span>
+            <span class="n">tensordicts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">stacked_td</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_data&quot;</span><span class="p">))</span>
+            <span class="n">stacked_td</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;_data&quot;</span><span class="p">,</span> <span class="n">tensordicts</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tensordicts</span><span class="o">.</span><span class="n">device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">stacked_td</span> <span class="o">=</span> <span class="n">stacked_td</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">tensordicts</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
         <span class="n">index</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_extend</span><span class="p">(</span><span class="n">stacked_td</span><span class="p">)</span>
-        <span class="c1"># stacked_td.set(</span>
-        <span class="c1">#     &quot;index&quot;,</span>
-        <span class="c1">#     torch.tensor(index, dtype=torch.int, device=stacked_td.device),</span>
-        <span class="c1">#     inplace=True,</span>
-        <span class="c1"># )</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_tensordict_priority</span><span class="p">(</span><span class="n">stacked_td</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">index</span></div>
 
