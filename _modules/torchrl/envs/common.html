@@ -377,13 +377,14 @@
 
 <span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">from</span> <span class="nn">tensordict</span> <span class="kn">import</span> <span class="n">unravel_key</span>
 <span class="kn">from</span> <span class="nn">tensordict.tensordict</span> <span class="kn">import</span> <span class="n">TensorDictBase</span>
-
+<span class="kn">from</span> <span class="nn">tensordict.utils</span> <span class="kn">import</span> <span class="n">NestedKey</span>
 <span class="kn">from</span> <span class="nn">torchrl._utils</span> <span class="kn">import</span> <span class="n">prod</span><span class="p">,</span> <span class="n">seed_generator</span>
 
 <span class="kn">from</span> <span class="nn">torchrl.data.tensor_specs</span> <span class="kn">import</span> <span class="p">(</span>
@@ -392,8 +393,13 @@
     <span class="n">TensorSpec</span><span class="p">,</span>
     <span class="n">UnboundedContinuousTensorSpec</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">torchrl.data.utils</span> <span class="kn">import</span> <span class="n">DEVICE_TYPING</span>
-<span class="kn">from</span> <span class="nn">torchrl.envs.utils</span> <span class="kn">import</span> <span class="n">get_available_libraries</span><span class="p">,</span> <span class="n">step_mdp</span>
+<span class="kn">from</span> <span class="nn">torchrl.data.utils</span> <span class="kn">import</span> <span class="n">_check_only_one_entry</span><span class="p">,</span> <span class="n">DEVICE_TYPING</span>
+<span class="kn">from</span> <span class="nn">torchrl.envs.utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_replace_last</span><span class="p">,</span>
+    <span class="n">DONE_AFTER_RESET_ERROR</span><span class="p">,</span>
+    <span class="n">get_available_libraries</span><span class="p">,</span>
+    <span class="n">step_mdp</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">LIBRARIES</span> <span class="o">=</span> <span class="n">get_available_libraries</span><span class="p">()</span>
 
@@ -447,7 +453,12 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">metadata_from_env</span><span class="p">(</span><span class="n">env</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnvMetaData</span><span class="p">:</span>
         <span class="n">tensordict</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">fake_tensordict</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-        <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;_reset&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">done_key</span><span class="p">)))</span>
+
+        <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">done_keys</span><span class="p">:</span>
+            <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="n">_replace_last</span><span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="s2">&quot;_reset&quot;</span><span class="p">),</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">done_key</span><span class="p">))),</span>
+            <span class="p">)</span>
 
         <span class="n">specs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
 
@@ -491,62 +502,6 @@
 <div class="viewcode-block" id="EnvBase"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.EnvBase.html#torchrl.envs.EnvBase">[docs]</a><span class="k">class</span> <span class="nc">EnvBase</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract environment parent class.</span>
 
-<span class="sd">    Properties:</span>
-<span class="sd">        observation_spec (CompositeSpec): sampling spec of the observations. Must be a</span>
-<span class="sd">            :class:`torchrl.data.CompositeSpec` instance. The keys listed in the</span>
-<span class="sd">            spec are directly accessible after reset.</span>
-<span class="sd">            In TorchRL, even though they are not properly speaking &quot;observations&quot;</span>
-<span class="sd">            all info, states, results of transforms etc. are stored in the</span>
-<span class="sd">            observation_spec. Therefore, &quot;observation_spec&quot; should be thought as</span>
-<span class="sd">            a generic data container for environment outputs that are not done</span>
-<span class="sd">            or reward data.</span>
-<span class="sd">        reward_spec (TensorSpec): the (leaf) spec of the reward. If the reward</span>
-<span class="sd">            is nested within a tensordict, its location can be accessed via</span>
-<span class="sd">            the ``reward_key`` attribute:</span>
-
-<span class="sd">                &gt;&gt;&gt; # accessing reward spec:</span>
-<span class="sd">                &gt;&gt;&gt; reward_spec = env.reward_spec</span>
-<span class="sd">                &gt;&gt;&gt; reward_spec = env.output_spec[&#39;_reward_spec&#39;][env.reward_key]</span>
-<span class="sd">                &gt;&gt;&gt; # accessing reward:</span>
-<span class="sd">                &gt;&gt;&gt; reward = env.fake_tensordict()[(&#39;next&#39;, *env.reward_key)]</span>
-
-<span class="sd">        done_spec (TensorSpec): the (leaf) spec of the done. If the done</span>
-<span class="sd">            is nested within a tensordict, its location can be accessed via</span>
-<span class="sd">            the ``done_key`` attribute.</span>
-
-<span class="sd">                &gt;&gt;&gt; # accessing done spec:</span>
-<span class="sd">                &gt;&gt;&gt; done_spec = env.done_spec</span>
-<span class="sd">                &gt;&gt;&gt; done_spec = env.output_spec[&#39;_done_spec&#39;][env.done_key]</span>
-<span class="sd">                &gt;&gt;&gt; # accessing done:</span>
-<span class="sd">                &gt;&gt;&gt; done = env.fake_tensordict()[(&#39;next&#39;, *env.done_key)]</span>
-
-<span class="sd">        action_spec (TensorSpec): the ampling spec of the actions. This attribute</span>
-<span class="sd">            is contained in input_spec.</span>
-
-<span class="sd">                &gt;&gt;&gt; # accessing action spec:</span>
-<span class="sd">                &gt;&gt;&gt; action_spec = env.action_spec</span>
-<span class="sd">                &gt;&gt;&gt; action_spec = env.input_spec[&#39;_action_spec&#39;][env.action_key]</span>
-<span class="sd">                &gt;&gt;&gt; # accessing action:</span>
-<span class="sd">                &gt;&gt;&gt; action = env.fake_tensordict()[env.action_key]</span>
-
-<span class="sd">        output_spec (CompositeSpec): The container for all output specs (reward,</span>
-<span class="sd">            done and observation).</span>
-<span class="sd">        input_spec (CompositeSpec): the container for all input specs (actions</span>
-<span class="sd">            and possibly others).</span>
-<span class="sd">        batch_size (torch.Size): number of environments contained in the instance;</span>
-<span class="sd">        device (torch.device): device where the env input and output are expected to live</span>
-<span class="sd">        run_type_checks (bool): if ``True``, the observation and reward dtypes</span>
-<span class="sd">            will be compared against their respective spec and an exception</span>
-<span class="sd">            will be raised if they don&#39;t match.</span>
-<span class="sd">            Defaults to False.</span>
-
-<span class="sd">    .. note::</span>
-<span class="sd">      The usage of ``done_key``, ``reward_key`` and ``action_key`` is aimed at</span>
-<span class="sd">      facilitating the custom placement of done, reward and action data within</span>
-<span class="sd">      the tensordict structures produced and read by the environment.</span>
-<span class="sd">      In most cases, these attributes can be ignored and the default values</span>
-<span class="sd">      (``&quot;done&quot;``, ``&quot;reward&quot;`` and ``&quot;action&quot;``) can be used.</span>
-
 <span class="sd">    Methods:</span>
 <span class="sd">        step (TensorDictBase -&gt; TensorDictBase): step in the environment</span>
 <span class="sd">        reset (TensorDictBase, optional -&gt; TensorDictBase): reset the environment</span>
@@ -562,14 +517,16 @@
 <span class="sd">        torch.Size([])</span>
 <span class="sd">        &gt;&gt;&gt; env.input_spec</span>
 <span class="sd">        CompositeSpec(</span>
-<span class="sd">            action: BoundedTensorSpec(</span>
-<span class="sd">                shape=torch.Size([1]),</span>
-<span class="sd">                space=ContinuousBox(</span>
-<span class="sd">                    minimum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                    maximum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
-<span class="sd">                device=cpu,</span>
-<span class="sd">                dtype=torch.float32,</span>
-<span class="sd">                domain=continuous), device=cpu, shape=torch.Size([]))</span>
+<span class="sd">            full_state_spec: None,</span>
+<span class="sd">            full_action_spec: CompositeSpec(</span>
+<span class="sd">                action: BoundedTensorSpec(</span>
+<span class="sd">                    shape=torch.Size([1]),</span>
+<span class="sd">                    space=ContinuousBox(</span>
+<span class="sd">                        minimum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                        maximum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                    device=cpu,</span>
+<span class="sd">                    dtype=torch.float32,</span>
+<span class="sd">                    domain=continuous), device=cpu, shape=torch.Size([])), device=cpu, shape=torch.Size([]))</span>
 <span class="sd">        &gt;&gt;&gt; env.action_spec</span>
 <span class="sd">        BoundedTensorSpec(</span>
 <span class="sd">            shape=torch.Size([1]),</span>
@@ -606,7 +563,14 @@
 <span class="sd">        &gt;&gt;&gt; # the output_spec contains all the expected outputs</span>
 <span class="sd">        &gt;&gt;&gt; env.output_spec</span>
 <span class="sd">        CompositeSpec(</span>
-<span class="sd">            observation: CompositeSpec(</span>
+<span class="sd">            full_reward_spec: CompositeSpec(</span>
+<span class="sd">                reward: UnboundedContinuousTensorSpec(</span>
+<span class="sd">                    shape=torch.Size([1]),</span>
+<span class="sd">                    space=None,</span>
+<span class="sd">                    device=cpu,</span>
+<span class="sd">                    dtype=torch.float32,</span>
+<span class="sd">                    domain=continuous), device=cpu, shape=torch.Size([])),</span>
+<span class="sd">            full_observation_spec: CompositeSpec(</span>
 <span class="sd">                observation: BoundedTensorSpec(</span>
 <span class="sd">                    shape=torch.Size([3]),</span>
 <span class="sd">                    space=ContinuousBox(</span>
@@ -615,14 +579,7 @@
 <span class="sd">                    device=cpu,</span>
 <span class="sd">                    dtype=torch.float32,</span>
 <span class="sd">                    domain=continuous), device=cpu, shape=torch.Size([])),</span>
-<span class="sd">            reward: CompositeSpec(</span>
-<span class="sd">                reward: UnboundedContinuousTensorSpec(</span>
-<span class="sd">                    shape=torch.Size([1]),</span>
-<span class="sd">                    space=None,</span>
-<span class="sd">                    device=cpu,</span>
-<span class="sd">                    dtype=torch.float32,</span>
-<span class="sd">                    domain=continuous), device=cpu, shape=torch.Size([])),</span>
-<span class="sd">            done: CompositeSpec(</span>
+<span class="sd">            full_done_spec: CompositeSpec(</span>
 <span class="sd">                done: DiscreteTensorSpec(</span>
 <span class="sd">                    shape=torch.Size([1]),</span>
 <span class="sd">                    space=DiscreteBox(n=2),</span>
@@ -639,9 +596,9 @@
         <span class="n">batch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">run_type_checks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_done_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_reward_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_action_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_done_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_reward_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_action_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
             <span class="n">output_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_output_spec&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -693,7 +650,15 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;_input_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;_observation_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;_action_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;_reward_spec&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;_input_spec&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;_observation_spec&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;_action_spec&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;_reward_spec&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;_output_spec&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;_state_spec&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;_done_spec&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
                 <span class="s2">&quot;To set an environment spec, please use `env.observation_spec = obs_spec` (without the leading&quot;</span>
                 <span class="s2">&quot; underscore).&quot;</span>
@@ -702,7 +667,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">batch_locked</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the environnement can be used with a batch size different from the one it was initialized with or not.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the environment can be used with a batch size different from the one it was initialized with or not.</span>
 
 <span class="sd">        If True, the env needs to be used with a tensordict having the same batch size as the env.</span>
 <span class="sd">        batch_locked is an immutable property.</span>
@@ -768,10 +733,40 @@
     <span class="c1"># Parent specs: input and output spec.</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">input_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Input spec.</span>
+
+<span class="sd">        The composite spec containing all specs for data input to the environments.</span>
+
+<span class="sd">        It contains:</span>
+
+<span class="sd">        - &quot;full_action_spec&quot;: the spec of the input actions</span>
+<span class="sd">        - &quot;full_state_spec&quot;: the spec of all other environment inputs</span>
+
+<span class="sd">        This attibute is locked and should be read-only.</span>
+<span class="sd">        Instead, to set the specs contained in it, use the respective properties.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from torchrl.envs.libs.gym import GymEnv</span>
+<span class="sd">            &gt;&gt;&gt; env = GymEnv(&quot;Pendulum-v1&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; env.input_spec</span>
+<span class="sd">            CompositeSpec(</span>
+<span class="sd">                full_state_spec: None,</span>
+<span class="sd">                full_action_spec: CompositeSpec(</span>
+<span class="sd">                    action: BoundedTensorSpec(</span>
+<span class="sd">                        shape=torch.Size([1]),</span>
+<span class="sd">                        space=ContinuousBox(</span>
+<span class="sd">                            minimum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                            maximum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        dtype=torch.float32,</span>
+<span class="sd">                        domain=continuous), device=cpu, shape=torch.Size([])), device=cpu, shape=torch.Size([]))</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">input_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_input_spec&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">input_spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">input_spec</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span>
-                <span class="n">_state_spec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">full_state_spec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
                 <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
             <span class="p">)</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
@@ -784,6 +779,50 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">output_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Output spec.</span>
+
+<span class="sd">        The composite spec containing all specs for data output from the environments.</span>
+
+<span class="sd">        It contains:</span>
+
+<span class="sd">        - &quot;full_reward_spec&quot;: the spec of reward</span>
+<span class="sd">        - &quot;full_done_spec&quot;: the spec of done</span>
+<span class="sd">        - &quot;full_observation_spec&quot;: the spec of all other environment outputs</span>
+
+<span class="sd">        This attibute is locked and should be read-only.</span>
+<span class="sd">        Instead, to set the specs contained in it, use the respective properties.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from torchrl.envs.libs.gym import GymEnv</span>
+<span class="sd">            &gt;&gt;&gt; env = GymEnv(&quot;Pendulum-v1&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; env.output_spec</span>
+<span class="sd">            CompositeSpec(</span>
+<span class="sd">                full_reward_spec: CompositeSpec(</span>
+<span class="sd">                    reward: UnboundedContinuousTensorSpec(</span>
+<span class="sd">                        shape=torch.Size([1]),</span>
+<span class="sd">                        space=None,</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        dtype=torch.float32,</span>
+<span class="sd">                        domain=continuous), device=cpu, shape=torch.Size([])),</span>
+<span class="sd">                full_observation_spec: CompositeSpec(</span>
+<span class="sd">                    observation: BoundedTensorSpec(</span>
+<span class="sd">                        shape=torch.Size([3]),</span>
+<span class="sd">                        space=ContinuousBox(</span>
+<span class="sd">                            minimum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                            maximum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        dtype=torch.float32,</span>
+<span class="sd">                        domain=continuous), device=cpu, shape=torch.Size([])),</span>
+<span class="sd">                full_done_spec: CompositeSpec(</span>
+<span class="sd">                    done: DiscreteTensorSpec(</span>
+<span class="sd">                        shape=torch.Size([1]),</span>
+<span class="sd">                        space=DiscreteBox(n=2),</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        dtype=torch.bool,</span>
+<span class="sd">                        domain=discrete), device=cpu, shape=torch.Size([])), device=cpu, shape=torch.Size([]))</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">output_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_output_spec&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">output_spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">output_spec</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span>
@@ -798,60 +837,133 @@
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;output_spec is protected.&quot;</span><span class="p">)</span>
 
     <span class="c1"># Action spec</span>
-    <span class="k">def</span> <span class="nf">_get_action_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
-            <span class="c1"># the first key is the action</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-                <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="p">,)</span>
-            <span class="k">break</span>
-        <span class="k">else</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_get_action_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Could not find action spec&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_action_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
-        <span class="k">return</span> <span class="n">key</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_action_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys</span>
+        <span class="k">return</span> <span class="n">keys</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">action_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">action_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The action keys of an environment.</span>
+
+<span class="sd">        By default, there will only be one key named &quot;action&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_keys</span>
+        <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_action_keys</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">action_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedKey</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The action key of an environment.</span>
 
-<span class="sd">        By default, non-nested keys are stored in the &#39;action&#39; key.</span>
+<span class="sd">        By default, this will be &quot;action&quot;.</span>
 
-<span class="sd">        If the action is in a nested tensordict, this property will return its</span>
-<span class="sd">        location.</span>
+<span class="sd">        If there is more than one action key in the environment, this function will raise an exception.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_key</span>
-        <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_action_key</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">out</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s2">&quot;action_key requested but more than one key present in the environment&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Action spec: action specs belong to input_spec</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">action_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ``action`` leaf spec.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ``action`` spec.</span>
 
-<span class="sd">        This property will always return the leaf spec of the action attribute,</span>
-<span class="sd">        which can be accessed in a typical rollout via</span>
+<span class="sd">        The ``action_spec`` is always stored as a composite spec.</span>
 
-<span class="sd">            &gt;&gt;&gt; fake_td = env.fake_tensordict()  # a typical tensordict</span>
-<span class="sd">            &gt;&gt;&gt; action = fake_td[env.action_key]</span>
+<span class="sd">        If the action spec is provided as a simple spec, this will be returned.</span>
+
+<span class="sd">            &gt;&gt;&gt; env.action_spec = UnboundedContinuousTensorSpec(1)</span>
+<span class="sd">            &gt;&gt;&gt; env.action_spec</span>
+<span class="sd">            UnboundedContinuousTensorSpec(</span>
+<span class="sd">                shape=torch.Size([1]),</span>
+<span class="sd">                space=ContinuousBox(</span>
+<span class="sd">                    minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                device=cpu,</span>
+<span class="sd">                dtype=torch.float32,</span>
+<span class="sd">                domain=continuous)</span>
+
+<span class="sd">        If the action spec is provided as a composite spec and contains only one leaf,</span>
+<span class="sd">        this function will return just the leaf.</span>
+
+<span class="sd">            &gt;&gt;&gt; env.action_spec = CompositeSpec({&quot;nested&quot;: {&quot;action&quot;: UnboundedContinuousTensorSpec(1)}})</span>
+<span class="sd">            &gt;&gt;&gt; env.action_spec</span>
+<span class="sd">            UnboundedContinuousTensorSpec(</span>
+<span class="sd">                shape=torch.Size([1]),</span>
+<span class="sd">                space=ContinuousBox(</span>
+<span class="sd">                    minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                device=cpu,</span>
+<span class="sd">                dtype=torch.float32,</span>
+<span class="sd">                domain=continuous)</span>
+
+<span class="sd">        If the action spec is provided as a composite spec and has more than one leaf,</span>
+<span class="sd">        this function will return the whole spec.</span>
+
+<span class="sd">            &gt;&gt;&gt; env.action_spec = CompositeSpec({&quot;nested&quot;: {&quot;action&quot;: UnboundedContinuousTensorSpec(1), &quot;another_action&quot;: DiscreteTensorSpec(1)}})</span>
+<span class="sd">            &gt;&gt;&gt; env.action_spec</span>
+<span class="sd">            CompositeSpec(</span>
+<span class="sd">                nested: CompositeSpec(</span>
+<span class="sd">                    action: UnboundedContinuousTensorSpec(</span>
+<span class="sd">                        shape=torch.Size([1]),</span>
+<span class="sd">                        space=ContinuousBox(</span>
+<span class="sd">                            minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                            maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        dtype=torch.float32,</span>
+<span class="sd">                        domain=continuous),</span>
+<span class="sd">                    another_action: DiscreteTensorSpec(</span>
+<span class="sd">                        shape=torch.Size([]),</span>
+<span class="sd">                        space=DiscreteBox(n=1),</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        dtype=torch.int64,</span>
+<span class="sd">                        domain=discrete), device=cpu, shape=torch.Size([])), device=cpu, shape=torch.Size([]))</span>
+
+<span class="sd">        To retrieve the full spec passed, use:</span>
+
+<span class="sd">            &gt;&gt;&gt; env.input_spec[&quot;full_action_spec&quot;]</span>
 
 <span class="sd">        This property is mutable.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from torchrl.envs.libs.gym import GymEnv</span>
+<span class="sd">            &gt;&gt;&gt; env = GymEnv(&quot;Pendulum-v1&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; env.action_spec</span>
+<span class="sd">            BoundedTensorSpec(</span>
+<span class="sd">                shape=torch.Size([1]),</span>
+<span class="sd">                space=ContinuousBox(</span>
+<span class="sd">                    minimum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    maximum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                device=cpu,</span>
+<span class="sd">                dtype=torch.float32,</span>
+<span class="sd">                domain=continuous)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">action_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_action_spec&quot;</span><span class="p">]</span>
+            <span class="n">action_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Failed to find the action_spec.&quot;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">action_spec</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">action_key</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="c1"># the key may have changed</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                <span class="s2">&quot;The action_key attribute seems to have changed. &quot;</span>
-                <span class="s2">&quot;This occurs when a action_spec is updated without &quot;</span>
-                <span class="s2">&quot;calling `env.action_spec = new_spec`. &quot;</span>
-                <span class="s2">&quot;Make sure you rely on this  type of command &quot;</span>
-                <span class="s2">&quot;to set the action and other specs.&quot;</span>
-            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">action_spec</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">action_spec</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">action_key</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="c1"># the key may have changed</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="s2">&quot;The action_key attribute seems to have changed. &quot;</span>
+                    <span class="s2">&quot;This occurs when a action_spec is updated without &quot;</span>
+                    <span class="s2">&quot;calling `env.action_spec = new_spec`. &quot;</span>
+                    <span class="s2">&quot;Make sure you rely on this  type of command &quot;</span>
+                    <span class="s2">&quot;to set the action and other specs.&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">out</span>
 
@@ -861,9 +973,17 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">unlock_</span><span class="p">()</span>
             <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">device</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_action_key&quot;</span><span class="p">)</span>
+                <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_action_keys&quot;</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                 <span class="k">pass</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;action_spec of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2"> do not have a shape attribute.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;The value of spec.shape must match the env batch size.&quot;</span>
+                <span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">CompositeSpec</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>  <span class="c1"># noqa: B007</span>
@@ -878,64 +998,134 @@
                     <span class="n">action</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span>
                 <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_action_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_action_key</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_action_keys</span><span class="p">()</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
 
     <span class="c1"># Reward spec</span>
-    <span class="k">def</span> <span class="nf">_get_reward_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_reward_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
-            <span class="c1"># the first key is the reward</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-                <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="p">,)</span>
-            <span class="k">break</span>
-        <span class="k">else</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_get_reward_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Could not find reward spec&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_reward_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
-        <span class="k">return</span> <span class="n">key</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_reward_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys</span>
+        <span class="k">return</span> <span class="n">keys</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reward_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The reward keys of an environment.</span>
+
+<span class="sd">        By default, there will only be one key named &quot;reward&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reward_keys</span>
+        <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_reward_keys</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reward_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The reward key of an environment.</span>
 
-<span class="sd">        By default, non-nested keys are stored in the ``&#39;reward&#39;`` entry.</span>
+<span class="sd">        By default, this will be &quot;reward&quot;.</span>
 
-<span class="sd">        If the reward is in a nested tensordict, this property will return its</span>
-<span class="sd">        location.</span>
+<span class="sd">        If there is more than one reward key in the environment, this function will raise an exception.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reward_key</span>
-        <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_reward_key</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">out</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s2">&quot;reward_key requested but more than one key present in the environment&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="c1"># Done spec: reward specs belong to output_spec</span>
+    <span class="c1"># Reward spec: reward specs belong to output_spec</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reward_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ``reward`` leaf spec.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ``reward`` spec.</span>
 
-<span class="sd">        This property will always return the leaf spec of the reward attribute,</span>
-<span class="sd">        which can be accessed in a typical rollout via</span>
+<span class="sd">        The ``reward_spec`` is always stored as a composite spec.</span>
 
-<span class="sd">            &gt;&gt;&gt; fake_td = env.fake_tensordict()  # a typical tensordict</span>
-<span class="sd">            &gt;&gt;&gt; reward = fake_td[(&quot;next&quot;, *env.reward_key)]</span>
+<span class="sd">        If the reward spec is provided as a simple spec, this will be returned.</span>
+
+<span class="sd">            &gt;&gt;&gt; env.reward_spec = UnboundedContinuousTensorSpec(1)</span>
+<span class="sd">            &gt;&gt;&gt; env.reward_spec</span>
+<span class="sd">            UnboundedContinuousTensorSpec(</span>
+<span class="sd">                shape=torch.Size([1]),</span>
+<span class="sd">                space=ContinuousBox(</span>
+<span class="sd">                    minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                device=cpu,</span>
+<span class="sd">                dtype=torch.float32,</span>
+<span class="sd">                domain=continuous)</span>
+
+<span class="sd">        If the reward spec is provided as a composite spec and contains only one leaf,</span>
+<span class="sd">        this function will return just the leaf.</span>
+
+<span class="sd">            &gt;&gt;&gt; env.reward_spec = CompositeSpec({&quot;nested&quot;: {&quot;reward&quot;: UnboundedContinuousTensorSpec(1)}})</span>
+<span class="sd">            &gt;&gt;&gt; env.reward_spec</span>
+<span class="sd">            UnboundedContinuousTensorSpec(</span>
+<span class="sd">                shape=torch.Size([1]),</span>
+<span class="sd">                space=ContinuousBox(</span>
+<span class="sd">                    minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                device=cpu,</span>
+<span class="sd">                dtype=torch.float32,</span>
+<span class="sd">                domain=continuous)</span>
+
+<span class="sd">        If the reward spec is provided as a composite spec and has more than one leaf,</span>
+<span class="sd">        this function will return the whole spec.</span>
+
+<span class="sd">            &gt;&gt;&gt; env.reward_spec = CompositeSpec({&quot;nested&quot;: {&quot;reward&quot;: UnboundedContinuousTensorSpec(1), &quot;another_reward&quot;: DiscreteTensorSpec(1)}})</span>
+<span class="sd">            &gt;&gt;&gt; env.reward_spec</span>
+<span class="sd">            CompositeSpec(</span>
+<span class="sd">                nested: CompositeSpec(</span>
+<span class="sd">                    reward: UnboundedContinuousTensorSpec(</span>
+<span class="sd">                        shape=torch.Size([1]),</span>
+<span class="sd">                        space=ContinuousBox(</span>
+<span class="sd">                            minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                            maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        dtype=torch.float32,</span>
+<span class="sd">                        domain=continuous),</span>
+<span class="sd">                    another_reward: DiscreteTensorSpec(</span>
+<span class="sd">                        shape=torch.Size([]),</span>
+<span class="sd">                        space=DiscreteBox(n=1),</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        dtype=torch.int64,</span>
+<span class="sd">                        domain=discrete), device=cpu, shape=torch.Size([])), device=cpu, shape=torch.Size([]))</span>
+
+<span class="sd">        To retrieve the full spec passed, use:</span>
+
+<span class="sd">            &gt;&gt;&gt; env.output_spec[&quot;full_reward_spec&quot;]</span>
 
 <span class="sd">        This property is mutable.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from torchrl.envs.libs.gym import GymEnv</span>
+<span class="sd">            &gt;&gt;&gt; env = GymEnv(&quot;Pendulum-v1&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; env.reward_spec</span>
+<span class="sd">            UnboundedContinuousTensorSpec(</span>
+<span class="sd">                shape=torch.Size([1]),</span>
+<span class="sd">                space=None,</span>
+<span class="sd">                device=cpu,</span>
+<span class="sd">                dtype=torch.float32,</span>
+<span class="sd">                domain=continuous)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">reward_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_reward_spec&quot;</span><span class="p">]</span>
+            <span class="n">reward_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
             <span class="c1"># populate the &quot;reward&quot; entry</span>
-            <span class="c1"># this will be raised if there is not _reward_spec (unlikely) or no reward_key</span>
+            <span class="c1"># this will be raised if there is not full_reward_spec (unlikely) or no reward_key</span>
             <span class="c1"># Since output_spec is lazily populated with an empty composite spec for</span>
             <span class="c1"># reward_spec, the second case is much more likely to occur.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reward_spec</span> <span class="o">=</span> <span class="n">out</span> <span class="o">=</span> <span class="n">UnboundedContinuousTensorSpec</span><span class="p">(</span>
                 <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                 <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">reward_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_reward_spec&quot;</span><span class="p">]</span>
-        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">reward_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">reward_spec</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">out</span> <span class="o">=</span> <span class="n">reward_spec</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_key</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -956,7 +1146,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">unlock_</span><span class="p">()</span>
             <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">device</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_reward_key&quot;</span><span class="p">)</span>
+                <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_reward_keys&quot;</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                 <span class="k">pass</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">):</span>
@@ -969,7 +1159,7 @@
                     <span class="s2">&quot;The value of spec.shape must match the env batch size.&quot;</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">CompositeSpec</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">nestedval</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>  <span class="c1"># noqa: B007</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>  <span class="c1"># noqa: B007</span>
                     <span class="k">break</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
@@ -977,76 +1167,137 @@
                         <span class="s2">&quot;This is currently not permitted.&quot;</span>
                     <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">nestedval</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span>
                     <span class="n">reward</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nestedval</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="s2">&quot;the reward_spec shape cannot be empty (this error&quot;</span>
-                    <span class="s2">&quot; usually comes from trying to set a reward_spec&quot;</span>
-                    <span class="s2">&quot; with a null number of dimensions. Try using a multidimensional&quot;</span>
-                    <span class="s2">&quot; spec instead, for instance with a singleton dimension at the tail).&quot;</span>
-                <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_reward_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_reward_key</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">leaf</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                        <span class="s2">&quot;the reward_spec&#39;s leafs shape cannot be empty (this error&quot;</span>
+                        <span class="s2">&quot; usually comes from trying to set a reward_spec&quot;</span>
+                        <span class="s2">&quot; with a null number of dimensions. Try using a multidimensional&quot;</span>
+                        <span class="s2">&quot; spec instead, for instance with a singleton dimension at the tail).&quot;</span>
+                    <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_reward_keys</span><span class="p">()</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
 
     <span class="c1"># done spec</span>
-    <span class="k">def</span> <span class="nf">_get_done_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_done_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
-            <span class="c1"># the first key is the reward</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-                <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="p">,)</span>
-            <span class="k">break</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Could not find done spec: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s1">&#39;_done_spec&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_done_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
-        <span class="k">return</span> <span class="n">key</span>
+    <span class="k">def</span> <span class="nf">_get_done_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Could not find done spec&quot;</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_done_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys</span>
+        <span class="k">return</span> <span class="n">keys</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">done_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The done keys of an environment.</span>
+
+<span class="sd">        By default, there will only be one key named &quot;done&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done_keys</span>
+        <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_done_keys</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">done_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The done key of an environment.</span>
 
-<span class="sd">        By default, non-nested keys are stored in the ``&#39;done&#39;`` entry.</span>
+<span class="sd">        By default, this will be &quot;done&quot;.</span>
 
-<span class="sd">        If the done is in a nested tensordict, this property will return its</span>
-<span class="sd">        location.</span>
+<span class="sd">        If there is more than one done key in the environment, this function will raise an exception.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done_key</span>
-        <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_done_key</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">out</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s2">&quot;done_key requested but more than one key present in the environment&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Done spec: done specs belong to output_spec</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">done_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ``done`` leaf spec.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The ``done`` spec.</span>
 
-<span class="sd">        This property will always return the leaf spec of the done attribute,</span>
-<span class="sd">        which can be accessed in a typical rollout via</span>
+<span class="sd">        The ``done_spec`` is always stored as a composite spec.</span>
 
-<span class="sd">            &gt;&gt;&gt; fake_td = env.fake_tensordict()  # a typical tensordict</span>
-<span class="sd">            &gt;&gt;&gt; done = fake_td[(&quot;next&quot;, *env.done_key)]</span>
+<span class="sd">        If the done spec is provided as a simple spec, this will be returned.</span>
+
+<span class="sd">            &gt;&gt;&gt; env.done_spec = DiscreteTensorSpec(2, dtype=torch.bool)</span>
+<span class="sd">            &gt;&gt;&gt; env.done_spec</span>
+<span class="sd">            DiscreteTensorSpec(</span>
+<span class="sd">                shape=torch.Size([]),</span>
+<span class="sd">                space=DiscreteBox(n=2),</span>
+<span class="sd">                device=cpu,</span>
+<span class="sd">                dtype=torch.bool,</span>
+<span class="sd">                domain=discrete)</span>
+
+<span class="sd">        If the done spec is provided as a composite spec and contains only one leaf,</span>
+<span class="sd">        this function will return just the leaf.</span>
+
+<span class="sd">            &gt;&gt;&gt; env.done_spec = CompositeSpec({&quot;nested&quot;: {&quot;done&quot;: DiscreteTensorSpec(2, dtype=torch.bool)}})</span>
+<span class="sd">            &gt;&gt;&gt; env.done_spec</span>
+<span class="sd">            DiscreteTensorSpec(</span>
+<span class="sd">                shape=torch.Size([]),</span>
+<span class="sd">                space=DiscreteBox(n=2),</span>
+<span class="sd">                device=cpu,</span>
+<span class="sd">                dtype=torch.bool,</span>
+<span class="sd">                domain=discrete)</span>
+
+<span class="sd">        If the done spec is provided as a composite spec and has more than one leaf,</span>
+<span class="sd">        this function will return the whole spec.</span>
+
+<span class="sd">            &gt;&gt;&gt; env.done_spec = CompositeSpec({&quot;nested&quot;: {&quot;done&quot;: DiscreteTensorSpec(2, dtype=torch.bool), &quot;another_done&quot;: DiscreteTensorSpec(2, dtype=torch.bool)}})</span>
+<span class="sd">            &gt;&gt;&gt; env.done_spec</span>
+<span class="sd">            CompositeSpec(</span>
+<span class="sd">                nested: CompositeSpec(</span>
+<span class="sd">                    done: DiscreteTensorSpec(</span>
+<span class="sd">                        shape=torch.Size([]),</span>
+<span class="sd">                        space=DiscreteBox(n=2),</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        dtype=torch.bool,</span>
+<span class="sd">                        domain=discrete),</span>
+<span class="sd">                    another_done: DiscreteTensorSpec(</span>
+<span class="sd">                        shape=torch.Size([]),</span>
+<span class="sd">                        space=DiscreteBox(n=2),</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        dtype=torch.bool,</span>
+<span class="sd">                        domain=discrete), device=cpu, shape=torch.Size([])), device=cpu, shape=torch.Size([]))</span>
+
+<span class="sd">        To always retrieve the full spec passed, use:</span>
+
+<span class="sd">            &gt;&gt;&gt; env.output_spec[&quot;full_done_spec&quot;]</span>
 
 <span class="sd">        This property is mutable.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from torchrl.envs.libs.gym import GymEnv</span>
+<span class="sd">            &gt;&gt;&gt; env = GymEnv(&quot;Pendulum-v1&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; env.done_spec</span>
+<span class="sd">            DiscreteTensorSpec(</span>
+<span class="sd">                shape=torch.Size([1]),</span>
+<span class="sd">                space=DiscreteBox(n=2),</span>
+<span class="sd">                device=cpu,</span>
+<span class="sd">                dtype=torch.bool,</span>
+<span class="sd">                domain=discrete)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">done_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_done_spec&quot;</span><span class="p">]</span>
+            <span class="n">done_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
             <span class="c1"># populate the &quot;done&quot; entry</span>
-            <span class="c1"># this will be raised if there is not _done_spec (unlikely) or no done_key</span>
+            <span class="c1"># this will be raised if there is not full_done_spec (unlikely) or no done_key</span>
             <span class="c1"># Since output_spec is lazily populated with an empty composite spec for</span>
             <span class="c1"># done_spec, the second case is much more likely to occur.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span> <span class="o">=</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
                 <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>
             <span class="p">)</span>
-            <span class="n">done_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_done_spec&quot;</span><span class="p">]</span>
-        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">done_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">done_spec</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">out</span> <span class="o">=</span> <span class="n">done_spec</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -1067,7 +1318,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">unlock_</span><span class="p">()</span>
             <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">device</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_done_key&quot;</span><span class="p">)</span>
+                <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_done_keys&quot;</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                 <span class="k">pass</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">):</span>
@@ -1080,40 +1331,72 @@
                     <span class="s2">&quot;The value of spec.shape must match the env batch size.&quot;</span>
                 <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">CompositeSpec</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">nestedval</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>  <span class="c1"># noqa: B007</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>  <span class="c1"># noqa: B007</span>
                     <span class="k">break</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                         <span class="s2">&quot;An empty CompositeSpec was passed for the done spec. &quot;</span>
                         <span class="s2">&quot;This is currently not permitted.&quot;</span>
                     <span class="p">)</span>
+                <span class="n">_check_only_one_entry</span><span class="p">(</span>
+                    <span class="n">value</span><span class="p">,</span>
+                    <span class="n">error</span><span class="o">=</span><span class="ne">RuntimeError</span><span class="p">(</span>
+                        <span class="s2">&quot;done_spec has more than one leaf entry for a CompositeSpec. &quot;</span>
+                        <span class="s2">&quot;Only one leaf entry per composite spec is currently allowed&quot;</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">nestedval</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span>
                     <span class="n">done</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nestedval</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="s2">&quot;the done_spec shape cannot be empty (this error&quot;</span>
-                    <span class="s2">&quot; usually comes from trying to set a done_spec&quot;</span>
-                    <span class="s2">&quot; with a null number of dimensions. Try using a multidimensional&quot;</span>
-                    <span class="s2">&quot; spec instead, for instance with a singleton dimension at the tail).&quot;</span>
-                <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_done_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_done_key</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">leaf</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                        <span class="s2">&quot;the done_spec&#39;s leafs shape cannot be empty (this error&quot;</span>
+                        <span class="s2">&quot; usually comes from trying to set a reward_spec&quot;</span>
+                        <span class="s2">&quot; with a null number of dimensions. Try using a multidimensional&quot;</span>
+                        <span class="s2">&quot; spec instead, for instance with a singleton dimension at the tail).&quot;</span>
+                    <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_done_keys</span><span class="p">()</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
 
     <span class="c1"># observation spec: observation specs belong to output_spec</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">observation_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompositeSpec</span><span class="p">:</span>
-        <span class="n">observation_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Observation spec.</span>
+
+<span class="sd">        Must be a :class:`torchrl.data.CompositeSpec` instance.</span>
+<span class="sd">        The keys listed in the spec are directly accessible after reset and step.</span>
+
+<span class="sd">        In TorchRL, even though they are not properly speaking &quot;observations&quot;</span>
+<span class="sd">        all info, states, results of transforms etc. outputs from the environment are stored in the</span>
+<span class="sd">        ``observation_spec``.</span>
+
+<span class="sd">        Therefore, ``&quot;observation_spec&quot;`` should be thought as</span>
+<span class="sd">        a generic data container for environment outputs that are not done or reward data.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from torchrl.envs.libs.gym import GymEnv</span>
+<span class="sd">            &gt;&gt;&gt; env = GymEnv(&quot;Pendulum-v1&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; env.observation_spec</span>
+<span class="sd">            CompositeSpec(</span>
+<span class="sd">                observation: BoundedTensorSpec(</span>
+<span class="sd">                    shape=torch.Size([3]),</span>
+<span class="sd">                    space=ContinuousBox(</span>
+<span class="sd">                        minimum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                        maximum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                    device=cpu,</span>
+<span class="sd">                    dtype=torch.float32,</span>
+<span class="sd">                    domain=continuous), device=cpu, shape=torch.Size([]))</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">observation_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">observation_spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">observation_spec</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">unlock_</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observation_spec</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">observation_spec</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">observation_spec</span>
 
@@ -1132,18 +1415,39 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;The value of spec.shape (</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">) must match the env batch size (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">).&quot;</span>
                 <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
 
     <span class="c1"># state spec: state specs belong to input_spec</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">state_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompositeSpec</span><span class="p">:</span>
-        <span class="n">state_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;State spec.</span>
+
+<span class="sd">        Must be a :class:`torchrl.data.CompositeSpec` instance.</span>
+<span class="sd">        The keys listed here should be provided as input alongside actions to the environment.</span>
+
+<span class="sd">        In TorchRL, even though they are not properly speaking &quot;state&quot;</span>
+<span class="sd">        all inputs to the environment that are not actions are stored in the</span>
+<span class="sd">        ``state_spec``.</span>
+
+<span class="sd">        Therefore, ``&quot;state_spec&quot;`` should be thought as</span>
+<span class="sd">        a generic data container for environment inputs that are not action data.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from torchrl.envs.libs.gym import GymEnv</span>
+<span class="sd">            &gt;&gt;&gt; env = GymEnv(&quot;Pendulum-v1&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; # Gym has not state input so this is empty</span>
+<span class="sd">            &gt;&gt;&gt; env.state_spec</span>
+<span class="sd">            CompositeSpec(</span>
+<span class="sd">            , device=cpu, shape=torch.Size([]))</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">state_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">state_spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">state_spec</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">unlock_</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_spec</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_spec</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">state_spec</span>
 
@@ -1152,7 +1456,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">unlock_</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span>
                     <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1167,7 +1471,7 @@
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;The value of spec.shape (</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">) must match the env batch size (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">).&quot;</span>
                     <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
 
@@ -1207,7 +1511,6 @@
             <span class="p">)</span>
 
         <span class="c1"># TODO: Refactor this using reward spec</span>
-        <span class="n">reward</span> <span class="o">=</span> <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_key</span><span class="p">)</span>
         <span class="c1"># unsqueeze rewards if needed</span>
         <span class="c1"># the input tensordict may have more leading dimensions than the batch_size</span>
         <span class="c1"># e.g. in model-based contexts.</span>
@@ -1218,22 +1521,33 @@
             <span class="k">if</span> <span class="n">dims</span>
             <span class="k">else</span> <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">shape</span>
         <span class="p">)</span>
-        <span class="n">expected_reward_shape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">(</span>
-            <span class="p">[</span><span class="o">*</span><span class="n">leading_batch_size</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="n">actual_reward_shape</span> <span class="o">=</span> <span class="n">reward</span><span class="o">.</span><span class="n">shape</span>
-        <span class="k">if</span> <span class="n">actual_reward_shape</span> <span class="o">!=</span> <span class="n">expected_reward_shape</span><span class="p">:</span>
-            <span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">expected_reward_shape</span><span class="p">)</span>
-            <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_key</span><span class="p">,</span> <span class="n">reward</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">reward_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_keys</span><span class="p">:</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reward_key</span><span class="p">)</span>
+            <span class="n">expected_reward_shape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="o">*</span><span class="n">leading_batch_size</span><span class="p">,</span>
+                    <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">][</span><span class="n">reward_key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">actual_reward_shape</span> <span class="o">=</span> <span class="n">reward</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">if</span> <span class="n">actual_reward_shape</span> <span class="o">!=</span> <span class="n">expected_reward_shape</span><span class="p">:</span>
+                <span class="n">reward</span> <span class="o">=</span> <span class="n">reward</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">expected_reward_shape</span><span class="p">)</span>
+                <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">reward_key</span><span class="p">,</span> <span class="n">reward</span><span class="p">)</span>
 
         <span class="c1"># TODO: Refactor this using done spec</span>
-        <span class="n">done</span> <span class="o">=</span> <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">)</span>
-        <span class="c1"># unsqueeze done if needed</span>
-        <span class="n">expected_done_shape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="o">*</span><span class="n">leading_batch_size</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">])</span>
-        <span class="n">actual_done_shape</span> <span class="o">=</span> <span class="n">done</span><span class="o">.</span><span class="n">shape</span>
-        <span class="k">if</span> <span class="n">actual_done_shape</span> <span class="o">!=</span> <span class="n">expected_done_shape</span><span class="p">:</span>
-            <span class="n">done</span> <span class="o">=</span> <span class="n">done</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">expected_done_shape</span><span class="p">)</span>
-            <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">,</span> <span class="n">done</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">:</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span>
+            <span class="n">expected_done_shape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="o">*</span><span class="n">leading_batch_size</span><span class="p">,</span>
+                    <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="n">unravel_key</span><span class="p">((</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">,</span> <span class="n">done_key</span><span class="p">))]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">actual_done_shape</span> <span class="o">=</span> <span class="n">done</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">if</span> <span class="n">actual_done_shape</span> <span class="o">!=</span> <span class="n">expected_done_shape</span><span class="p">:</span>
+                <span class="n">done</span> <span class="o">=</span> <span class="n">done</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">expected_done_shape</span><span class="p">)</span>
+                <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="n">done</span><span class="p">)</span>
+
         <span class="n">tensordict_out</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">next_tensordict_out</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_type_checks</span><span class="p">:</span>
@@ -1241,19 +1555,26 @@
                 <span class="n">obs</span> <span class="o">=</span> <span class="n">tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">observation_spec</span><span class="o">.</span><span class="n">type_check</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span>
-                <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_spec</span><span class="o">.</span><span class="n">dtype</span>
-            <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;expected reward.dtype to be </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_spec</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2"> &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;but got </span><span class="si">{</span><span class="n">tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
+            <span class="k">for</span> <span class="n">reward_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_keys</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reward_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span>
+                    <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span>
+                        <span class="n">unravel_key</span><span class="p">((</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">,</span> <span class="n">reward_key</span><span class="p">))</span>
+                    <span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;expected reward.dtype to be </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="n">unravel_key</span><span class="p">((</span><span class="s1">&#39;full_reward_spec&#39;</span><span class="p">,</span><span class="n">reward_key</span><span class="p">))]</span><span class="si">}</span><span class="s2"> &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;but got </span><span class="si">{</span><span class="n">tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reward_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;expected done.dtype to be torch.bool but got </span><span class="si">{</span><span class="n">tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
+            <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span>
+                    <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;expected done.dtype to be torch.bool but got </span><span class="si">{</span><span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
         <span class="c1"># tensordict could already have a &quot;next&quot; key</span>
         <span class="n">tensordict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tensordict_out</span><span class="p">)</span>
 
@@ -1301,15 +1622,26 @@
 <span class="sd">            a tensordict (or the input tensordict, if any), modified in place with the resulting observations.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;_reset&quot;</span> <span class="ow">in</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_assert_tensordict_shape</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
-            <span class="n">_reset</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_reset&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">_reset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="p">:]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="s2">&quot;_reset flag in tensordict should follow env.done_spec&quot;</span>
-                <span class="p">)</span>
+            <span class="n">_reset_map</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">:</span>
+                <span class="n">_reset_key</span> <span class="o">=</span> <span class="n">_replace_last</span><span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="s2">&quot;_reset&quot;</span><span class="p">)</span>
+                <span class="n">_reset</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_reset_key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">_reset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">_reset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span>
+                        <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">][</span><span class="n">done_key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="p">:</span>
+                    <span class="p">]</span>
+                    <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">][</span><span class="n">done_key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                        <span class="s2">&quot;_reset flag in tensordict should follow env.done_spec&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">_reset_map</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">done_key</span><span class="p">:</span> <span class="n">_reset</span><span class="p">})</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">_reset</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">_reset_map</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">tensordict_reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">(</span><span class="n">tensordict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">device</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
@@ -1329,20 +1661,23 @@
             <span class="n">leading_dim</span> <span class="o">=</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">leading_dim</span> <span class="o">=</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">shape</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span>
-            <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
-        <span class="p">):</span>
-            <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span><span class="o">.</span><span class="n">zero</span><span class="p">(</span><span class="n">leading_dim</span><span class="p">),</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">td_reset_keys</span> <span class="o">=</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">done_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">td_reset_keys</span><span class="p">:</span>
+                    <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                        <span class="n">done_key</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">][</span><span class="n">done_key</span><span class="p">]</span><span class="o">.</span><span class="n">zero</span><span class="p">(</span><span class="n">leading_dim</span><span class="p">),</span>
+                    <span class="p">)</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">_reset</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">())</span> <span class="ow">or</span> <span class="p">(</span>
-            <span class="n">_reset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">)[</span><span class="n">_reset</span><span class="p">]</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Env </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> was done after reset on specified &#39;_reset&#39; dimensions. This is (currently) not allowed.&quot;</span>
-            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">done_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_reset_map</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="k">raise</span> <span class="n">DONE_AFTER_RESET_ERROR</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)[</span><span class="n">_reset_map</span><span class="p">[</span><span class="n">done_key</span><span class="p">]]</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="k">raise</span> <span class="n">DONE_AFTER_RESET_ERROR</span>
+
         <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tensordict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tensordict_reset</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1414,7 +1749,7 @@
                 <span class="sa">f</span><span class="s2">&quot;Non batch-locked environment require the env batch-size to be either empty or to&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot; match the tensordict one.&quot;</span>
             <span class="p">)</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">r</span>
         <span class="n">tensordict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
@@ -1608,28 +1943,40 @@
             <span class="n">tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
 
             <span class="n">tensordicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
-            <span class="n">done</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">))</span>
-            <span class="n">truncated</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                <span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">),</span>
-                <span class="n">default</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((),</span> <span class="n">device</span><span class="o">=</span><span class="n">done</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="n">done</span> <span class="o">=</span> <span class="n">done</span> <span class="o">|</span> <span class="n">truncated</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">break_when_any_done</span> <span class="ow">and</span> <span class="n">done</span><span class="o">.</span><span class="n">any</span><span class="p">())</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="n">max_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+
+            <span class="n">any_done</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">_reset_map</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">:</span>
+                <span class="n">done</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">done_key</span><span class="p">))</span>
+                <span class="n">truncated</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">_replace_last</span><span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">)),</span>
+                    <span class="n">default</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((),</span> <span class="n">device</span><span class="o">=</span><span class="n">done</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="n">done</span> <span class="o">=</span> <span class="n">done</span> <span class="o">|</span> <span class="n">truncated</span>
+                <span class="n">any_sub_done</span> <span class="o">=</span> <span class="n">done</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">any_sub_done</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">break_when_any_done</span><span class="p">:</span>
+                    <span class="c1"># Add this done to the map, we will need it to reset</span>
+                    <span class="n">_reset_map</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">_replace_last</span><span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="s2">&quot;_reset&quot;</span><span class="p">):</span> <span class="n">done</span><span class="p">})</span>
+                <span class="n">any_done</span> <span class="o">+=</span> <span class="n">any_sub_done</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">break_when_any_done</span> <span class="ow">and</span> <span class="n">any_done</span><span class="p">)</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="n">max_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="n">tensordict</span> <span class="o">=</span> <span class="n">step_mdp</span><span class="p">(</span>
                 <span class="n">tensordict</span><span class="p">,</span>
                 <span class="n">keep_other</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">exclude_action</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">exclude_reward</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">reward_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_key</span><span class="p">,</span>
-                <span class="n">action_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">action_key</span><span class="p">,</span>
-                <span class="n">done_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">,</span>
+                <span class="n">reward_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_keys</span><span class="p">,</span>
+                <span class="n">action_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">action_keys</span><span class="p">,</span>
+                <span class="n">done_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">break_when_any_done</span> <span class="ow">and</span> <span class="n">done</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-                <span class="n">_reset</span> <span class="o">=</span> <span class="n">done</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-                <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;_reset&quot;</span><span class="p">,</span> <span class="n">_reset</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">break_when_any_done</span> <span class="ow">and</span> <span class="n">any_done</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">_reset_key</span><span class="p">,</span> <span class="n">done</span> <span class="ow">in</span> <span class="n">_reset_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">_reset_key</span><span class="p">,</span> <span class="n">done</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
-                <span class="k">del</span> <span class="n">tensordict</span><span class="p">[</span><span class="s2">&quot;_reset&quot;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">_reset_key</span> <span class="ow">in</span> <span class="n">_reset_map</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">del</span> <span class="n">tensordict</span><span class="p">[</span><span class="n">_reset_key</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">)</span>
@@ -1676,13 +2023,13 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a fake tensordict with key-value pairs that match in shape, device and dtype what can be expected during an environment rollout.&quot;&quot;&quot;</span>
         <span class="n">state_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_spec</span>
         <span class="n">observation_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_spec</span>
-        <span class="n">action_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_action_spec&quot;</span><span class="p">]</span>
+        <span class="n">action_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span>
         <span class="c1"># instantiates reward_spec if needed</span>
         <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_spec</span>
-        <span class="n">reward_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_reward_spec&quot;</span><span class="p">]</span>
+        <span class="n">reward_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span>
         <span class="c1"># instantiates done_spec if needed</span>
         <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span>
-        <span class="n">done_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_done_spec&quot;</span><span class="p">]</span>
+        <span class="n">done_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span>
 
         <span class="n">fake_obs</span> <span class="o">=</span> <span class="n">observation_spec</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
 

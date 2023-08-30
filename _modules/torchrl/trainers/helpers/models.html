@@ -498,7 +498,7 @@
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">atoms</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">distributional</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="n">linear_layer_class</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">noisy</span> <span class="k">else</span> <span class="n">NoisyLinear</span>
 
-    <span class="n">action_spec</span> <span class="o">=</span> <span class="n">env_specs</span><span class="p">[</span><span class="s2">&quot;input_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;_action_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">]</span>
+    <span class="n">action_spec</span> <span class="o">=</span> <span class="n">env_specs</span><span class="p">[</span><span class="s2">&quot;input_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;full_action_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">action_spec</span><span class="o">.</span><span class="n">domain</span> <span class="o">!=</span> <span class="s2">&quot;discrete&quot;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;env </span><span class="si">{</span><span class="n">proof_environment</span><span class="si">}</span><span class="s2"> has an action domain &quot;</span>
@@ -528,7 +528,9 @@
             <span class="s2">&quot;mlp_kwargs_output&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;num_cells&quot;</span><span class="p">:</span> <span class="mi">512</span><span class="p">,</span> <span class="s2">&quot;layer_class&quot;</span><span class="p">:</span> <span class="n">linear_layer_class</span><span class="p">},</span>
         <span class="p">}</span>
         <span class="c1"># automatically infer in key</span>
-        <span class="p">(</span><span class="n">in_key</span><span class="p">,)</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">env_specs</span><span class="p">[</span><span class="s2">&quot;output_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;_observation_spec&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">in_key</span><span class="p">,)</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span>
+            <span class="n">env_specs</span><span class="p">[</span><span class="s2">&quot;output_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;full_observation_spec&quot;</span><span class="p">],</span> <span class="mi">1</span>
+        <span class="p">)</span>
 
     <span class="n">actor_class</span> <span class="o">=</span> <span class="n">QValueActor</span>
     <span class="n">actor_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -537,7 +539,7 @@
         <span class="c1"># if action spec is modeled as categorical variable, we still need to have features equal</span>
         <span class="c1"># to the number of possible choices and also set categorical behavioural for actors.</span>
         <span class="n">actor_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;action_space&quot;</span><span class="p">:</span> <span class="s2">&quot;categorical&quot;</span><span class="p">})</span>
-        <span class="n">out_features</span> <span class="o">=</span> <span class="n">env_specs</span><span class="p">[</span><span class="s2">&quot;input_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;_action_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">n</span>
+        <span class="n">out_features</span> <span class="o">=</span> <span class="n">env_specs</span><span class="p">[</span><span class="s2">&quot;input_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;full_action_spec&quot;</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">n</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">out_features</span> <span class="o">=</span> <span class="n">action_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 

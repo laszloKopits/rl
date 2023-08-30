@@ -405,23 +405,11 @@ in which case this value should be set  to <cite>False</cite>. Default is
 </pre></div>
 </div>
 <dl class="py property">
-<dt class="sig sig-object py" id="torchrl.envs.transforms.TransformedEnv.action_spec">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.tensor_specs.TensorSpec"><span class="pre">TensorSpec</span></a></em><a class="headerlink" href="#torchrl.envs.transforms.TransformedEnv.action_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Action spec of the transformed environment.</p>
-</dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="torchrl.envs.transforms.TransformedEnv.batch_locked">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_locked</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#torchrl.envs.transforms.TransformedEnv.batch_locked" title="Permalink to this definition">¶</a></dt>
-<dd><p>Whether the environnement can be used with a batch size different from the one it was initialized with or not.</p>
+<dd><p>Whether the environment can be used with a batch size different from the one it was initialized with or not.</p>
 <p>If True, the env needs to be used with a tensordict having the same batch size as the env.
 batch_locked is an immutable property.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="torchrl.envs.transforms.TransformedEnv.done_spec">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">done_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.tensor_specs.TensorSpec"><span class="pre">TensorSpec</span></a></em><a class="headerlink" href="#torchrl.envs.transforms.TransformedEnv.done_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Done spec of the transformed environment.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -500,21 +488,9 @@ exists in <a class="reference internal" href="#torchrl.envs.transforms.Transform
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="torchrl.envs.transforms.TransformedEnv.observation_spec">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observation_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.tensor_specs.TensorSpec"><span class="pre">TensorSpec</span></a></em><a class="headerlink" href="#torchrl.envs.transforms.TransformedEnv.observation_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Observation spec of the transformed environment.</p>
-</dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="torchrl.envs.transforms.TransformedEnv.output_spec">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.tensor_specs.TensorSpec"><span class="pre">TensorSpec</span></a></em><a class="headerlink" href="#torchrl.envs.transforms.TransformedEnv.output_spec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Observation spec of the transformed environment.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="torchrl.envs.transforms.TransformedEnv.reward_spec">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reward_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.tensor_specs.TensorSpec"><span class="pre">TensorSpec</span></a></em><a class="headerlink" href="#torchrl.envs.transforms.TransformedEnv.reward_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reward spec of the transformed environment.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -581,12 +557,6 @@ Default: <code class="docutils literal notranslate"><span class="pre">False</spa
 <span class="go">[&#39;bias&#39;, &#39;weight&#39;]</span>
 </pre></div>
 </div>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="torchrl.envs.transforms.TransformedEnv.state_spec">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.tensor_specs.TensorSpec"><span class="pre">TensorSpec</span></a></em><a class="headerlink" href="#torchrl.envs.transforms.TransformedEnv.state_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>State spec of the transformed environment.</p>
 </dd></dl>
 
 <dl class="py method">

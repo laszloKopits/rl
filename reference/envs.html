@@ -410,10 +410,10 @@ the reward spec.</p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">env.done_spec</span></code>: a <a class="reference internal" href="generated/torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.TensorSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorSpec</span></code></a> object representing
 the done-flag spec.</p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">env.input_spec</span></code>: a <a class="reference internal" href="generated/torchrl.data.CompositeSpec.html#torchrl.data.CompositeSpec" title="torchrl.data.CompositeSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompositeSpec</span></code></a> object containing
-all the input keys (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;_action_spec&quot;</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;_state_spec&quot;</span></code>).
+all the input keys (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;full_action_spec&quot;</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;full_state_spec&quot;</span></code>).
 It is locked and should not be modified directly.</p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">env.output_spec</span></code>: a <a class="reference internal" href="generated/torchrl.data.CompositeSpec.html#torchrl.data.CompositeSpec" title="torchrl.data.CompositeSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompositeSpec</span></code></a> object containing
-all the output keys (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;_observation_spec&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;_reward_spec&quot;</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;_done_spec&quot;</span></code>).
+all the output keys (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;full_observation_spec&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;full_reward_spec&quot;</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;full_done_spec&quot;</span></code>).
 It is locked and should not be modified directly.</p></li>
 </ul>
 <p>Importantly, the environment spec shapes should contain the batch size, e.g.
@@ -710,8 +710,8 @@ This means that accessing <cite>env.reward_spec</cite> will always return the le
 spec if the accessed spec is Composite. Therefore, if in the example above
 we run <cite>env.reward_spec</cite> after env creation, we would get the same output as <cite>torch.stack(reward_specs)}</cite>.
 To get the full composite spec with the “agents” key, you can run
-<cite>env.output_spec[“_reward_spec”]</cite>. The same is valid for action and done specs.
-Note that <cite>env.reward_spec == env.output_spec[“_reward_spec”][env.reward_key]</cite>.</p>
+<cite>env.output_spec[“full_reward_spec”]</cite>. The same is valid for action and done specs.
+Note that <cite>env.reward_spec == env.output_spec[“full_reward_spec”][env.reward_key]</cite>.</p>
 </div>
 </section>
 <section id="transforms">

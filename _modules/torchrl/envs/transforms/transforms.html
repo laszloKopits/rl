@@ -462,8 +462,8 @@
     <span class="c1"># tensor is not updated) an out_key that does not match the in_key has</span>
     <span class="c1"># no effect on the spec.</span>
     <span class="k">def</span> <span class="nf">new_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_spec</span><span class="p">):</span>
-        <span class="n">action_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-        <span class="n">state_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">]</span>
+        <span class="n">action_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">state_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">state_spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">state_spec</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">input_spec</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -477,8 +477,8 @@
             <span class="k">elif</span> <span class="n">in_key</span> <span class="ow">in</span> <span class="n">state_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
                 <span class="n">state_spec</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_spec</span><span class="p">[</span><span class="n">in_key</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">CompositeSpec</span><span class="p">(</span>
-            <span class="n">_state_spec</span><span class="o">=</span><span class="n">state_spec</span><span class="p">,</span>
-            <span class="n">_action_spec</span><span class="o">=</span><span class="n">action_spec</span><span class="p">,</span>
+            <span class="n">full_state_spec</span><span class="o">=</span><span class="n">state_spec</span><span class="p">,</span>
+            <span class="n">full_action_spec</span><span class="o">=</span><span class="n">action_spec</span><span class="p">,</span>
             <span class="n">shape</span><span class="o">=</span><span class="n">input_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
             <span class="n">device</span><span class="o">=</span><span class="n">input_spec</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
         <span class="p">)</span>
@@ -642,7 +642,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transforms the output spec such that the resulting spec matches transform mapping.</span>
 
 <span class="sd">        This method should generally be left untouched. Changes should be implemented using</span>
-<span class="sd">        :meth:`~.transform_observation_spec`, :meth:`~.transform_reward_spec` and :meth:`~.transform_done_spec`.</span>
+<span class="sd">        :meth:`~.transform_observation_spec`, :meth:`~.transform_reward_spec` and :meth:`~.transformfull_done_spec`.</span>
 <span class="sd">        Args:</span>
 <span class="sd">            output_spec (TensorSpec): spec before the transform</span>
 
@@ -651,16 +651,16 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">output_spec</span> <span class="o">=</span> <span class="n">output_spec</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-        <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_observation_spec</span><span class="p">(</span>
-            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">]</span>
+        <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_observation_spec</span><span class="p">(</span>
+            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">]</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="s2">&quot;_reward_spec&quot;</span> <span class="ow">in</span> <span class="n">output_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_reward_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_reward_spec</span><span class="p">(</span>
-                <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_reward_spec&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;full_reward_spec&quot;</span> <span class="ow">in</span> <span class="n">output_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_reward_spec</span><span class="p">(</span>
+                <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="s2">&quot;_done_spec&quot;</span> <span class="ow">in</span> <span class="n">output_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_done_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_done_spec</span><span class="p">(</span>
-                <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_done_spec&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;full_done_spec&quot;</span> <span class="ow">in</span> <span class="n">output_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_done_spec</span><span class="p">(</span>
+                <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">output_spec</span></div>
 
@@ -946,11 +946,6 @@
         <span class="k">return</span> <span class="n">output_spec</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">action_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Action spec of the transformed environment.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[(</span><span class="s2">&quot;_action_spec&quot;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">action_key</span><span class="p">)]</span>
-
-    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">input_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Action spec of the transformed environment.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_input_spec&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_specs</span><span class="p">:</span>
@@ -963,32 +958,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">input_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_input_spec&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">input_spec</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">reward_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reward spec of the transformed environment.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[(</span><span class="s2">&quot;_reward_spec&quot;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_key</span><span class="p">)]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">observation_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Observation spec of the transformed environment.&quot;&quot;&quot;</span>
-        <span class="n">observation_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">observation_spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">observation_spec</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">observation_spec</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">state_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;State spec of the transformed environment.&quot;&quot;&quot;</span>
-        <span class="n">state_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">state_spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">state_spec</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">state_spec</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">done_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Done spec of the transformed environment.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[(</span><span class="s2">&quot;_done_spec&quot;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">done_key</span><span class="p">)]</span>
 
     <span class="k">def</span> <span class="nf">_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
         <span class="n">tensordict</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -2923,8 +2892,8 @@
 <div class="viewcode-block" id="DTypeCastTransform.transform_input_spec"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.DTypeCastTransform.html#torchrl.envs.transforms.DTypeCastTransform.transform_input_spec">[docs]</a>    <span class="k">def</span> <span class="nf">transform_input_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_spec</span><span class="p">:</span> <span class="n">TensorSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_inv_unset</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_in_keys</span><span class="p">()</span>
-        <span class="n">action_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_action_spec&quot;</span><span class="p">]</span>
-        <span class="n">state_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">]</span>
+        <span class="n">action_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span>
+        <span class="n">state_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">action_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
                 <span class="n">_spec</span> <span class="o">=</span> <span class="n">action_spec</span>
@@ -3336,8 +3305,8 @@
 
 <div class="viewcode-block" id="DiscreteActionProjection.transform_input_spec"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.DiscreteActionProjection.html#torchrl.envs.transforms.DiscreteActionProjection.transform_input_spec">[docs]</a>    <span class="k">def</span> <span class="nf">transform_input_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_spec</span><span class="p">:</span> <span class="n">CompositeSpec</span><span class="p">):</span>
         <span class="n">input_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_action_spec&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
             <span class="k">break</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;key not found in action_spec.&quot;</span><span class="p">)</span>
@@ -4266,8 +4235,8 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;input_spec was expected to be of type CompositeSpec. Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">input_spec</span><span class="p">)</span><span class="si">}</span><span class="s2"> instead.&quot;</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span>
+        <span class="k">if</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span>
                 <span class="n">shape</span><span class="o">=</span><span class="n">input_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">input_spec</span><span class="o">.</span><span class="n">device</span>
             <span class="p">)</span>
         <span class="n">step_spec</span> <span class="o">=</span> <span class="n">UnboundedDiscreteTensorSpec</span><span class="p">(</span>
@@ -4276,7 +4245,7 @@
             <span class="n">device</span><span class="o">=</span><span class="n">input_spec</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">step_spec</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">minimum</span> <span class="o">*=</span> <span class="mi">0</span>
-        <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_count_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">step_spec</span>
+        <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_count_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">step_spec</span>
 
         <span class="k">return</span> <span class="n">input_spec</span></div>
 
@@ -4796,8 +4765,8 @@
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Expected one key to be &#39;done&#39;&quot;</span><span class="p">)</span>
-            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">][</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_spec</span><span class="p">[</span>
-                <span class="s2">&quot;_done_spec&quot;</span>
+            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">][</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_spec</span><span class="p">[</span>
+                <span class="s2">&quot;full_done_spec&quot;</span>
             <span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
         <span class="k">if</span> <span class="s2">&quot;reward&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span><span class="p">):</span>  <span class="c1"># noqa: B007</span>
@@ -4805,20 +4774,22 @@
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Expected one key to be &#39;reward&#39;&quot;</span><span class="p">)</span>
-            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">][</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_spec</span><span class="p">[</span>
-                <span class="s2">&quot;_reward_spec&quot;</span>
+            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">][</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_spec</span><span class="p">[</span>
+                <span class="s2">&quot;full_reward_spec&quot;</span>
             <span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">in_key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;reward&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">):</span>
-                <span class="n">output_spec</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">][</span><span class="n">in_key</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+                <span class="n">output_spec</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">][</span>
+                    <span class="n">in_key</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">][</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_spec</span><span class="p">[</span>
-                    <span class="s2">&quot;_observation_spec&quot;</span>
+                <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">][</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_spec</span><span class="p">[</span>
+                    <span class="s2">&quot;full_observation_spec&quot;</span>
                 <span class="p">][</span><span class="n">in_key</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_copy</span><span class="p">:</span>
-                <span class="k">del</span> <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;_observation_spec&quot;</span><span class="p">][</span><span class="n">in_key</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">][</span><span class="n">in_key</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">output_spec</span></div>
 
 <div class="viewcode-block" id="RenameTransform.transform_input_spec"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.RenameTransform.html#torchrl.envs.transforms.RenameTransform.transform_input_spec">[docs]</a>    <span class="k">def</span> <span class="nf">transform_input_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_spec</span><span class="p">:</span> <span class="n">CompositeSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompositeSpec</span><span class="p">:</span>
@@ -4827,11 +4798,11 @@
         <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys_inv</span><span class="p">):</span>
             <span class="n">in_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">in_key</span><span class="p">,)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="n">in_key</span>
             <span class="n">out_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">out_key</span><span class="p">,)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="n">out_key</span>
-            <span class="n">input_spec</span><span class="p">[(</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">out_key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span>
-                <span class="p">(</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">in_key</span><span class="p">)</span>
+            <span class="n">input_spec</span><span class="p">[(</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">out_key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span>
+                <span class="p">(</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">in_key</span><span class="p">)</span>
             <span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_copy</span><span class="p">:</span>
-                <span class="k">del</span> <span class="n">input_spec</span><span class="p">[(</span><span class="s2">&quot;_state_spec&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">in_key</span><span class="p">)]</span>
+                <span class="k">del</span> <span class="n">input_spec</span><span class="p">[(</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">in_key</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">input_spec</span></div></div>
 
 

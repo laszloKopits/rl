@@ -592,6 +592,22 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+<span class="k">def</span> <span class="nf">_check_only_one_entry</span><span class="p">(</span>
+    <span class="n">spec</span><span class="p">:</span> <span class="n">CompositeSpec</span><span class="p">,</span>
+    <span class="n">error</span><span class="p">:</span> <span class="ne">RuntimeError</span><span class="p">,</span>
+    <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">found_entry</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">CompositeSpec</span><span class="p">):</span>
+            <span class="n">_check_only_one_entry</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">recursive</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">found_entry</span><span class="p">:</span>
+                <span class="n">found_entry</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">error</span>
+
+
 <span class="k">class</span> <span class="nc">CloudpickleWrapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A wrapper for functions that allow for serialization in multiprocessed settings.&quot;&quot;&quot;</span>
 
