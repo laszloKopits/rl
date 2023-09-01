@@ -374,7 +374,10 @@
 <span class="c1"># LICENSE file in the root directory of this source tree.</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span> <span class="nn">contextlib</span>
+
 <span class="kn">import</span> <span class="nn">importlib.util</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -600,19 +603,17 @@
         <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="p">,)</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">_get_str</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">is_tensor_collection</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-                <span class="n">new_val</span> <span class="o">=</span> <span class="n">dest</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">new_val</span> <span class="o">=</span> <span class="n">dest</span><span class="o">.</span><span class="n">_get_str</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">new_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">new_val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">empty</span><span class="p">()</span>
-                    <span class="c1"># dest.set(k, new_val)</span>
                     <span class="n">dest</span><span class="o">.</span><span class="n">_set_str</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">new_val</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validated</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">source</span> <span class="o">=</span> <span class="n">val</span>
                 <span class="n">dest</span> <span class="o">=</span> <span class="n">new_val</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">clone</span><span class="p">:</span>
                     <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-                <span class="c1"># dest.set(k, val)</span>
                 <span class="n">dest</span><span class="o">.</span><span class="n">_set_str</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validated</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># This is a temporary solution to understand if a key is heterogeneous</span>
         <span class="c1"># while not having performance impact when the exception is not raised</span>
@@ -930,6 +931,32 @@
         <span class="n">shape</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">composite</span></div>
+
+
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">clear_mpi_env_vars</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clears the MPI of environment variables.</span>
+
+<span class="sd">    `from mpi4py import MPI` will call `MPI_Init` by default.</span>
+<span class="sd">    If the child process has MPI environment variables, MPI will think that the child process</span>
+<span class="sd">    is an MPI process just like the parent and do bad things such as hang.</span>
+
+<span class="sd">    This context manager is a hacky way to clear those environment variables</span>
+<span class="sd">    temporarily such as when we are starting multiprocessing Processes.</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        Yields for the context manager</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">removed_environment</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;OMPI_&quot;</span><span class="p">,</span> <span class="s2">&quot;PMI_&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
+                <span class="n">removed_environment</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                <span class="k">del</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">removed_environment</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_replace_last</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">NestedKey</span><span class="p">,</span> <span class="n">new_ending</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedKey</span><span class="p">:</span>

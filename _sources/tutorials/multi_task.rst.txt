@@ -378,6 +378,7 @@ it will assume that we are in a multi-task setting.
 
     LazyStackedTensorDict(
         fields={
+            _reset: Tensor(shape=torch.Size([2, 1]), device=cpu, dtype=torch.bool, is_shared=False),
             done: Tensor(shape=torch.Size([2, 1]), device=cpu, dtype=torch.bool, is_shared=False),
             observation: Tensor(shape=torch.Size([2, 67]), device=cpu, dtype=torch.float32, is_shared=False)},
         exclusive_fields={
@@ -391,6 +392,7 @@ it will assume that we are in a multi-task setting.
         stack_dim=0)
     TensorDict(
         fields={
+            _reset: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             observation: Tensor(shape=torch.Size([67]), device=cpu, dtype=torch.float32, is_shared=False),
             observation_stand: Tensor(shape=torch.Size([67]), device=cpu, dtype=torch.float32, is_shared=False)},
@@ -399,6 +401,7 @@ it will assume that we are in a multi-task setting.
         is_shared=False)
     TensorDict(
         fields={
+            _reset: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             observation: Tensor(shape=torch.Size([67]), device=cpu, dtype=torch.float32, is_shared=False),
             observation_walk: Tensor(shape=torch.Size([67]), device=cpu, dtype=torch.float32, is_shared=False)},
@@ -439,6 +442,7 @@ Let's pass the output through our network.
 
     LazyStackedTensorDict(
         fields={
+            _reset: Tensor(shape=torch.Size([2, 1]), device=cpu, dtype=torch.bool, is_shared=False),
             action: Tensor(shape=torch.Size([2, 21]), device=cpu, dtype=torch.float32, is_shared=False),
             done: Tensor(shape=torch.Size([2, 1]), device=cpu, dtype=torch.bool, is_shared=False),
             hidden: Tensor(shape=torch.Size([2, 64]), device=cpu, dtype=torch.float32, is_shared=False),
@@ -454,6 +458,7 @@ Let's pass the output through our network.
         stack_dim=0)
     TensorDict(
         fields={
+            _reset: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             action: Tensor(shape=torch.Size([21]), device=cpu, dtype=torch.float32, is_shared=False),
             done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             hidden: Tensor(shape=torch.Size([64]), device=cpu, dtype=torch.float32, is_shared=False),
@@ -464,6 +469,7 @@ Let's pass the output through our network.
         is_shared=False)
     TensorDict(
         fields={
+            _reset: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             action: Tensor(shape=torch.Size([21]), device=cpu, dtype=torch.float32, is_shared=False),
             done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             hidden: Tensor(shape=torch.Size([64]), device=cpu, dtype=torch.float32, is_shared=False),
@@ -474,6 +480,7 @@ Let's pass the output through our network.
         is_shared=False)
     LazyStackedTensorDict(
         fields={
+            _reset: Tensor(shape=torch.Size([2, 1]), device=cpu, dtype=torch.bool, is_shared=False),
             action: Tensor(shape=torch.Size([2, 21]), device=cpu, dtype=torch.float32, is_shared=False),
             done: Tensor(shape=torch.Size([2, 1]), device=cpu, dtype=torch.bool, is_shared=False),
             hidden: Tensor(shape=torch.Size([2, 64]), device=cpu, dtype=torch.float32, is_shared=False),
@@ -503,6 +510,7 @@ Let's pass the output through our network.
         stack_dim=0)
     TensorDict(
         fields={
+            _reset: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             action: Tensor(shape=torch.Size([21]), device=cpu, dtype=torch.float32, is_shared=False),
             done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             hidden: Tensor(shape=torch.Size([64]), device=cpu, dtype=torch.float32, is_shared=False),
@@ -522,6 +530,7 @@ Let's pass the output through our network.
         is_shared=False)
     TensorDict(
         fields={
+            _reset: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             action: Tensor(shape=torch.Size([21]), device=cpu, dtype=torch.float32, is_shared=False),
             done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),
             hidden: Tensor(shape=torch.Size([64]), device=cpu, dtype=torch.float32, is_shared=False),
@@ -580,6 +589,7 @@ Rollout
 
     LazyStackedTensorDict(
         fields={
+            _reset: Tensor(shape=torch.Size([2, 1]), device=cpu, dtype=torch.bool, is_shared=False),
             action: Tensor(shape=torch.Size([2, 21]), device=cpu, dtype=torch.float32, is_shared=False),
             done: Tensor(shape=torch.Size([2, 1]), device=cpu, dtype=torch.bool, is_shared=False),
             hidden: Tensor(shape=torch.Size([2, 64]), device=cpu, dtype=torch.float32, is_shared=False),
@@ -629,9 +639,9 @@ Rollout
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 50.750 seconds)
+   **Total running time of the script:** (0 minutes 50.279 seconds)
 
-**Estimated memory usage:**  11 MB
+**Estimated memory usage:**  56 MB
 
 
 .. _sphx_glr_download_tutorials_multi_task.py:
