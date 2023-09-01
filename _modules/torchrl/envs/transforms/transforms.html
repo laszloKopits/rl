@@ -3493,8 +3493,11 @@
 <span class="sd">        env (EnvBase): env on which the random actions have to be</span>
 <span class="sd">            performed. Can be the same env as the one provided to the</span>
 <span class="sd">            TransformedEnv class</span>
-<span class="sd">        noops (int, optional): number of actions performed after reset.</span>
-<span class="sd">            Default is `30`.</span>
+<span class="sd">        noops (int, optional): upper-bound on the number of actions</span>
+<span class="sd">            performed after reset. Default is `30`.</span>
+<span class="sd">            If noops is too high such that it results in the env being</span>
+<span class="sd">            done or truncated before the all the noops are applied,</span>
+<span class="sd">            in multiple trials, the transform raises a RuntimeError.</span>
 <span class="sd">        random (bool, optional): if False, the number of random ops will</span>
 <span class="sd">            always be equal to the noops value. If True, the number of</span>
 <span class="sd">            random actions will be randomly selected between 0 and noops.</span>
@@ -3503,10 +3506,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">noops</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample initial states by taking random number of no-ops on reset.</span>
-
-<span class="sd">        No-op is assumed to be action 0.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample initial states by taking random number of no-ops on reset.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">noops</span> <span class="o">=</span> <span class="n">noops</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random</span> <span class="o">=</span> <span class="n">random</span>
@@ -3541,31 +3541,31 @@
         <span class="n">noops</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">noops</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">random</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noops</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,))</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
         <span class="p">)</span>
-        <span class="n">trial</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">trial</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">trial</span> <span class="o">&lt;=</span> <span class="n">_MAX_NOOPS_TRIALS</span><span class="p">:</span>
             <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
             <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">noops</span><span class="p">:</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">tensordict</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">rand_step</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
                 <span class="n">tensordict</span> <span class="o">=</span> <span class="n">step_mdp</span><span class="p">(</span><span class="n">tensordict</span><span class="p">,</span> <span class="n">exclude_done</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span> <span class="ow">or</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;truncated&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="p">):</span>
                     <span class="n">tensordict</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">td_reset</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">break</span>
 
             <span class="n">trial</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">trial</span> <span class="o">&gt;</span> <span class="n">_MAX_NOOPS_TRIALS</span><span class="p">:</span>
-                <span class="n">tensordict</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">rand_step</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">done_key</span><span class="p">)):</span>
-                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;parent is still done after a single random step (i=</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">).&quot;</span>
-                    <span class="p">)</span>
-                <span class="k">break</span>
 
-        <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;NoopResetEnv concluded with done environment&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Parent env was repeatedly done or truncated&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; before the sampled number of noops (=</span><span class="si">{</span><span class="n">noops</span><span class="si">}</span><span class="s2">) could be applied. &quot;</span>
+            <span class="p">)</span>
+
         <span class="k">return</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">reward_key</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

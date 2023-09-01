@@ -388,8 +388,11 @@
 <li><p><strong>env</strong> (<a class="reference internal" href="torchrl.envs.EnvBase.html#torchrl.envs.EnvBase" title="torchrl.envs.EnvBase"><em>EnvBase</em></a>) – env on which the random actions have to be
 performed. Can be the same env as the one provided to the
 TransformedEnv class</p></li>
-<li><p><strong>noops</strong> (<em>int</em><em>, </em><em>optional</em>) – number of actions performed after reset.
-Default is <cite>30</cite>.</p></li>
+<li><p><strong>noops</strong> (<em>int</em><em>, </em><em>optional</em>) – upper-bound on the number of actions
+performed after reset. Default is <cite>30</cite>.
+If noops is too high such that it results in the env being
+done or truncated before the all the noops are applied,
+in multiple trials, the transform raises a RuntimeError.</p></li>
 <li><p><strong>random</strong> (<em>bool</em><em>, </em><em>optional</em>) – if False, the number of random ops will
 always be equal to the noops value. If True, the number of
 random actions will be randomly selected between 0 and noops.
