@@ -1488,6 +1488,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            tensordict (TensorDictBase): Tensordict containing the action to be taken.</span>
+<span class="sd">                If the input tensordict contains a ``&quot;next&quot;`` entry, the values contained in it</span>
+<span class="sd">                will prevail over the newly computed values. This gives a mechanism</span>
+<span class="sd">                to override the underlying computations.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            the input tensordict, modified in place with the resulting observations, done state and reward</span>
@@ -1496,10 +1499,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># sanity check</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_assert_tensordict_shape</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
+        <span class="n">next_preset</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="n">next_tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
         <span class="n">next_tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_proc_data</span><span class="p">(</span><span class="n">next_tensordict</span><span class="p">)</span>
-        <span class="c1"># tensordict could already have a &quot;next&quot; key</span>
+        <span class="k">if</span> <span class="n">next_preset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># tensordict could already have a &quot;next&quot; key</span>
+            <span class="n">next_tensordict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">next_preset</span><span class="p">)</span>
         <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">next_tensordict</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tensordict</span></div>
 
@@ -2039,11 +2045,14 @@
         <span class="n">next_output</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fake_reward</span><span class="p">)</span>
         <span class="n">next_output</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fake_done</span><span class="p">)</span>
         <span class="n">fake_in_out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fake_done</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
+        <span class="k">if</span> <span class="s2">&quot;next&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fake_in_out</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">fake_in_out</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">next_output</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fake_in_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">next_output</span><span class="p">)</span>
 
-        <span class="n">fake_td</span> <span class="o">=</span> <span class="n">fake_in_out</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">next_output</span><span class="p">)</span>
-        <span class="n">fake_td</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
-        <span class="n">fake_td</span> <span class="o">=</span> <span class="n">fake_td</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">fake_td</span></div></div>
+        <span class="n">fake_in_out</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
+        <span class="n">fake_in_out</span> <span class="o">=</span> <span class="n">fake_in_out</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fake_in_out</span></div></div>
 
 
 <span class="k">class</span> <span class="nc">_EnvWrapper</span><span class="p">(</span><span class="n">EnvBase</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>

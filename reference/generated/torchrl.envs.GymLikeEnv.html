@@ -2138,7 +2138,10 @@ to be taken.
 Step will call an out-place private method, _step, which is the method to be re-written by EnvBase subclasses.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tensordict</strong> (<em>TensorDictBase</em>) – Tensordict containing the action to be taken.</p>
+<dd class="field-odd"><p><strong>tensordict</strong> (<em>TensorDictBase</em>) – Tensordict containing the action to be taken.
+If the input tensordict contains a <code class="docutils literal notranslate"><span class="pre">&quot;next&quot;</span></code> entry, the values contained in it
+will prevail over the newly computed values. This gives a mechanism
+to override the underlying computations.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the input tensordict, modified in place with the resulting observations, done state and reward
