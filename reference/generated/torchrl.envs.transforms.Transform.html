@@ -399,10 +399,42 @@ independent).</p>
 specs from an environment: when querying
 <cite>transformed_env.observation_spec</cite>, the resulting objects will describe
 the specs of the transformed_in tensors.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="torchrl.envs.transforms.Transform.container">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">container</span></span><a class="headerlink" href="#torchrl.envs.transforms.Transform.container" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the env containing the transform.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">torchrl.envs</span> <span class="kn">import</span> <span class="n">TransformedEnv</span><span class="p">,</span> <span class="n">Compose</span><span class="p">,</span> <span class="n">RewardSum</span><span class="p">,</span> <span class="n">StepCounter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">torchrl.envs.libs.gym</span> <span class="kn">import</span> <span class="n">GymEnv</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span> <span class="o">=</span> <span class="n">TransformedEnv</span><span class="p">(</span><span class="n">GymEnv</span><span class="p">(</span><span class="s2">&quot;Pendulum-v1&quot;</span><span class="p">),</span> <span class="n">Compose</span><span class="p">(</span><span class="n">RewardSum</span><span class="p">(),</span> <span class="n">StepCounter</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">transform</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">env</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="torchrl.envs.transforms.Transform.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensordict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TensorDictBase</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TensorDictBase</span></span></span><a class="reference internal" href="../../_modules/torchrl/envs/transforms/transforms.html#Transform.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.transforms.Transform.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads the input tensordict, and for the selected keys, applies the transform.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="torchrl.envs.transforms.Transform.parent">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="torchrl.envs.EnvBase.html#torchrl.envs.EnvBase" title="torchrl.envs.common.EnvBase"><span class="pre">EnvBase</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#torchrl.envs.transforms.Transform.parent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the parent env of the transform.</p>
+<p>The parent env is the env that contains all the transforms up until the current one.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">torchrl.envs</span> <span class="kn">import</span> <span class="n">TransformedEnv</span><span class="p">,</span> <span class="n">Compose</span><span class="p">,</span> <span class="n">RewardSum</span><span class="p">,</span> <span class="n">StepCounter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">torchrl.envs.libs.gym</span> <span class="kn">import</span> <span class="n">GymEnv</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span> <span class="o">=</span> <span class="n">TransformedEnv</span><span class="p">(</span><span class="n">GymEnv</span><span class="p">(</span><span class="s2">&quot;Pendulum-v1&quot;</span><span class="p">),</span> <span class="n">Compose</span><span class="p">(</span><span class="n">RewardSum</span><span class="p">(),</span> <span class="n">StepCounter</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">transform</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
+<span class="go">TransformedEnv(</span>
+<span class="go">    env=GymEnv(env=Pendulum-v1, batch_size=torch.Size([]), device=cpu),</span>
+<span class="go">    transform=Compose(</span>
+<span class="go">            RewardSum(keys=[&#39;reward&#39;])))</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">

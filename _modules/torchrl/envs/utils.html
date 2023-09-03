@@ -811,6 +811,7 @@
 
     <span class="c1"># Check specs</span>
     <span class="n">last_td</span> <span class="o">=</span> <span class="n">real_tensordict</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">last_td</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">rand_action</span><span class="p">(</span><span class="n">last_td</span><span class="p">)</span>
     <span class="n">full_action_spec</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span>
     <span class="n">full_state_spec</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span>
     <span class="n">full_observation_spec</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">]</span>
