@@ -530,7 +530,7 @@ output vector:</p>
 <section id="lstm-module">
 <h3>LSTM Module<a class="headerlink" href="#lstm-module" title="Permalink to this heading">¶</a></h3>
 <p>TorchRL provides a specialized <a class="reference internal" href="../reference/generated/torchrl.modules.LSTMModule.html#torchrl.modules.LSTMModule" title="torchrl.modules.LSTMModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">torchrl.modules.LSTMModule</span></code></a> class
-to incorporate LSTMs in your code-base. It is a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictModuleBase.html#tensordict.nn.TensorDictModuleBase" title="(in tensordict vmain (0.1.2+11b8a8c ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictModuleBase</span></code></a>
+to incorporate LSTMs in your code-base. It is a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictModuleBase.html#tensordict.nn.TensorDictModuleBase" title="(in tensordict vmain (0.1.2+252bfa8 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictModuleBase</span></code></a>
 subclass: as such, it has a set of <code class="docutils literal notranslate"><span class="pre">in_keys</span></code> and <code class="docutils literal notranslate"><span class="pre">out_keys</span></code> that indicate
 what values should be expected to be read and written/updated during the
 execution of the module. The class comes with customizable pre-defined
@@ -646,7 +646,7 @@ like we are doing explicitly here. There is little advantage to do this
 and the process is less transparent, but the end results will be similar to
 what we do here.</p>
 </div>
-<p>We can now put things together in a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictSequential.html#tensordict.nn.TensorDictSequential" title="(in tensordict vmain (0.1.2+11b8a8c ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictSequential</span></code></a></p>
+<p>We can now put things together in a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictSequential.html#tensordict.nn.TensorDictSequential" title="(in tensordict vmain (0.1.2+252bfa8 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictSequential</span></code></a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stoch_policy</span> <span class="o">=</span> <a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictSequential.html#tensordict.nn.TensorDictSequential" title="tensordict.nn.TensorDictSequential" class="sphx-glr-backref-module-tensordict-nn sphx-glr-backref-type-py-class"><span class="n">Seq</span></a><span class="p">(</span><a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictModule.html#tensordict.nn.TensorDictModule" title="tensordict.nn.TensorDictModule" class="sphx-glr-backref-module-tensordict-nn sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">feature</span></a><span class="p">,</span> <span class="n">lstm</span><span class="p">,</span> <a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictModule.html#tensordict.nn.TensorDictModule" title="tensordict.nn.TensorDictModule" class="sphx-glr-backref-module-tensordict-nn sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mlp</span></a><span class="p">,</span> <span class="n">qval</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -822,15 +822,15 @@ Pay attention to the key names which will reflect what can be found in this data
     device=cpu,
     is_shared=False)
 
-  0%|          | 50/1000000 [00:00&lt;2:36:13, 106.67it/s]
-  0%|          | 50/1000000 [00:15&lt;2:36:13, 106.67it/s]
-steps: 10, loss_val:  0.0006, action_spread: tensor([47,  3]):   0%|          | 50/1000000 [00:19&lt;2:36:13, 106.67it/s]
-steps: 10, loss_val:  0.0006, action_spread: tensor([47,  3]):   0%|          | 100/1000000 [00:19&lt;64:15:28,  4.32it/s]
-steps: 10, loss_val:  0.0006, action_spread: tensor([46,  4]):   0%|          | 100/1000000 [00:38&lt;64:15:28,  4.32it/s]
-steps: 10, loss_val:  0.0006, action_spread: tensor([46,  4]):   0%|          | 150/1000000 [00:38&lt;83:31:33,  3.33it/s]
-steps: 25, loss_val:  0.0004, action_spread: tensor([12, 38]):   0%|          | 150/1000000 [00:57&lt;83:31:33,  3.33it/s]
-steps: 25, loss_val:  0.0004, action_spread: tensor([12, 38]):   0%|          | 200/1000000 [00:58&lt;92:36:06,  3.00it/s]
-steps: 25, loss_val:  0.0003, action_spread: tensor([18, 32]):   0%|          | 200/1000000 [01:16&lt;92:36:06,  3.00it/s]
+  0%|          | 50/1000000 [00:00&lt;2:29:35, 111.40it/s]
+  0%|          | 50/1000000 [00:16&lt;2:29:35, 111.40it/s]
+steps: 20, loss_val:  0.0002, action_spread: tensor([37, 13]):   0%|          | 50/1000000 [00:19&lt;2:29:35, 111.40it/s]
+steps: 20, loss_val:  0.0002, action_spread: tensor([37, 13]):   0%|          | 100/1000000 [00:20&lt;65:27:28,  4.24it/s]
+steps: 20, loss_val:  0.0003, action_spread: tensor([ 4, 46]):   0%|          | 100/1000000 [00:39&lt;65:27:28,  4.24it/s]
+steps: 20, loss_val:  0.0003, action_spread: tensor([ 4, 46]):   0%|          | 150/1000000 [00:39&lt;85:07:24,  3.26it/s]
+steps: 21, loss_val:  0.0001, action_spread: tensor([36, 14]):   0%|          | 150/1000000 [00:58&lt;85:07:24,  3.26it/s]
+steps: 21, loss_val:  0.0001, action_spread: tensor([36, 14]):   0%|          | 200/1000000 [00:59&lt;94:24:14,  2.94it/s]
+steps: 21, loss_val:  0.0003, action_spread: tensor([ 4, 46]):   0%|          | 200/1000000 [01:18&lt;94:24:14,  2.94it/s]
 </pre></div>
 </div>
 <p>Let’s plot our results:</p>
@@ -856,8 +856,8 @@ transform.</p></li>
 such that they can be stored in the replay buffer along with the rest of
 the data.</p></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 25.430 seconds)</p>
-<p><strong>Estimated memory usage:</strong>  2217 MB</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 26.284 seconds)</p>
+<p><strong>Estimated memory usage:</strong>  2074 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-dqn-with-rnn-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/dde09d3c1d4412e9da159191e4ac8de2/dqn_with_rnn.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">dqn_with_rnn.py</span></code></a></p>

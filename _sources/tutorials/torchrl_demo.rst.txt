@@ -322,13 +322,16 @@ Here are some other functionalities of TensorDict.
  .. code-block:: none
 
     view(-1):  torch.Size([10]) torch.Size([10, 1])
-    to device:  TensorDict(
+    to device:  LazyStackedTensorDict(
         fields={
             key 1: Tensor(shape=torch.Size([2, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),
             key 2: Tensor(shape=torch.Size([2, 5, 5, 6]), device=cpu, dtype=torch.bool, is_shared=False)},
+        exclusive_fields={
+        },
         batch_size=torch.Size([2, 5]),
         device=cpu,
-        is_shared=False)
+        is_shared=False,
+        stack_dim=0)
     share memory:  LazyStackedTensorDict(
         fields={
             key 1: Tensor(shape=torch.Size([2, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),
@@ -1997,7 +2000,7 @@ The library is on PyPI: *pip install torchrl*
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (4 minutes 14.273 seconds)
+   **Total running time of the script:** (4 minutes 20.752 seconds)
 
 **Estimated memory usage:**  15 MB
 
