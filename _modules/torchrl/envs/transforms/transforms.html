@@ -5181,6 +5181,12 @@
 
 <span class="sd">      .. note:: This transform will fail when used without an environment.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        action_key (NestedKey, optional): the key where the action tensor can be found.</span>
+<span class="sd">            Defaults to ``&quot;action&quot;``.</span>
+<span class="sd">        mask_key (NestedKey, optional): the key where the action mask can be found.</span>
+<span class="sd">            Defaults to ``&quot;action_mask&quot;``.</span>
+
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; import torch</span>
 <span class="sd">        &gt;&gt;&gt; from torchrl.data.tensor_specs import DiscreteTensorSpec, BinaryDiscreteTensorSpec, UnboundedContinuousTensorSpec, CompositeSpec</span>
@@ -5190,7 +5196,7 @@
 <span class="sd">        ...     def __init__(self, *args, **kwargs):</span>
 <span class="sd">        ...         super().__init__(*args, **kwargs)</span>
 <span class="sd">        ...         self.action_spec = DiscreteTensorSpec(4)</span>
-<span class="sd">        ...         self.state_spec = CompositeSpec(mask=BinaryDiscreteTensorSpec(4, dtype=torch.bool))</span>
+<span class="sd">        ...         self.state_spec = CompositeSpec(action_mask=BinaryDiscreteTensorSpec(4, dtype=torch.bool))</span>
 <span class="sd">        ...         self.observation_spec = CompositeSpec(obs=UnboundedContinuousTensorSpec(3))</span>
 <span class="sd">        ...         self.reward_spec = UnboundedContinuousTensorSpec(1)</span>
 <span class="sd">        ...</span>
@@ -5201,11 +5207,11 @@
 <span class="sd">        ...</span>
 <span class="sd">        ...     def _step(self, data):</span>
 <span class="sd">        ...         td = self.observation_spec.rand()</span>
-<span class="sd">        ...         mask = data.get(&quot;mask&quot;)</span>
+<span class="sd">        ...         mask = data.get(&quot;action_mask&quot;)</span>
 <span class="sd">        ...         action = data.get(&quot;action&quot;)</span>
 <span class="sd">        ...         mask = mask.scatter(-1, action.unsqueeze(-1), 0)</span>
 <span class="sd">        ...</span>
-<span class="sd">        ...         td.set(&quot;mask&quot;, mask)</span>
+<span class="sd">        ...         td.set(&quot;action_mask&quot;, mask)</span>
 <span class="sd">        ...         td.set(&quot;reward&quot;, self.reward_spec.rand())</span>
 <span class="sd">        ...         td.set(&quot;done&quot;, ~mask.any().view(1))</span>
 <span class="sd">        ...         return td</span>
@@ -5219,7 +5225,7 @@
 <span class="sd">        &gt;&gt;&gt; r = env.rollout(10)</span>
 <span class="sd">        &gt;&gt;&gt; env = TransformedEnv(base_env, ActionMask())</span>
 <span class="sd">        &gt;&gt;&gt; r = env.rollout(10)</span>
-<span class="sd">        &gt;&gt;&gt; r[&quot;mask&quot;]</span>
+<span class="sd">        &gt;&gt;&gt; r[&quot;action_mask&quot;]</span>
 <span class="sd">        tensor([[ True,  True,  True,  True],</span>
 <span class="sd">                [ True,  True, False,  True],</span>
 <span class="sd">                [ True,  True, False, False],</span>
@@ -5235,7 +5241,9 @@
     <span class="p">)</span>
     <span class="n">SPEC_TYPE_ERROR</span> <span class="o">=</span> <span class="s2">&quot;The action spec must be one of </span><span class="si">{}</span><span class="s2">. Got </span><span class="si">{}</span><span class="s2"> instead.&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_key</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="n">mask_key</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">=</span> <span class="s2">&quot;mask&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">action_key</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="n">mask_key</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">=</span> <span class="s2">&quot;action_mask&quot;</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_key</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;The action key must be a nested key. Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">action_key</span><span class="p">)</span><span class="si">}</span><span class="s2"> instead.&quot;</span>
