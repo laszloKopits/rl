@@ -221,7 +221,7 @@ uniformly distributed) numbers in that space:
  .. code-block:: none
 
     random action: 
-     tensor([-0.4794])
+     tensor([-0.3868])
 
 
 
@@ -648,7 +648,7 @@ argument that allows the user to quickly ask for image-based environments:
  .. code-block:: none
 
 
-    <matplotlib.image.AxesImage object at 0x7fd0d4295dc0>
+    <matplotlib.image.AxesImage object at 0x7f7693540cd0>
 
 
 
@@ -1421,7 +1421,7 @@ to access this attribute. Here's an example:
  .. code-block:: none
 
 
-    'bar_14abf080-4cce-11ee-a5c8-0242ac120002'
+    'bar_72e8c006-4cf1-11ee-a4e8-0242ac120002'
 
 
 
@@ -1470,7 +1470,7 @@ to access this attribute. Here's an example:
  .. code-block:: none
 
 
-    <torchrl.envs.vec_env._dispatch_caller_parallel object at 0x7fd0401e44f0>
+    <torchrl.envs.vec_env._dispatch_caller_parallel object at 0x7f769320ae50>
 
 
 
@@ -1490,7 +1490,7 @@ to access this attribute. Here's an example:
  .. code-block:: none
 
 
-    ['bar_1c41fa24-4cce-11ee-b76e-0242ac120002', 'bar_1c404c74-4cce-11ee-b8e7-0242ac120002', 'bar_1c40b448-4cce-11ee-9bda-0242ac120002']
+    ['bar_7a746d5c-4cf1-11ee-b9a2-0242ac120002', 'bar_7a7a80fc-4cf1-11ee-a00d-0242ac120002', 'bar_7a788d56-4cf1-11ee-a1c7-0242ac120002']
 
 
 
@@ -1705,8 +1705,8 @@ In regular setting, using VecNorm is quite easy:
 
  .. code-block:: none
 
-    mean: : tensor([0.2252, 0.2824, 0.2740])
-    std: : tensor([1.2770, 1.1556, 1.2604])
+    mean: : tensor([-0.3027,  0.2485,  0.1459])
+    std: : tensor([0.9425, 1.1314, 1.1327])
 
 
 
@@ -1765,8 +1765,8 @@ once created:
         batch_size=torch.Size([3, 5]),
         device=cpu,
         is_shared=False)
-    mean: : tensor([-0.1115,  0.1442,  0.1473])
-    std: : tensor([1.2415, 1.0638, 1.2325])
+    mean: : tensor([-0.1073,  0.1093,  0.0228])
+    std: : tensor([1.2054, 1.2422, 1.3026])
 
 
 
@@ -1807,7 +1807,7 @@ This small difference will usually be absored throughout training.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (3 minutes 42.206 seconds)
+   **Total running time of the script:** (3 minutes 41.341 seconds)
 
 **Estimated memory usage:**  165 MB
 
