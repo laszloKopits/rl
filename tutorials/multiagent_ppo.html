@@ -407,7 +407,7 @@ using  <a class="reference external" href="https://en.wikipedia.org/wiki/Lidar">
 <li><p>How to create a multi-agent environment in TorchRL, how its specs work, and how it integrates with the library;</p></li>
 <li><p>How you use GPU vectorized environments in TorchRL;</p></li>
 <li><p>How to create different multi-agent network architectures in TorchRL (e.g., using parameter sharing, centralised critic)</p></li>
-<li><p>How we can use <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+252bfa8 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> to carry multi-agent data;</p></li>
+<li><p>How we can use <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+4b309d9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> to carry multi-agent data;</p></li>
 <li><p>How we can tie all the library components (collectors, modules, replay buffers, and losses) in a multi-agent MAPPO/IPPO training loop.</p></li>
 </ul>
 <p>If you are running this in Google Colab, make sure you install the following dependencies:</p>
@@ -1189,16 +1189,16 @@ The steps include:</p>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>episode_reward_mean = 0:   0%|          | 0/10 [00:00&lt;?, ?it/s]
-episode_reward_mean = -0.3641679584980011:  10%|█         | 1/10 [00:07&lt;01:03,  7.04s/it]
-episode_reward_mean = 0.5052392482757568:  20%|██        | 2/10 [00:14&lt;00:56,  7.03s/it]
-episode_reward_mean = 1.0283849239349365:  30%|███       | 3/10 [00:21&lt;00:49,  7.02s/it]
-episode_reward_mean = 1.331086277961731:  40%|████      | 4/10 [00:28&lt;00:42,  7.03s/it]
-episode_reward_mean = 2.0674946308135986:  50%|█████     | 5/10 [00:35&lt;00:35,  7.01s/it]
-episode_reward_mean = 2.245943784713745:  60%|██████    | 6/10 [00:42&lt;00:28,  7.02s/it]
-episode_reward_mean = 2.611856698989868:  70%|███████   | 7/10 [00:49&lt;00:21,  7.04s/it]
-episode_reward_mean = 2.8442416191101074:  80%|████████  | 8/10 [00:56&lt;00:14,  7.14s/it]
-episode_reward_mean = 2.856468677520752:  90%|█████████ | 9/10 [01:04&lt;00:07,  7.30s/it]
-episode_reward_mean = 2.9219210147857666: 100%|██████████| 10/10 [01:12&lt;00:00,  7.46s/it]
+episode_reward_mean = -0.3641679584980011:  10%|█         | 1/10 [00:07&lt;01:03,  7.11s/it]
+episode_reward_mean = 0.5052392482757568:  20%|██        | 2/10 [00:14&lt;00:56,  7.07s/it]
+episode_reward_mean = 1.0283849239349365:  30%|███       | 3/10 [00:21&lt;00:49,  7.06s/it]
+episode_reward_mean = 1.331086277961731:  40%|████      | 4/10 [00:28&lt;00:42,  7.06s/it]
+episode_reward_mean = 2.0674946308135986:  50%|█████     | 5/10 [00:35&lt;00:35,  7.07s/it]
+episode_reward_mean = 2.245943784713745:  60%|██████    | 6/10 [00:42&lt;00:28,  7.06s/it]
+episode_reward_mean = 2.611856698989868:  70%|███████   | 7/10 [00:49&lt;00:21,  7.10s/it]
+episode_reward_mean = 2.8442416191101074:  80%|████████  | 8/10 [00:56&lt;00:14,  7.19s/it]
+episode_reward_mean = 2.856468677520752:  90%|█████████ | 9/10 [01:04&lt;00:07,  7.35s/it]
+episode_reward_mean = 2.9219210147857666: 100%|██████████| 10/10 [01:12&lt;00:00,  7.51s/it]
 </pre></div>
 </div>
 </section>
@@ -1268,7 +1268,7 @@ episode_reward_mean = 2.9219210147857666: 100%|██████████| 1
 <li><p>How to create a multi-agent environment in TorchRL, how its specs work, and how it integrates with the library;</p></li>
 <li><p>How you use GPU vectorized environments in TorchRL;</p></li>
 <li><p>How to create different multi-agent network architectures in TorchRL (e.g., using parameter sharing, centralised critic)</p></li>
-<li><p>How we can use <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+252bfa8 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> to carry multi-agent data;</p></li>
+<li><p>How we can use <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+4b309d9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> to carry multi-agent data;</p></li>
 <li><p>How we can tie all the library components (collectors, modules, replay buffers, and losses) in a multi-agent MAPPO/IPPO training loop.</p></li>
 </ul>
 <p>Now that you are proficient with multi-agent PPO, you can check out all
@@ -1287,8 +1287,8 @@ Here are a few videos of some possible scenarios you can try in VMAS.</p>
 <p><span class="caption-text">Scenarios available in <a class="reference external" href="https://github.com/proroklab/VectorizedMultiAgentSimulator">VMAS</a></span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </figcaption>
 </figure>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 19.990 seconds)</p>
-<p><strong>Estimated memory usage:</strong>  12 MB</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 24.873 seconds)</p>
+<p><strong>Estimated memory usage:</strong>  25 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-multiagent-ppo-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/f40bd467562dfb87148a8df03c1efb7a/multiagent_ppo.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">multiagent_ppo.py</span></code></a></p>

@@ -407,7 +407,7 @@ in a replay buffer;</p></li>
 </ul>
 <p>This tutorial assumes that you have completed the PPO tutorial which gives
 an overview of the torchrl components and dependencies, such as
-<a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+252bfa8 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> and <code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictModules</span></code>,
+<a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+4b309d9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> and <code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictModules</span></code>,
 although it should be
 sufficiently transparent to be understood without a deep understanding of
 these classes.</p>
@@ -449,7 +449,7 @@ information to return a loss value.</p>
 </pre></div>
 </div>
 </li>
-<li><p>They output a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+252bfa8 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> instance with the loss values
+<li><p>They output a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+4b309d9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> instance with the loss values
 written under a <code class="docutils literal notranslate"><span class="pre">&quot;loss_&lt;smth&gt;&quot;</span></code> where <code class="docutils literal notranslate"><span class="pre">smth</span></code> is a string describing the
 loss. Additional keys in the tensordict may be useful metrics to log during
 training time.
@@ -467,7 +467,7 @@ training time.
 <h3>The <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method<a class="headerlink" href="#the-init-method" title="Permalink to this heading">¶</a></h3>
 <p>The parent class of all losses is <a class="reference internal" href="../reference/generated/torchrl.objectives.LossModule.html#torchrl.objectives.LossModule" title="torchrl.objectives.LossModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">LossModule</span></code></a>.
 As many other components of the library, its <a class="reference internal" href="../reference/generated/torchrl.objectives.LossModule.html#torchrl.objectives.LossModule.forward" title="torchrl.objectives.LossModule.forward"><code class="xref py py-meth docutils literal notranslate"><span class="pre">forward()</span></code></a> method expects
-as input a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+252bfa8 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> instance sampled from an experience
+as input a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+4b309d9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> instance sampled from an experience
 replay buffer, or any similar data structure. Using this format makes it
 possible to re-use the module across
 modalities, or in complex settings where the model needs to read multiple
@@ -483,7 +483,7 @@ training a policy to output actions that maximise the value predicted by
 a value network. Hence, our loss module needs to receive two networks in its
 constructor: an actor and a value networks. We expect both of these to be
 tensordict-compatible objects, such as
-<a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictModule.html#tensordict.nn.TensorDictModule" title="(in tensordict vmain (0.1.2+252bfa8 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictModule</span></code></a>.
+<a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictModule.html#tensordict.nn.TensorDictModule" title="(in tensordict vmain (0.1.2+4b309d9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictModule</span></code></a>.
 Our loss function will need to compute a target value and fit the value
 network to this, and generate an action and fit the policy such that its
 value estimate is maximised.</p>
@@ -997,10 +997,10 @@ parametric actor that learns how to select actions that maximize this value.</p>
 <p>Recall that building a TorchRL module requires two steps:</p>
 <ul class="simple">
 <li><p>writing the <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a> that will be used as network,</p></li>
-<li><p>wrapping the network in a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictModule.html#tensordict.nn.TensorDictModule" title="(in tensordict vmain (0.1.2+252bfa8 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictModule</span></code></a> where the
+<li><p>wrapping the network in a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictModule.html#tensordict.nn.TensorDictModule" title="(in tensordict vmain (0.1.2+4b309d9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictModule</span></code></a> where the
 data flow is handled by specifying the input and output keys.</p></li>
 </ul>
-<p>In more complex scenarios, <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictSequential.html#tensordict.nn.TensorDictSequential" title="(in tensordict vmain (0.1.2+252bfa8 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictSequential</span></code></a> can
+<p>In more complex scenarios, <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictSequential.html#tensordict.nn.TensorDictSequential" title="(in tensordict vmain (0.1.2+4b309d9 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictSequential</span></code></a> can
 also be used.</p>
 <p>The Q-Value network is wrapped in a <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueOperator</span></code>
 that automatically sets the <code class="docutils literal notranslate"><span class="pre">out_keys</span></code> to <code class="docutils literal notranslate"><span class="pre">&quot;state_action_value</span></code> for q-value
@@ -1462,25 +1462,26 @@ modules we need.</p>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/10000 [00:00&lt;?, ?it/s]
-  8%|▊         | 800/10000 [00:00&lt;00:04, 2059.63it/s]
- 16%|█▌        | 1600/10000 [00:02&lt;00:12, 694.95it/s]
- 24%|██▍       | 2400/10000 [00:02&lt;00:07, 1039.34it/s]
- 40%|████      | 4000/10000 [00:02&lt;00:03, 1801.07it/s]
- 48%|████▊     | 4800/10000 [00:03&lt;00:02, 1986.62it/s]
- 56%|█████▌    | 5600/10000 [00:03&lt;00:01, 2237.90it/s]
-reward: -2.40 (r0 = -2.25), reward eval: reward: -0.00, reward normalized=-2.82/6.45, grad norm= 183.27, loss_value= 446.57, loss_actor= 14.40, target value: -19.27:  56%|█████▌    | 5600/10000 [00:05&lt;00:01, 2237.90it/s]
-reward: -2.40 (r0 = -2.25), reward eval: reward: -0.00, reward normalized=-2.82/6.45, grad norm= 183.27, loss_value= 446.57, loss_actor= 14.40, target value: -19.27:  64%|██████▍   | 6400/10000 [00:05&lt;00:03, 979.75it/s]
-reward: -3.01 (r0 = -2.25), reward eval: reward: -0.00, reward normalized=-1.95/5.72, grad norm= 157.20, loss_value= 190.19, loss_actor= 14.29, target value: -13.39:  64%|██████▍   | 6400/10000 [00:09&lt;00:03, 979.75it/s]
-reward: -3.01 (r0 = -2.25), reward eval: reward: -0.00, reward normalized=-1.95/5.72, grad norm= 157.20, loss_value= 190.19, loss_actor= 14.29, target value: -13.39:  72%|███████▏  | 7200/10000 [00:09&lt;00:06, 404.15it/s]
-reward: -3.55 (r0 = -2.25), reward eval: reward: -0.00, reward normalized=-2.36/5.61, grad norm= 99.37, loss_value= 230.22, loss_actor= 15.62, target value: -14.58:  72%|███████▏  | 7200/10000 [00:11&lt;00:06, 404.15it/s]
-reward: -3.55 (r0 = -2.25), reward eval: reward: -0.00, reward normalized=-2.36/5.61, grad norm= 99.37, loss_value= 230.22, loss_actor= 15.62, target value: -14.58:  80%|████████  | 8000/10000 [00:11&lt;00:04, 404.07it/s]
-reward: -3.70 (r0 = -2.25), reward eval: reward: -0.00, reward normalized=-2.70/5.02, grad norm= 153.90, loss_value= 185.04, loss_actor= 13.81, target value: -18.82:  80%|████████  | 8000/10000 [00:14&lt;00:04, 404.07it/s]
-reward: -3.70 (r0 = -2.25), reward eval: reward: -0.00, reward normalized=-2.70/5.02, grad norm= 153.90, loss_value= 185.04, loss_actor= 13.81, target value: -18.82:  88%|████████▊ | 8800/10000 [00:14&lt;00:03, 390.52it/s]
-reward: -4.56 (r0 = -2.25), reward eval: reward: -4.87, reward normalized=-2.18/5.79, grad norm= 74.56, loss_value= 310.19, loss_actor= 10.67, target value: -14.17:  88%|████████▊ | 8800/10000 [00:17&lt;00:03, 390.52it/s]
-reward: -4.56 (r0 = -2.25), reward eval: reward: -4.87, reward normalized=-2.18/5.79, grad norm= 74.56, loss_value= 310.19, loss_actor= 10.67, target value: -14.17:  96%|█████████▌| 9600/10000 [00:18&lt;00:01, 310.33it/s]
-reward: -2.84 (r0 = -2.25), reward eval: reward: -4.87, reward normalized=-2.40/5.65, grad norm= 115.73, loss_value= 227.48, loss_actor= 13.06, target value: -16.59:  96%|█████████▌| 9600/10000 [00:22&lt;00:01, 310.33it/s]
-reward: -2.84 (r0 = -2.25), reward eval: reward: -4.87, reward normalized=-2.40/5.65, grad norm= 115.73, loss_value= 227.48, loss_actor= 13.06, target value: -16.59: : 10400it [00:22, 262.90it/s]
-reward: -4.73 (r0 = -2.25), reward eval: reward: -4.87, reward normalized=-2.48/5.22, grad norm= 100.58, loss_value= 204.59, loss_actor= 17.24, target value: -17.95: : 10400it [00:24, 262.90it/s]
+  8%|▊         | 800/10000 [00:00&lt;00:05, 1817.10it/s]
+ 16%|█▌        | 1600/10000 [00:02&lt;00:12, 693.20it/s]
+ 24%|██▍       | 2400/10000 [00:02&lt;00:07, 1063.13it/s]
+ 32%|███▏      | 3200/10000 [00:02&lt;00:04, 1588.46it/s]
+ 40%|████      | 4000/10000 [00:02&lt;00:03, 1958.72it/s]
+ 48%|████▊     | 4800/10000 [00:03&lt;00:02, 2080.93it/s]
+ 56%|█████▌    | 5600/10000 [00:03&lt;00:01, 2342.75it/s]
+reward: -2.71 (r0 = -1.85), reward eval: reward: -0.01, reward normalized=-2.18/6.06, grad norm= 83.04, loss_value= 319.53, loss_actor= 14.01, target value: -12.03:  56%|█████▌    | 5600/10000 [00:05&lt;00:01, 2342.75it/s]
+reward: -2.71 (r0 = -1.85), reward eval: reward: -0.01, reward normalized=-2.18/6.06, grad norm= 83.04, loss_value= 319.53, loss_actor= 14.01, target value: -12.03:  64%|██████▍   | 6400/10000 [00:05&lt;00:03, 912.75it/s]
+reward: -2.04 (r0 = -1.85), reward eval: reward: -0.01, reward normalized=-2.17/5.61, grad norm= 91.67, loss_value= 235.02, loss_actor= 14.68, target value: -13.48:  64%|██████▍   | 6400/10000 [00:08&lt;00:03, 912.75it/s]
+reward: -2.04 (r0 = -1.85), reward eval: reward: -0.01, reward normalized=-2.17/5.61, grad norm= 91.67, loss_value= 235.02, loss_actor= 14.68, target value: -13.48:  72%|███████▏  | 7200/10000 [00:08&lt;00:05, 475.17it/s]
+reward: -1.31 (r0 = -1.85), reward eval: reward: -0.01, reward normalized=-2.28/5.75, grad norm= 47.13, loss_value= 229.48, loss_actor= 12.25, target value: -15.12:  72%|███████▏  | 7200/10000 [00:10&lt;00:05, 475.17it/s]
+reward: -1.31 (r0 = -1.85), reward eval: reward: -0.01, reward normalized=-2.28/5.75, grad norm= 47.13, loss_value= 229.48, loss_actor= 12.25, target value: -15.12:  80%|████████  | 8000/10000 [00:10&lt;00:04, 448.85it/s]
+reward: -3.43 (r0 = -1.85), reward eval: reward: -0.01, reward normalized=-2.38/5.33, grad norm= 81.30, loss_value= 218.81, loss_actor= 13.60, target value: -15.40:  80%|████████  | 8000/10000 [00:12&lt;00:04, 448.85it/s]
+reward: -3.43 (r0 = -1.85), reward eval: reward: -0.01, reward normalized=-2.38/5.33, grad norm= 81.30, loss_value= 218.81, loss_actor= 13.60, target value: -15.40:  88%|████████▊ | 8800/10000 [00:12&lt;00:02, 437.53it/s]
+reward: -4.39 (r0 = -1.85), reward eval: reward: -5.91, reward normalized=-2.05/5.30, grad norm= 83.71, loss_value= 176.47, loss_actor= 14.95, target value: -12.86:  88%|████████▊ | 8800/10000 [00:16&lt;00:02, 437.53it/s]
+reward: -4.39 (r0 = -1.85), reward eval: reward: -5.91, reward normalized=-2.05/5.30, grad norm= 83.71, loss_value= 176.47, loss_actor= 14.95, target value: -12.86:  96%|█████████▌| 9600/10000 [00:16&lt;00:01, 314.20it/s]
+reward: -4.57 (r0 = -1.85), reward eval: reward: -5.91, reward normalized=-2.94/6.10, grad norm= 241.28, loss_value= 352.99, loss_actor= 19.13, target value: -20.25:  96%|█████████▌| 9600/10000 [00:20&lt;00:01, 314.20it/s]
+reward: -4.57 (r0 = -1.85), reward eval: reward: -5.91, reward normalized=-2.94/6.10, grad norm= 241.28, loss_value= 352.99, loss_actor= 19.13, target value: -20.25: : 10400it [00:20, 268.96it/s]
+reward: -5.13 (r0 = -1.85), reward eval: reward: -5.91, reward normalized=-2.33/5.39, grad norm= 124.56, loss_value= 225.07, loss_actor= 17.55, target value: -15.55: : 10400it [00:22, 268.96it/s]
 </pre></div>
 </div>
 </section>
@@ -1516,7 +1517,7 @@ loss component;</p></li>
 <li><p>How to use (or not) a target network, and how to update its parameters;</p></li>
 <li><p>How to create an optimizer associated with a loss module.</p></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 9.736 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 14.115 seconds)</p>
 <p><strong>Estimated memory usage:</strong>  14 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-coding-ddpg-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
