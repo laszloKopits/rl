@@ -420,8 +420,8 @@ the first output is a dictionary. In that case, each observation output will be 
 <span class="go">UnboundedContinuousTensorSpec(</span>
 <span class="go">    shape=torch.Size([1]),</span>
 <span class="go">    space=ContinuousBox(</span>
-<span class="go">        minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="go">        maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="go">        low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="go">        high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="go">    device=cpu,</span>
 <span class="go">    dtype=torch.float32,</span>
 <span class="go">    domain=continuous)</span>
@@ -434,8 +434,8 @@ this function will return just the leaf.</p>
 <span class="go">UnboundedContinuousTensorSpec(</span>
 <span class="go">    shape=torch.Size([1]),</span>
 <span class="go">    space=ContinuousBox(</span>
-<span class="go">        minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="go">        maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="go">        low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="go">        high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="go">    device=cpu,</span>
 <span class="go">    dtype=torch.float32,</span>
 <span class="go">    domain=continuous)</span>
@@ -450,8 +450,8 @@ this function will return the whole spec.</p>
 <span class="go">        action: UnboundedContinuousTensorSpec(</span>
 <span class="go">            shape=torch.Size([1]),</span>
 <span class="go">            space=ContinuousBox(</span>
-<span class="go">                minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="go">                maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="go">                low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="go">                high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="go">            device=cpu,</span>
 <span class="go">            dtype=torch.float32,</span>
 <span class="go">            domain=continuous),</span>
@@ -475,8 +475,8 @@ this function will return the whole spec.</p>
 <span class="go">BoundedTensorSpec(</span>
 <span class="go">    shape=torch.Size([1]),</span>
 <span class="go">    space=ContinuousBox(</span>
-<span class="go">        minimum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="go">        maximum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="go">        low=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="go">        high=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="go">    device=cpu,</span>
 <span class="go">    dtype=torch.float32,</span>
 <span class="go">    domain=continuous)</span>
@@ -996,8 +996,8 @@ Instead, to set the specs contained in it, use the respective properties.</p>
 <span class="go">        action: BoundedTensorSpec(</span>
 <span class="go">            shape=torch.Size([1]),</span>
 <span class="go">            space=ContinuousBox(</span>
-<span class="go">                minimum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="go">                maximum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="go">                low=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="go">                high=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="go">            device=cpu,</span>
 <span class="go">            dtype=torch.float32,</span>
 <span class="go">            domain=continuous), device=cpu, shape=torch.Size([])), device=cpu, shape=torch.Size([]))</span>
@@ -1240,8 +1240,8 @@ a generic data container for environment outputs that are not done or reward dat
 <span class="go">    observation: BoundedTensorSpec(</span>
 <span class="go">        shape=torch.Size([3]),</span>
 <span class="go">        space=ContinuousBox(</span>
-<span class="go">            minimum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="go">            maximum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="go">            low=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="go">            high=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="go">        device=cpu,</span>
 <span class="go">        dtype=torch.float32,</span>
 <span class="go">        domain=continuous), device=cpu, shape=torch.Size([]))</span>
@@ -1278,8 +1278,8 @@ Instead, to set the specs contained in it, use the respective properties.</p>
 <span class="go">        observation: BoundedTensorSpec(</span>
 <span class="go">            shape=torch.Size([3]),</span>
 <span class="go">            space=ContinuousBox(</span>
-<span class="go">                minimum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="go">                maximum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="go">                low=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="go">                high=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="go">            device=cpu,</span>
 <span class="go">            dtype=torch.float32,</span>
 <span class="go">            domain=continuous), device=cpu, shape=torch.Size([])),</span>
@@ -1781,8 +1781,8 @@ reset function.</p></li>
 <span class="go">UnboundedContinuousTensorSpec(</span>
 <span class="go">    shape=torch.Size([1]),</span>
 <span class="go">    space=ContinuousBox(</span>
-<span class="go">        minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="go">        maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="go">        low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="go">        high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="go">    device=cpu,</span>
 <span class="go">    dtype=torch.float32,</span>
 <span class="go">    domain=continuous)</span>
@@ -1795,8 +1795,8 @@ this function will return just the leaf.</p>
 <span class="go">UnboundedContinuousTensorSpec(</span>
 <span class="go">    shape=torch.Size([1]),</span>
 <span class="go">    space=ContinuousBox(</span>
-<span class="go">        minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="go">        maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="go">        low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="go">        high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="go">    device=cpu,</span>
 <span class="go">    dtype=torch.float32,</span>
 <span class="go">    domain=continuous)</span>
@@ -1811,8 +1811,8 @@ this function will return the whole spec.</p>
 <span class="go">        reward: UnboundedContinuousTensorSpec(</span>
 <span class="go">            shape=torch.Size([1]),</span>
 <span class="go">            space=ContinuousBox(</span>
-<span class="go">                minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="go">                maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="go">                low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="go">                high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="go">            device=cpu,</span>
 <span class="go">            dtype=torch.float32,</span>
 <span class="go">            domain=continuous),</span>

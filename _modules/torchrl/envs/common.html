@@ -522,8 +522,8 @@
 <span class="sd">                action: BoundedTensorSpec(</span>
 <span class="sd">                    shape=torch.Size([1]),</span>
 <span class="sd">                    space=ContinuousBox(</span>
-<span class="sd">                        minimum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                        maximum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                        low=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                        high=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                    device=cpu,</span>
 <span class="sd">                    dtype=torch.float32,</span>
 <span class="sd">                    domain=continuous), device=cpu, shape=torch.Size([])), device=cpu, shape=torch.Size([]))</span>
@@ -531,8 +531,8 @@
 <span class="sd">        BoundedTensorSpec(</span>
 <span class="sd">            shape=torch.Size([1]),</span>
 <span class="sd">            space=ContinuousBox(</span>
-<span class="sd">                minimum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                maximum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                low=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                high=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">            device=cpu,</span>
 <span class="sd">            dtype=torch.float32,</span>
 <span class="sd">            domain=continuous)</span>
@@ -541,8 +541,8 @@
 <span class="sd">            observation: BoundedTensorSpec(</span>
 <span class="sd">                shape=torch.Size([3]),</span>
 <span class="sd">                space=ContinuousBox(</span>
-<span class="sd">                    minimum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                    maximum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                    low=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    high=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                device=cpu,</span>
 <span class="sd">                dtype=torch.float32,</span>
 <span class="sd">                domain=continuous), device=cpu, shape=torch.Size([]))</span>
@@ -574,8 +574,8 @@
 <span class="sd">                observation: BoundedTensorSpec(</span>
 <span class="sd">                    shape=torch.Size([3]),</span>
 <span class="sd">                    space=ContinuousBox(</span>
-<span class="sd">                        minimum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                        maximum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                        low=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                        high=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                    device=cpu,</span>
 <span class="sd">                    dtype=torch.float32,</span>
 <span class="sd">                    domain=continuous), device=cpu, shape=torch.Size([])),</span>
@@ -757,8 +757,8 @@
 <span class="sd">                    action: BoundedTensorSpec(</span>
 <span class="sd">                        shape=torch.Size([1]),</span>
 <span class="sd">                        space=ContinuousBox(</span>
-<span class="sd">                            minimum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                            maximum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                            low=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                            high=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                        device=cpu,</span>
 <span class="sd">                        dtype=torch.float32,</span>
 <span class="sd">                        domain=continuous), device=cpu, shape=torch.Size([])), device=cpu, shape=torch.Size([]))</span>
@@ -810,8 +810,8 @@
 <span class="sd">                    observation: BoundedTensorSpec(</span>
 <span class="sd">                        shape=torch.Size([3]),</span>
 <span class="sd">                        space=ContinuousBox(</span>
-<span class="sd">                            minimum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                            maximum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                            low=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                            high=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                        device=cpu,</span>
 <span class="sd">                        dtype=torch.float32,</span>
 <span class="sd">                        domain=continuous), device=cpu, shape=torch.Size([])),</span>
@@ -886,8 +886,8 @@
 <span class="sd">            UnboundedContinuousTensorSpec(</span>
 <span class="sd">                shape=torch.Size([1]),</span>
 <span class="sd">                space=ContinuousBox(</span>
-<span class="sd">                    minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                    maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                    low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                device=cpu,</span>
 <span class="sd">                dtype=torch.float32,</span>
 <span class="sd">                domain=continuous)</span>
@@ -900,8 +900,8 @@
 <span class="sd">            UnboundedContinuousTensorSpec(</span>
 <span class="sd">                shape=torch.Size([1]),</span>
 <span class="sd">                space=ContinuousBox(</span>
-<span class="sd">                    minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                    maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                    low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                device=cpu,</span>
 <span class="sd">                dtype=torch.float32,</span>
 <span class="sd">                domain=continuous)</span>
@@ -916,8 +916,8 @@
 <span class="sd">                    action: UnboundedContinuousTensorSpec(</span>
 <span class="sd">                        shape=torch.Size([1]),</span>
 <span class="sd">                        space=ContinuousBox(</span>
-<span class="sd">                            minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                            maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                            low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                            high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                        device=cpu,</span>
 <span class="sd">                        dtype=torch.float32,</span>
 <span class="sd">                        domain=continuous),</span>
@@ -941,8 +941,8 @@
 <span class="sd">            BoundedTensorSpec(</span>
 <span class="sd">                shape=torch.Size([1]),</span>
 <span class="sd">                space=ContinuousBox(</span>
-<span class="sd">                    minimum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                    maximum=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                    low=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    high=Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                device=cpu,</span>
 <span class="sd">                dtype=torch.float32,</span>
 <span class="sd">                domain=continuous)</span>
@@ -1053,8 +1053,8 @@
 <span class="sd">            UnboundedContinuousTensorSpec(</span>
 <span class="sd">                shape=torch.Size([1]),</span>
 <span class="sd">                space=ContinuousBox(</span>
-<span class="sd">                    minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                    maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                    low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                device=cpu,</span>
 <span class="sd">                dtype=torch.float32,</span>
 <span class="sd">                domain=continuous)</span>
@@ -1067,8 +1067,8 @@
 <span class="sd">            UnboundedContinuousTensorSpec(</span>
 <span class="sd">                shape=torch.Size([1]),</span>
 <span class="sd">                space=ContinuousBox(</span>
-<span class="sd">                    minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                    maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                    low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                    high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                device=cpu,</span>
 <span class="sd">                dtype=torch.float32,</span>
 <span class="sd">                domain=continuous)</span>
@@ -1083,8 +1083,8 @@
 <span class="sd">                    reward: UnboundedContinuousTensorSpec(</span>
 <span class="sd">                        shape=torch.Size([1]),</span>
 <span class="sd">                        space=ContinuousBox(</span>
-<span class="sd">                            minimum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                            maximum=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                            low=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                            high=Tensor(shape=torch.Size([]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                        device=cpu,</span>
 <span class="sd">                        dtype=torch.float32,</span>
 <span class="sd">                        domain=continuous),</span>
@@ -1391,8 +1391,8 @@
 <span class="sd">                observation: BoundedTensorSpec(</span>
 <span class="sd">                    shape=torch.Size([3]),</span>
 <span class="sd">                    space=ContinuousBox(</span>
-<span class="sd">                        minimum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
-<span class="sd">                        maximum=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
+<span class="sd">                        low=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True),</span>
+<span class="sd">                        high=Tensor(shape=torch.Size([3]), device=cpu, dtype=torch.float32, contiguous=True)),</span>
 <span class="sd">                    device=cpu,</span>
 <span class="sd">                    dtype=torch.float32,</span>
 <span class="sd">                    domain=continuous), device=cpu, shape=torch.Size([]))</span>
