@@ -697,6 +697,8 @@
 <span class="sd">            conditions the action_space.</span>
 <span class="sd">        action_value_key (str or tuple of str, optional): The input key</span>
 <span class="sd">            representing the action value. Defaults to ``&quot;action_value&quot;``.</span>
+<span class="sd">        action_mask_key (str or tuple of str, optional): The input key</span>
+<span class="sd">            representing the action mask. Defaults to ``&quot;None&quot;`` (equivalent to no masking).</span>
 <span class="sd">        out_keys (list of str or tuple of str, optional): The output keys</span>
 <span class="sd">            representing the actions, action values and chosen action value.</span>
 <span class="sd">            Defaults to ``[&quot;action&quot;, &quot;action_value&quot;, &quot;chosen_action_value&quot;]``.</span>
@@ -748,6 +750,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">action_space</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">action_value_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">action_mask_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">out_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">var_nums</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">spec</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TensorSpec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -777,7 +780,11 @@
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">action_value_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">action_value_key</span> <span class="o">=</span> <span class="s2">&quot;action_value&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">action_value_key</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_mask_key</span> <span class="o">=</span> <span class="n">action_mask_key</span>
+        <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">action_value_key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_mask_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">in_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_mask_key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span> <span class="o">=</span> <span class="n">in_keys</span>
         <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">out_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="n">action_value_key</span><span class="p">,</span> <span class="s2">&quot;chosen_action_value&quot;</span><span class="p">]</span>
         <span class="k">elif</span> <span class="n">action_value_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out_keys</span><span class="p">:</span>
@@ -815,6 +822,15 @@
         <span class="k">if</span> <span class="n">action_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Action value key </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">action_value_key</span><span class="si">}</span><span class="s2"> not found in </span><span class="si">{</span><span class="n">tensordict</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_mask_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">action_mask</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_mask_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">action_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Action mask key </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">action_mask_key</span><span class="si">}</span><span class="s2"> not found in </span><span class="si">{</span><span class="n">tensordict</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">action_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="n">action_mask</span><span class="p">,</span> <span class="n">action_values</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">action_values</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">min</span>
             <span class="p">)</span>
 
         <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_func_mapping</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">](</span><span class="n">action_values</span><span class="p">)</span>
@@ -898,6 +914,8 @@
 <span class="sd">        support (torch.Tensor): support of the action values.</span>
 <span class="sd">        action_value_key (str or tuple of str, optional): The input key</span>
 <span class="sd">            representing the action value. Defaults to ``&quot;action_value&quot;``.</span>
+<span class="sd">        action_mask_key (str or tuple of str, optional): The input key</span>
+<span class="sd">            representing the action mask. Defaults to ``&quot;None&quot;`` (equivalent to no masking).</span>
 <span class="sd">        out_keys (list of str or tuple of str, optional): The output keys</span>
 <span class="sd">            representing the actions and action values.</span>
 <span class="sd">            Defaults to ``[&quot;action&quot;, &quot;action_value&quot;]``.</span>
@@ -953,6 +971,7 @@
         <span class="n">action_space</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">support</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">action_value_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">action_mask_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">out_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">var_nums</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">spec</span><span class="p">:</span> <span class="n">TensorSpec</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -965,6 +984,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">action_space</span><span class="o">=</span><span class="n">action_space</span><span class="p">,</span>
             <span class="n">action_value_key</span><span class="o">=</span><span class="n">action_value_key</span><span class="p">,</span>
+            <span class="n">action_mask_key</span><span class="o">=</span><span class="n">action_mask_key</span><span class="p">,</span>
             <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">,</span>
             <span class="n">var_nums</span><span class="o">=</span><span class="n">var_nums</span><span class="p">,</span>
             <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span>
@@ -978,6 +998,15 @@
         <span class="k">if</span> <span class="n">action_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Action value key </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">action_value_key</span><span class="si">}</span><span class="s2"> not found in </span><span class="si">{</span><span class="n">tensordict</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_mask_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">action_mask</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_mask_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">action_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Action mask key </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">action_mask_key</span><span class="si">}</span><span class="s2"> not found in </span><span class="si">{</span><span class="n">tensordict</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">action_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="n">action_mask</span><span class="p">,</span> <span class="n">action_values</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">action_values</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">min</span>
             <span class="p">)</span>
 
         <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_func_mapping</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">](</span><span class="n">action_values</span><span class="p">)</span>
@@ -1068,6 +1097,8 @@
 <span class="sd">        action_value_key (str or tuple of str, optional): to be used when hooked on</span>
 <span class="sd">            a TensorDictModule. The input key representing the action value. Defaults</span>
 <span class="sd">            to ``&quot;action_value&quot;``.</span>
+<span class="sd">        action_mask_key (str or tuple of str, optional): The input key</span>
+<span class="sd">            representing the action mask. Defaults to ``&quot;None&quot;`` (equivalent to no masking).</span>
 <span class="sd">        out_keys (list of str or tuple of str, optional): to be used when hooked on</span>
 <span class="sd">            a TensorDictModule. The output keys representing the actions, action values</span>
 <span class="sd">            and chosen action value. Defaults to ``[&quot;action&quot;, &quot;action_value&quot;, &quot;chosen_action_value&quot;]``.</span>
@@ -1103,6 +1134,7 @@
         <span class="n">action_space</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">var_nums</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">action_value_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">action_mask_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">out_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">TensorSpec</span><span class="p">):</span>
@@ -1117,6 +1149,7 @@
             <span class="n">action_space</span><span class="o">=</span><span class="n">action_space</span><span class="p">,</span>
             <span class="n">var_nums</span><span class="o">=</span><span class="n">var_nums</span><span class="p">,</span>
             <span class="n">action_value_key</span><span class="o">=</span><span class="n">action_value_key</span><span class="p">,</span>
+            <span class="n">action_mask_key</span><span class="o">=</span><span class="n">action_mask_key</span><span class="p">,</span>
             <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">action_value_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qvalue_model</span><span class="o">.</span><span class="n">in_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1146,6 +1179,11 @@
 <span class="sd">    Args:</span>
 <span class="sd">        action_space (str): Action space. Must be one of</span>
 <span class="sd">            ``&quot;one-hot&quot;``, ``&quot;mult-one-hot&quot;``, ``&quot;binary&quot;`` or ``&quot;categorical&quot;``.</span>
+<span class="sd">        action_value_key (str or tuple of str, optional): to be used when hooked on</span>
+<span class="sd">            a TensorDictModule. The input key representing the action value. Defaults</span>
+<span class="sd">            to ``&quot;action_value&quot;``.</span>
+<span class="sd">        action_mask_key (str or tuple of str, optional): The input key</span>
+<span class="sd">            representing the action mask. Defaults to ``&quot;None&quot;`` (equivalent to no masking).</span>
 <span class="sd">        support (torch.Tensor): support of the action values.</span>
 <span class="sd">        var_nums (int, optional): if ``action_space = &quot;mult-one-hot&quot;``, this</span>
 <span class="sd">            value represents the cardinality of each</span>
@@ -1193,6 +1231,7 @@
         <span class="n">support</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">var_nums</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">action_value_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">action_mask_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">out_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">TensorSpec</span><span class="p">):</span>
@@ -1207,6 +1246,7 @@
             <span class="n">var_nums</span><span class="o">=</span><span class="n">var_nums</span><span class="p">,</span>
             <span class="n">support</span><span class="o">=</span><span class="n">support</span><span class="p">,</span>
             <span class="n">action_value_key</span><span class="o">=</span><span class="n">action_value_key</span><span class="p">,</span>
+            <span class="n">action_mask_key</span><span class="o">=</span><span class="n">action_mask_key</span><span class="p">,</span>
             <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">action_value_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qvalue_model</span><span class="o">.</span><span class="n">in_keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1254,6 +1294,8 @@
 <span class="sd">            is a :class:`tensordict.nn.TensorDictModuleBase` instance, it must</span>
 <span class="sd">            match one of its output keys. Otherwise, this string represents</span>
 <span class="sd">            the name of the action-value entry in the output tensordict.</span>
+<span class="sd">        action_mask_key (str or tuple of str, optional): The input key</span>
+<span class="sd">            representing the action mask. Defaults to ``&quot;None&quot;`` (equivalent to no masking).</span>
 
 <span class="sd">    .. note::</span>
 <span class="sd">        ``out_keys`` cannot be passed. If the module is a :class:`tensordict.nn.TensorDictModule`</span>
@@ -1312,6 +1354,7 @@
         <span class="n">safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">action_space</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">action_value_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">action_mask_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">TensorSpec</span><span class="p">):</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -1357,6 +1400,7 @@
             <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span>
             <span class="n">safe</span><span class="o">=</span><span class="n">safe</span><span class="p">,</span>
             <span class="n">action_space</span><span class="o">=</span><span class="n">action_space</span><span class="p">,</span>
+            <span class="n">action_mask_key</span><span class="o">=</span><span class="n">action_mask_key</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">qvalue</span><span class="p">)</span></div>
@@ -1405,6 +1449,12 @@
 <span class="sd">        make_log_softmax (bool, optional): if ``True`` and if the module is not</span>
 <span class="sd">            of type :class:`torchrl.modules.DistributionalDQNnet`, a log-softmax</span>
 <span class="sd">            operation will be applied along dimension -2 of the action value tensor.</span>
+<span class="sd">        action_value_key (str or tuple of str, optional): if the input module</span>
+<span class="sd">            is a :class:`tensordict.nn.TensorDictModuleBase` instance, it must</span>
+<span class="sd">            match one of its output keys. Otherwise, this string represents</span>
+<span class="sd">            the name of the action-value entry in the output tensordict.</span>
+<span class="sd">        action_mask_key (str or tuple of str, optional): The input key</span>
+<span class="sd">            representing the action mask. Defaults to ``&quot;None&quot;`` (equivalent to no masking).</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; import torch</span>
@@ -1449,6 +1499,7 @@
         <span class="n">var_nums</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">action_space</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">action_value_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;action_value&quot;</span><span class="p">,</span>
+        <span class="n">action_mask_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">make_log_softmax</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action_space</span><span class="p">,</span> <span class="n">TensorSpec</span><span class="p">):</span>
@@ -1491,6 +1542,7 @@
             <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span>
             <span class="n">safe</span><span class="o">=</span><span class="n">safe</span><span class="p">,</span>
             <span class="n">action_space</span><span class="o">=</span><span class="n">action_space</span><span class="p">,</span>
+            <span class="n">action_mask_key</span><span class="o">=</span><span class="n">action_mask_key</span><span class="p">,</span>
             <span class="n">support</span><span class="o">=</span><span class="n">support</span><span class="p">,</span>
             <span class="n">var_nums</span><span class="o">=</span><span class="n">var_nums</span><span class="p">,</span>
         <span class="p">)</span>

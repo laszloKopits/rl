@@ -418,6 +418,8 @@ conditions the action_space.</p></li>
 is a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictModuleBase.html#tensordict.nn.TensorDictModuleBase" title="(in tensordict vmain (0.1.2+14ca63b ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictModuleBase</span></code></a> instance, it must
 match one of its output keys. Otherwise, this string represents
 the name of the action-value entry in the output tensordict.</p></li>
+<li><p><strong>action_mask_key</strong> (<em>str</em><em> or </em><em>tuple of str</em><em>, </em><em>optional</em>) – The input key
+representing the action mask. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;None&quot;</span></code> (equivalent to no masking).</p></li>
 </ul>
 </dd>
 </dl>
