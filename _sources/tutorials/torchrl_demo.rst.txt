@@ -1960,7 +1960,7 @@ Objectives
                 device=cpu,
                 is_shared=False),
             observation: Tensor(shape=torch.Size([10, 3]), device=cpu, dtype=torch.float32, is_shared=False),
-            td_error: Tensor(shape=torch.Size([10, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
+            td_error: Tensor(shape=torch.Size([10]), device=cpu, dtype=torch.float32, is_shared=False)},
         batch_size=torch.Size([10]),
         device=cpu,
         is_shared=False)
@@ -2000,7 +2000,7 @@ The library is on PyPI: *pip install torchrl*
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (4 minutes 11.917 seconds)
+   **Total running time of the script:** (4 minutes 11.588 seconds)
 
 **Estimated memory usage:**  15 MB
 
