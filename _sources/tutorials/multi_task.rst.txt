@@ -639,7 +639,7 @@ Rollout
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 52.853 seconds)
+   **Total running time of the script:** (0 minutes 53.316 seconds)
 
 **Estimated memory usage:**  10 MB
 

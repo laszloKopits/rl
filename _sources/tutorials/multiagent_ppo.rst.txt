@@ -1158,7 +1158,7 @@ The steps include:
 
  .. code-block:: none
 
-    episode_reward_mean = 0:   0%|          | 0/10 [00:00<?, ?it/s]    episode_reward_mean = -0.3641679584980011:  10%|█         | 1/10 [00:07<01:04,  7.13s/it]    episode_reward_mean = 0.5052392482757568:  20%|██        | 2/10 [00:14<00:57,  7.13s/it]     episode_reward_mean = 1.0283849239349365:  30%|███       | 3/10 [00:21<00:49,  7.13s/it]    episode_reward_mean = 1.331086277961731:  40%|████      | 4/10 [00:28<00:42,  7.13s/it]     episode_reward_mean = 2.0674946308135986:  50%|█████     | 5/10 [00:35<00:35,  7.12s/it]    episode_reward_mean = 2.245943784713745:  60%|██████    | 6/10 [00:42<00:28,  7.11s/it]     episode_reward_mean = 2.611856698989868:  70%|███████   | 7/10 [00:49<00:21,  7.14s/it]    episode_reward_mean = 2.8442416191101074:  80%|████████  | 8/10 [00:57<00:14,  7.25s/it]    episode_reward_mean = 2.856468677520752:  90%|█████████ | 9/10 [01:05<00:07,  7.41s/it]     episode_reward_mean = 2.9219210147857666: 100%|██████████| 10/10 [01:13<00:00,  7.57s/it]
+    episode_reward_mean = 0:   0%|          | 0/10 [00:00<?, ?it/s]    episode_reward_mean = -0.3641679584980011:  10%|█         | 1/10 [00:07<01:03,  7.05s/it]    episode_reward_mean = 0.5052392482757568:  20%|██        | 2/10 [00:14<00:56,  7.03s/it]     episode_reward_mean = 1.0283849239349365:  30%|███       | 3/10 [00:21<00:49,  7.03s/it]    episode_reward_mean = 1.331086277961731:  40%|████      | 4/10 [00:28<00:42,  7.05s/it]     episode_reward_mean = 2.0674946308135986:  50%|█████     | 5/10 [00:35<00:35,  7.05s/it]    episode_reward_mean = 2.245943784713745:  60%|██████    | 6/10 [00:42<00:28,  7.05s/it]     episode_reward_mean = 2.611856698989868:  70%|███████   | 7/10 [00:49<00:21,  7.06s/it]    episode_reward_mean = 2.8442416191101074:  80%|████████  | 8/10 [00:56<00:14,  7.16s/it]    episode_reward_mean = 2.856468677520752:  90%|█████████ | 9/10 [01:04<00:07,  7.31s/it]     episode_reward_mean = 2.9219210147857666: 100%|██████████| 10/10 [01:12<00:00,  7.46s/it]
 
 
 
@@ -1284,7 +1284,7 @@ Here are a few videos of some possible scenarios you can try in VMAS.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 23.992 seconds)
+   **Total running time of the script:** (2 minutes 23.495 seconds)
 
 **Estimated memory usage:**  12 MB
 
