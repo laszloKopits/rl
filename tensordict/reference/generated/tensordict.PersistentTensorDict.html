@@ -218,7 +218,7 @@
               
               
                 <div class="version">
-                  main (0.1.2+14ca63b )
+                  main (0.1.2+0006b91 )
                 </div>
               
             
@@ -591,7 +591,7 @@ TensorDict will be copied too. Default is <cite>True</cite>.</p>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>For some TensorDictBase subtypes, such as <a class="reference internal" href="tensordict.SubTensorDict.html#tensordict.SubTensorDict" title="tensordict.SubTensorDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubTensorDict</span></code></a>, cloning
+<p>For some TensorDictBase subtypes, such as <a class="reference internal" href="tensordict.SubTensorDict.html#tensordict.SubTensorDict" title="tensordict.tensordict.SubTensorDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubTensorDict</span></code></a>, cloning
 recursively makes little sense (in this specific case it would involve
 copying the parent tensordict too). In those cases, <a class="reference internal" href="#tensordict.PersistentTensorDict.clone" title="tensordict.PersistentTensorDict.clone"><code class="xref py py-meth docutils literal notranslate"><span class="pre">clone()</span></code></a> will
 fall back onto <a class="reference internal" href="#tensordict.PersistentTensorDict.to_tensordict" title="tensordict.PersistentTensorDict.to_tensordict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_tensordict()</span></code></a>.</p>
@@ -846,7 +846,7 @@ tensordict.</p>
 <dd><p>Copies the params and buffers of a module in a tensordict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>as_module</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, a <a class="reference internal" href="tensordict.nn.TensorDictParams.html#tensordict.nn.TensorDictParams" title="tensordict.nn.TensorDictParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.nn.TensorDictParams</span></code></a>
+<dd class="field-odd"><p><strong>as_module</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, a <a class="reference internal" href="tensordict.nn.TensorDictParams.html#tensordict.nn.TensorDictParams" title="tensordict.nn.TensorDictParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorDictParams</span></code></a>
 instance will be returned which can be used to store parameters
 within a <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="(in PyTorch v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></a>. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
 </dd>
@@ -1196,6 +1196,46 @@ Defaults to <code class="docutils literal notranslate"><span class="pre">False</
 <dt class="sig sig-object py" id="tensordict.PersistentTensorDict.keys">
 <span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include_nested</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leaves_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_PersistentTDKeysView</span></span></span><a class="headerlink" href="#tensordict.PersistentTensorDict.keys" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a generator of tensordict keys.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tensordict.PersistentTensorDict.load_state_dict">
+<span class="sig-name descname"><span class="pre">load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.OrderedDict" title="(in Python v3.11)"><span class="pre">OrderedDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assign</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_flatten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">T</span></span></span><a class="headerlink" href="#tensordict.PersistentTensorDict.load_state_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a state-dict, formatted as in <a class="reference internal" href="#tensordict.PersistentTensorDict.state_dict" title="tensordict.PersistentTensorDict.state_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">state_dict()</span></code></a>, into the tensordict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_dict</strong> (<em>OrderedDict</em>) – the state_dict of to be copied.</p></li>
+<li><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to strictly enforce that the keys
+in <a class="reference internal" href="#tensordict.PersistentTensorDict.state_dict" title="tensordict.PersistentTensorDict.state_dict"><code class="xref py py-attr docutils literal notranslate"><span class="pre">state_dict</span></code></a> match the keys returned by this tensordict’s
+<a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.state_dict" title="(in PyTorch v2.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.nn.Module.state_dict()</span></code></a> function. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>assign</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to assign items in the state
+dictionary to their corresponding keys in the tensordict instead
+of copying them inplace into the tensordict’s current tensors.
+When <code class="docutils literal notranslate"><span class="pre">False</span></code>, the properties of the tensors in the current
+module are preserved while when <code class="docutils literal notranslate"><span class="pre">True</span></code>, the properties of the
+Tensors in the state dict are preserved.
+Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>from_flatten</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, the input state_dict is
+assumed to be flattened.
+Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">({</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}},</span> <span class="p">[])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_zeroed</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">({</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}},</span> <span class="p">[])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_zeroed</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">data_zeroed</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">])</span>
+<span class="go">tensor(3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># with flattening</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_zeroed</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">({</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}},</span> <span class="p">[])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_zeroed</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">from_flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">data_zeroed</span><span class="p">[</span><span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">])</span>
+<span class="go">tensor(3)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1800,6 +1840,42 @@ is unlocked.</p>
 <dd class="field-odd"><p><strong>dim</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – dimension along which to squeeze. If dim is None, all singleton dimensions will be squeezed. dim is None by default.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tensordict.PersistentTensorDict.state_dict">
+<span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destination</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flatten</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.OrderedDict" title="(in Python v3.11)"><span class="pre">OrderedDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#tensordict.PersistentTensorDict.state_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produces a state_dict from the tensordict. The structure of the state-dict will still be nested, unless <code class="docutils literal notranslate"><span class="pre">flatten</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>A tensordict state-dict contains all the tensors and meta-data needed
+to rebuild the tensordict (names are currently not supported).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>destination</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – If provided, the state of tensordict will
+be updated into the dict and the same object is returned.
+Otherwise, an <code class="docutils literal notranslate"><span class="pre">OrderedDict</span></code> will be created and returned.
+Default: <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – a prefix added to tensor
+names to compose the keys in state_dict. Default: <code class="docutils literal notranslate"><span class="pre">''</span></code>.</p></li>
+<li><p><strong>keep_vars</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – by default the <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a> s
+returned in the state dict are detached from autograd. If it’s
+set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, detaching will not be performed.
+Default: <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>flatten</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – whether the structure should be flattened
+with the <code class="docutils literal notranslate"><span class="pre">&quot;.&quot;</span></code> character or not.
+Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">({</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;3&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}},</span> <span class="p">[])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
+<span class="go">OrderedDict([(&#39;1&#39;, tensor(1)), (&#39;2&#39;, tensor(2)), (&#39;3&#39;, OrderedDict([(&#39;3&#39;, tensor(3)), (&#39;__batch_size&#39;, torch.Size([])), (&#39;__device&#39;, None)])), (&#39;__batch_size&#39;, torch.Size([])), (&#39;__device&#39;, None)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sd</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">OrderedDict([(&#39;1&#39;, tensor(1)), (&#39;2&#39;, tensor(2)), (&#39;3.3&#39;, tensor(3)), (&#39;__batch_size&#39;, torch.Size([])), (&#39;__device&#39;, None)])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">

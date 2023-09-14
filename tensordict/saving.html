@@ -218,7 +218,7 @@
               
               
                 <div class="version">
-                  main (0.1.2+14ca63b )
+                  main (0.1.2+0006b91 )
                 </div>
               
             
@@ -430,17 +430,17 @@ of <code class="xref py py-obj docutils literal notranslate"><span class="pre">T
 that we will re-populate with the saved data.</p>
 <p>Again, two lines of code are sufficient to save the data:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">app_state</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tensordict_source</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
+<span class="gp">... </span>    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tensordict_source</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">keep_vars</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 <span class="gp">... </span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">snapshot</span> <span class="o">=</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">Snapshot</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">app_state</span><span class="o">=</span><span class="n">app_state</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/path/to/my/snapshot&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We have been using <code class="xref py py-obj docutils literal notranslate"><span class="pre">torchsnapshot.StateDict</span></code> and we explicitly called
-<code class="xref py py-obj docutils literal notranslate"><span class="pre">my_tensordict_source.state_dict()</span></code>, unlike the previous example.
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">my_tensordict_source.state_dict(keep_vars=True)</span></code>, unlike the previous example.
 Now, to load this onto a destination tensordict:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">snapshot</span> <span class="o">=</span> <span class="n">Snapshot</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;/path/to/my/snapshot&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">app_state</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tensordict_target</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
+<span class="gp">... </span>    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tensordict_target</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">keep_vars</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 <span class="gp">... </span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">snapshot</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">app_state</span><span class="o">=</span><span class="n">app_state</span><span class="p">)</span>
 </pre></div>
@@ -466,7 +466,7 @@ key in the destination tensordict will go unnoticed.</p></li>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">td</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">],</span> <span class="n">MemmapTensor</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">app_state</span> <span class="o">=</span> <span class="p">{</span>
-<span class="o">...</span>     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">td</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
+<span class="o">...</span>     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">td</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">keep_vars</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 <span class="o">...</span> <span class="p">}</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">snapshot</span> <span class="o">=</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">Snapshot</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">app_state</span><span class="o">=</span><span class="n">app_state</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/tmp/</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>
@@ -475,7 +475,7 @@ key in the destination tensordict will go unnoticed.</p></li>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">td_dest</span><span class="o">.</span><span class="n">memmap_</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">td_dest</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">],</span> <span class="n">MemmapTensor</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">app_state</span> <span class="o">=</span> <span class="p">{</span>
-<span class="o">...</span>     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">td_dest</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
+<span class="o">...</span>     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">td_dest</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">keep_vars</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 <span class="o">...</span> <span class="p">}</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">app_state</span><span class="o">=</span><span class="n">app_state</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="c1"># sanity check</span>
@@ -504,7 +504,7 @@ key in the destination tensordict will go unnoticed.</p></li>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tc</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">MemmapTensor</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">app_state</span> <span class="o">=</span> <span class="p">{</span>
-<span class="o">...</span>     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tc</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
+<span class="o">...</span>     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tc</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">keep_vars</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 <span class="o">...</span> <span class="p">}</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">snapshot</span> <span class="o">=</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">Snapshot</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">app_state</span><span class="o">=</span><span class="n">app_state</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;/tmp/</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>
@@ -512,7 +512,7 @@ key in the destination tensordict will go unnoticed.</p></li>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">tc_dest</span><span class="o">.</span><span class="n">memmap_</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tc_dest</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">MemmapTensor</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">app_state</span> <span class="o">=</span> <span class="p">{</span>
-<span class="o">...</span>     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tc_dest</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
+<span class="o">...</span>     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">torchsnapshot</span><span class="o">.</span><span class="n">StateDict</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tc_dest</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(</span><span class="n">keep_vars</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 <span class="o">...</span> <span class="p">}</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">app_state</span><span class="o">=</span><span class="n">app_state</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>
