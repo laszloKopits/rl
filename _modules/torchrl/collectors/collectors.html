@@ -408,6 +408,7 @@
 <span class="kn">from</span> <span class="nn">torchrl.collectors.utils</span> <span class="kn">import</span> <span class="n">split_trajectories</span>
 <span class="kn">from</span> <span class="nn">torchrl.data.tensor_specs</span> <span class="kn">import</span> <span class="n">CompositeSpec</span><span class="p">,</span> <span class="n">TensorSpec</span>
 <span class="kn">from</span> <span class="nn">torchrl.data.utils</span> <span class="kn">import</span> <span class="n">CloudpickleWrapper</span><span class="p">,</span> <span class="n">DEVICE_TYPING</span>
+<span class="kn">from</span> <span class="nn">torchrl.envs.batched_envs</span> <span class="kn">import</span> <span class="n">_BatchedEnv</span>
 <span class="kn">from</span> <span class="nn">torchrl.envs.common</span> <span class="kn">import</span> <span class="n">EnvBase</span>
 <span class="kn">from</span> <span class="nn">torchrl.envs.transforms</span> <span class="kn">import</span> <span class="n">StepCounter</span><span class="p">,</span> <span class="n">TransformedEnv</span>
 <span class="kn">from</span> <span class="nn">torchrl.envs.utils</span> <span class="kn">import</span> <span class="p">(</span>
@@ -417,7 +418,6 @@
     <span class="n">set_exploration_type</span><span class="p">,</span>
     <span class="n">step_mdp</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">torchrl.envs.vec_env</span> <span class="kn">import</span> <span class="n">_BatchedEnv</span>
 
 <span class="n">_TIMEOUT</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">_MIN_TIMEOUT</span> <span class="o">=</span> <span class="mf">1e-3</span>  <span class="c1"># should be several orders of magnitude inferior wrt time spent collecting a trajectory</span>
