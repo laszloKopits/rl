@@ -379,7 +379,8 @@
 <span class="kn">import</span> <span class="nn">importlib.util</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 
@@ -405,6 +406,8 @@
     <span class="s2">&quot;check_env_specs&quot;</span><span class="p">,</span>
     <span class="s2">&quot;step_mdp&quot;</span><span class="p">,</span>
     <span class="s2">&quot;make_composite_from_td&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MarlGroupMapType&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;check_marl_grouping&quot;</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -427,7 +430,7 @@
         <span class="k">return</span> <span class="nb">classmethod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fget</span><span class="p">)</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">owner</span><span class="p">)()</span>
 
 
-<div class="viewcode-block" id="step_mdp"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.utils.step_mdp.html#torchrl.envs.utils.step_mdp">[docs]</a><span class="k">def</span> <span class="nf">step_mdp</span><span class="p">(</span>
+<div class="viewcode-block" id="step_mdp"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.utils.step_mdp.html#torchrl.envs.step_mdp">[docs]</a><span class="k">def</span> <span class="nf">step_mdp</span><span class="p">(</span>
     <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span>
     <span class="n">next_tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">keep_other</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -668,7 +671,7 @@
     <span class="k">return</span> <span class="n">non_empty</span>
 
 
-<div class="viewcode-block" id="get_available_libraries"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.utils.get_available_libraries.html#torchrl.envs.utils.get_available_libraries">[docs]</a><span class="k">def</span> <span class="nf">get_available_libraries</span><span class="p">():</span>
+<div class="viewcode-block" id="get_available_libraries"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.utils.get_available_libraries.html#torchrl.envs.get_available_libraries">[docs]</a><span class="k">def</span> <span class="nf">get_available_libraries</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns all the supported libraries.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">SUPPORTED_LIBRARIES</span></div>
 
@@ -762,7 +765,7 @@
                     <span class="p">)</span>
 
 
-<div class="viewcode-block" id="check_env_specs"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.utils.check_env_specs.html#torchrl.envs.utils.check_env_specs">[docs]</a><span class="k">def</span> <span class="nf">check_env_specs</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">return_contiguous</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="check_env_specs"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.utils.check_env_specs.html#torchrl.envs.check_env_specs">[docs]</a><span class="k">def</span> <span class="nf">check_env_specs</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">return_contiguous</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check_dtype</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests an environment specs against the results of short rollout.</span>
 
 <span class="sd">    This test function should be used as a sanity check for an env wrapped with</span>
@@ -904,7 +907,7 @@
     <span class="k">return</span> <span class="n">element</span>
 
 
-<div class="viewcode-block" id="make_composite_from_td"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.utils.make_composite_from_td.html#torchrl.envs.utils.make_composite_from_td">[docs]</a><span class="k">def</span> <span class="nf">make_composite_from_td</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="make_composite_from_td"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.utils.make_composite_from_td.html#torchrl.envs.make_composite_from_td">[docs]</a><span class="k">def</span> <span class="nf">make_composite_from_td</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a CompositeSpec instance from a tensordict, assuming all values are unbounded.</span>
 
 <span class="sd">    Args:</span>
@@ -982,6 +985,122 @@
         <span class="k">return</span> <span class="n">new_ending</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">new_ending</span><span class="p">,)</span>
+
+
+<div class="viewcode-block" id="MarlGroupMapType"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.MarlGroupMapType.html#torchrl.envs.MarlGroupMapType">[docs]</a><span class="k">class</span> <span class="nc">MarlGroupMapType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Marl Group Map Type.</span>
+
+<span class="sd">    As a feature of torchrl multiagent, you are able to control the grouping of agents in your environment.</span>
+<span class="sd">    You can group agents together (stacking their tensors) to leverage vectorization when passing them through the same</span>
+<span class="sd">    neural network. You can split agents in different groups where they are heterogenous or should be processed by</span>
+<span class="sd">    different neural networks. To group, you just need to pass a ``group_map`` at env constructiuon time.</span>
+
+<span class="sd">    Otherwise, you can choose one of the premade grouping strategies from this class.</span>
+
+<span class="sd">    - With ``group_map=MarlGroupMapType.ALL_IN_ONE_GROUP`` and</span>
+<span class="sd">      agents ``[&quot;agent_0&quot;, &quot;agent_1&quot;, &quot;agent_2&quot;, &quot;agent_3&quot;]``,</span>
+<span class="sd">      the tensordicts coming and going from your environment will look</span>
+<span class="sd">      something like:</span>
+
+<span class="sd">        &gt;&gt;&gt; print(env.rand_action(env.reset()))</span>
+<span class="sd">        TensorDict(</span>
+<span class="sd">            fields={</span>
+<span class="sd">                agents: TensorDict(</span>
+<span class="sd">                    fields={</span>
+<span class="sd">                        action: Tensor(shape=torch.Size([4, 9]), device=cpu, dtype=torch.int64, is_shared=False),</span>
+<span class="sd">                        done: Tensor(shape=torch.Size([4, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                        observation: Tensor(shape=torch.Size([4, 3, 3, 2]), device=cpu, dtype=torch.int8, is_shared=False)},</span>
+<span class="sd">                    batch_size=torch.Size([4]))},</span>
+<span class="sd">            batch_size=torch.Size([]))</span>
+<span class="sd">        &gt;&gt;&gt; print(env.group_map)</span>
+<span class="sd">        {&quot;agents&quot;: [&quot;agent_0&quot;, &quot;agent_1&quot;, &quot;agent_2&quot;, &quot;agent_3]}</span>
+
+<span class="sd">    - With ``group_map=MarlGroupMapType.ONE_GROUP_PER_AGENT`` and</span>
+<span class="sd">      agents ``[&quot;agent_0&quot;, &quot;agent_1&quot;, &quot;agent_2&quot;, &quot;agent_3&quot;]``,</span>
+<span class="sd">      the tensordicts coming and going from your environment will look</span>
+<span class="sd">      something like:</span>
+
+<span class="sd">        &gt;&gt;&gt; print(env.rand_action(env.reset()))</span>
+<span class="sd">        TensorDict(</span>
+<span class="sd">            fields={</span>
+<span class="sd">                agent_0: TensorDict(</span>
+<span class="sd">                    fields={</span>
+<span class="sd">                        action: Tensor(shape=torch.Size([9]), device=cpu, dtype=torch.int64, is_shared=False),</span>
+<span class="sd">                        done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                        observation: Tensor(shape=torch.Size([3, 3, 2]), device=cpu, dtype=torch.int8, is_shared=False)},</span>
+<span class="sd">                    batch_size=torch.Size([]))},</span>
+<span class="sd">                agent_1: TensorDict(</span>
+<span class="sd">                    fields={</span>
+<span class="sd">                        action: Tensor(shape=torch.Size([9]), device=cpu, dtype=torch.int64, is_shared=False),</span>
+<span class="sd">                        done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                        observation: Tensor(shape=torch.Size([3, 3, 2]), device=cpu, dtype=torch.int8, is_shared=False)},</span>
+<span class="sd">                    batch_size=torch.Size([]))},</span>
+<span class="sd">                agent_2: TensorDict(</span>
+<span class="sd">                    fields={</span>
+<span class="sd">                        action: Tensor(shape=torch.Size([9]), device=cpu, dtype=torch.int64, is_shared=False),</span>
+<span class="sd">                        done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                        observation: Tensor(shape=torch.Size([3, 3, 2]), device=cpu, dtype=torch.int8, is_shared=False)},</span>
+<span class="sd">                    batch_size=torch.Size([]))},</span>
+<span class="sd">                agent_3: TensorDict(</span>
+<span class="sd">                    fields={</span>
+<span class="sd">                        action: Tensor(shape=torch.Size([9]), device=cpu, dtype=torch.int64, is_shared=False),</span>
+<span class="sd">                        done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                        observation: Tensor(shape=torch.Size([3, 3, 2]), device=cpu, dtype=torch.int8, is_shared=False)},</span>
+<span class="sd">                    batch_size=torch.Size([]))},</span>
+<span class="sd">            batch_size=torch.Size([]))</span>
+<span class="sd">        &gt;&gt;&gt; print(env.group_map)</span>
+<span class="sd">        {&quot;agent_0&quot;: [&quot;agent_0&quot;], &quot;agent_1&quot;: [&quot;agent_1&quot;], &quot;agent_2&quot;: [&quot;agent_2&quot;], &quot;agent_3&quot;: [&quot;agent_3&quot;]}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ALL_IN_ONE_GROUP</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ONE_GROUP_PER_AGENT</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">def</span> <span class="nf">get_group_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">MarlGroupMapType</span><span class="o">.</span><span class="n">ALL_IN_ONE_GROUP</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;agents&quot;</span><span class="p">:</span> <span class="n">agent_names</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">MarlGroupMapType</span><span class="o">.</span><span class="n">ONE_GROUP_PER_AGENT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="n">agent_name</span><span class="p">:</span> <span class="p">[</span><span class="n">agent_name</span><span class="p">]</span> <span class="k">for</span> <span class="n">agent_name</span> <span class="ow">in</span> <span class="n">agent_names</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="check_marl_grouping"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.check_marl_grouping.html#torchrl.envs.check_marl_grouping">[docs]</a><span class="k">def</span> <span class="nf">check_marl_grouping</span><span class="p">(</span><span class="n">group_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">agent_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check MARL group map.</span>
+
+<span class="sd">    Performs checks on the group map of a marl environment to assess its validity.</span>
+<span class="sd">    Raises an error in cas of an invalid group_map.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        group_map (Dict[str, List[str]]): the group map mapping group names to list of agent names in the group</span>
+<span class="sd">        agent_names (List[str]): a list of all the agent names in the environment4</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; from torchrl.envs.utils import MarlGroupMapType, check_marl_grouping</span>
+<span class="sd">        &gt;&gt;&gt; agent_names = [&quot;agent_0&quot;, &quot;agent_1&quot;, &quot;agent_2&quot;]</span>
+<span class="sd">        &gt;&gt;&gt; check_marl_grouping(MarlGroupMapType.ALL_IN_ONE_GROUP.get_group_map(agent_names), agent_names)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_agents</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">agent_names</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_agents</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No agents passed&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">agent_names</span><span class="p">))</span> <span class="o">!=</span> <span class="n">n_agents</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;There are agents with the same name&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_map</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">n_agents</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Number of groups </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">group_map</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2"> greater than number of agents </span><span class="si">{</span><span class="n">n_agents</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="n">found_agents</span> <span class="o">=</span> <span class="p">{</span><span class="n">agent_name</span><span class="p">:</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">agent_name</span> <span class="ow">in</span> <span class="n">agent_names</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">group_name</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">group_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Group </span><span class="si">{</span><span class="n">group_name</span><span class="si">}</span><span class="s2"> is empty&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">agent_name</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">agent_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">found_agents</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2"> not present in environment&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">found_agents</span><span class="p">[</span><span class="n">agent_name</span><span class="p">]:</span>
+                <span class="n">found_agents</span><span class="p">[</span><span class="n">agent_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2"> present more than once&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">found_agents</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2"> not found in any group&quot;</span><span class="p">)</span></div>
 </pre></div>
 
              </article>
