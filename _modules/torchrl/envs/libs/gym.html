@@ -414,7 +414,7 @@
 <span class="n">_has_mo</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;mo_gymnasium&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
 
-<div class="viewcode-block" id="set_gym_backend"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.gym.set_gym_backend.html#torchrl.envs.libs.gym.set_gym_backend">[docs]</a><span class="k">class</span> <span class="nc">set_gym_backend</span><span class="p">(</span><span class="n">_DecoratorContextManager</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">set_gym_backend</span><span class="p">(</span><span class="n">_DecoratorContextManager</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets the gym-backend to a certain value.</span>
 
 <span class="sd">    Args:</span>
@@ -505,10 +505,10 @@
 
     <span class="nd">@backend</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">backend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">value</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">value</span>
 
 
-<div class="viewcode-block" id="gym_backend"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.gym.gym_backend.html#torchrl.envs.libs.gym.gym_backend">[docs]</a><span class="k">def</span> <span class="nf">gym_backend</span><span class="p">(</span><span class="n">submodule</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">gym_backend</span><span class="p">(</span><span class="n">submodule</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the gym backend, or a sumbodule of it.</span>
 
 <span class="sd">    Args:</span>
@@ -543,7 +543,7 @@
             <span class="n">submodule</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">submodule</span>
             <span class="n">submodule</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">submodule</span><span class="p">,</span> <span class="n">package</span><span class="o">=</span><span class="n">DEFAULT_GYM</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">submodule</span>
-    <span class="k">return</span> <span class="n">DEFAULT_GYM</span></div>
+    <span class="k">return</span> <span class="n">DEFAULT_GYM</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GymWrapper&quot;</span><span class="p">,</span> <span class="s2">&quot;GymEnv&quot;</span><span class="p">]</span>
@@ -652,6 +652,8 @@
 
 
 <span class="k">def</span> <span class="nf">_get_envs</span><span class="p">(</span><span class="n">to_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_gym</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Gym(nasium) could not be found in your virtual environment.&quot;</span><span class="p">)</span>
     <span class="n">envs</span> <span class="o">=</span> <span class="n">_get_gym_envs</span><span class="p">()</span>
     <span class="n">envs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">envs</span><span class="p">)</span>
     <span class="n">envs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">envs</span><span class="p">)</span>
@@ -711,7 +713,7 @@
     <span class="k">return</span> <span class="kc">False</span>
 
 
-<div class="viewcode-block" id="GymWrapper"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.gym.GymWrapper.html#torchrl.envs.libs.gym.GymWrapper">[docs]</a><span class="k">class</span> <span class="nc">GymWrapper</span><span class="p">(</span><span class="n">GymLikeEnv</span><span class="p">):</span>
+<div class="viewcode-block" id="GymWrapper"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.GymWrapper.html#torchrl.envs.GymWrapper">[docs]</a><span class="k">class</span> <span class="nc">GymWrapper</span><span class="p">(</span><span class="n">GymLikeEnv</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;OpenAI Gym environment wrapper.</span>
 
 <span class="sd">    Examples:</span>
@@ -743,7 +745,7 @@
                 <span class="k">return</span> <span class="n">gymnasium</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">pass</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Could not find the library of env </span><span class="si">{</span><span class="n">env</span><span class="si">}</span><span class="s2">. Please file an issue on torchrl github repo.&quot;</span>
         <span class="p">)</span>
 
@@ -861,6 +863,8 @@
 
     <span class="nd">@_classproperty</span>
     <span class="k">def</span> <span class="nf">available_envs</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_gym</span><span class="p">:</span>
+            <span class="k">return</span>
         <span class="k">yield from</span> <span class="n">_get_envs</span><span class="p">()</span>
 
     <span class="nd">@property</span>
@@ -976,7 +980,7 @@
 <span class="p">}</span>
 
 
-<div class="viewcode-block" id="GymEnv"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.gym.GymEnv.html#torchrl.envs.libs.gym.GymEnv">[docs]</a><span class="k">class</span> <span class="nc">GymEnv</span><span class="p">(</span><span class="n">GymWrapper</span><span class="p">):</span>
+<div class="viewcode-block" id="GymEnv"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.GymEnv.html#torchrl.envs.GymEnv">[docs]</a><span class="k">class</span> <span class="nc">GymEnv</span><span class="p">(</span><span class="n">GymWrapper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;OpenAI Gym environment wrapper.</span>
 
 <span class="sd">    Examples:</span>
@@ -1087,7 +1091,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(env=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env_name</span><span class="si">}</span><span class="s2">, batch_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">, device=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="MOGymWrapper"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.gym.MOGymWrapper.html#torchrl.envs.libs.gym.MOGymWrapper">[docs]</a><span class="k">class</span> <span class="nc">MOGymWrapper</span><span class="p">(</span><span class="n">GymWrapper</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MOGymWrapper</span><span class="p">(</span><span class="n">GymWrapper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;FARAMA MO-Gymnasium environment wrapper.</span>
 
 <span class="sd">    Examples:</span>
@@ -1102,10 +1106,10 @@
     <span class="n">git_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/Farama-Foundation/MO-Gymnasium&quot;</span>
     <span class="n">libname</span> <span class="o">=</span> <span class="s2">&quot;mo-gymnasium&quot;</span>
 
-    <span class="n">_make_specs</span> <span class="o">=</span> <span class="n">set_gym_backend</span><span class="p">(</span><span class="s2">&quot;gymnasium&quot;</span><span class="p">)(</span><span class="n">GymEnv</span><span class="o">.</span><span class="n">_make_specs</span><span class="p">)</span></div>
+    <span class="n">_make_specs</span> <span class="o">=</span> <span class="n">set_gym_backend</span><span class="p">(</span><span class="s2">&quot;gymnasium&quot;</span><span class="p">)(</span><span class="n">GymEnv</span><span class="o">.</span><span class="n">_make_specs</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="MOGymEnv"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.gym.MOGymEnv.html#torchrl.envs.libs.gym.MOGymEnv">[docs]</a><span class="k">class</span> <span class="nc">MOGymEnv</span><span class="p">(</span><span class="n">GymEnv</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MOGymEnv</span><span class="p">(</span><span class="n">GymEnv</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;FARAMA MO-Gymnasium environment wrapper.</span>
 
 <span class="sd">    Examples:</span>
@@ -1131,7 +1135,7 @@
             <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;MO-gymnasium not found, check installation&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
 
-    <span class="n">_make_specs</span> <span class="o">=</span> <span class="n">set_gym_backend</span><span class="p">(</span><span class="s2">&quot;gymnasium&quot;</span><span class="p">)(</span><span class="n">GymEnv</span><span class="o">.</span><span class="n">_make_specs</span><span class="p">)</span></div>
+    <span class="n">_make_specs</span> <span class="o">=</span> <span class="n">set_gym_backend</span><span class="p">(</span><span class="s2">&quot;gymnasium&quot;</span><span class="p">)(</span><span class="n">GymEnv</span><span class="o">.</span><span class="n">_make_specs</span><span class="p">)</span>
 </pre></div>
 
              </article>

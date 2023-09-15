@@ -375,11 +375,15 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">torchrl._utils</span> <span class="kn">import</span> <span class="n">VERBOSE</span>
 
 <span class="kn">from</span> <span class="nn">torchrl.data.tensor_specs</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BoundedTensorSpec</span><span class="p">,</span>
@@ -389,10 +393,9 @@
     <span class="n">UnboundedDiscreteTensorSpec</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">..._utils</span> <span class="kn">import</span> <span class="n">VERBOSE</span>
-
-<span class="kn">from</span> <span class="nn">...data.utils</span> <span class="kn">import</span> <span class="n">DEVICE_TYPING</span><span class="p">,</span> <span class="n">numpy_to_torch_dtype_dict</span>
-<span class="kn">from</span> <span class="nn">..gym_like</span> <span class="kn">import</span> <span class="n">GymLikeEnv</span>
+<span class="kn">from</span> <span class="nn">torchrl.data.utils</span> <span class="kn">import</span> <span class="n">DEVICE_TYPING</span><span class="p">,</span> <span class="n">numpy_to_torch_dtype_dict</span>
+<span class="kn">from</span> <span class="nn">torchrl.envs.gym_like</span> <span class="kn">import</span> <span class="n">GymLikeEnv</span>
+<span class="kn">from</span> <span class="nn">torchrl.envs.utils</span> <span class="kn">import</span> <span class="n">_classproperty</span>
 
 <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
@@ -400,20 +403,7 @@
     <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;EGL_DEVICE_ID: &quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;EGL_DEVICE_ID&quot;</span><span class="p">])</span>
 
-<span class="k">try</span><span class="p">:</span>
-
-    <span class="kn">import</span> <span class="nn">dm_control</span>
-    <span class="kn">import</span> <span class="nn">dm_env</span>
-    <span class="kn">from</span> <span class="nn">dm_control</span> <span class="kn">import</span> <span class="n">suite</span>
-    <span class="kn">from</span> <span class="nn">dm_control.suite.wrappers</span> <span class="kn">import</span> <span class="n">pixels</span>
-
-    <span class="n">_has_dmc</span> <span class="o">=</span> <span class="kc">True</span>
-
-<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-    <span class="n">_has_dmc</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">IMPORT_ERR</span> <span class="o">=</span> <span class="n">err</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">IMPORT_ERR</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_has_dmc</span> <span class="o">=</span> <span class="n">_has_dm_control</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;dm_control&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;DMControlEnv&quot;</span><span class="p">,</span> <span class="s2">&quot;DMControlWrapper&quot;</span><span class="p">]</span>
 
@@ -423,6 +413,8 @@
     <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">dtype</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">device</span><span class="p">:</span> <span class="n">DEVICE_TYPING</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">dm_env</span>
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">):</span>
         <span class="n">spec</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">k</span><span class="p">:</span> <span class="n">_dmcontrol_to_torchrl_spec_transform</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
@@ -460,8 +452,10 @@
 
 
 <span class="k">def</span> <span class="nf">_get_envs</span><span class="p">(</span><span class="n">to_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_dmc</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_dm_control</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Cannot find dm_control in virtual environment.&quot;</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">dm_control</span> <span class="kn">import</span> <span class="n">suite</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">to_dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">suite</span><span class="o">.</span><span class="n">BENCHMARKING</span><span class="p">)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">suite</span><span class="o">.</span><span class="n">EXTRA</span><span class="p">)</span>
     <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
@@ -471,7 +465,7 @@
     <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">suite</span><span class="o">.</span><span class="n">EXTRA</span><span class="p">:</span>
         <span class="n">env_name</span> <span class="o">=</span> <span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">d</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">env_name</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">d</span>
+    <span class="k">return</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
 
 
 <span class="k">def</span> <span class="nf">_robust_to_tensor</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
@@ -481,7 +475,7 @@
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="DMControlWrapper"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.dm_control.DMControlWrapper.html#torchrl.envs.libs.dm_control.DMControlWrapper">[docs]</a><span class="k">class</span> <span class="nc">DMControlWrapper</span><span class="p">(</span><span class="n">GymLikeEnv</span><span class="p">):</span>
+<div class="viewcode-block" id="DMControlWrapper"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.DMControlWrapper.html#torchrl.envs.DMControlWrapper">[docs]</a><span class="k">class</span> <span class="nc">DMControlWrapper</span><span class="p">(</span><span class="n">GymLikeEnv</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;DeepMind Control lab environment wrapper.</span>
 
 <span class="sd">    Args:</span>
@@ -500,7 +494,18 @@
 
     <span class="n">git_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/deepmind/dm_control&quot;</span>
     <span class="n">libname</span> <span class="o">=</span> <span class="s2">&quot;dm_control&quot;</span>
-    <span class="n">available_envs</span> <span class="o">=</span> <span class="n">_get_envs</span><span class="p">()</span>
+
+    <span class="nd">@_classproperty</span>
+    <span class="k">def</span> <span class="nf">available_envs</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_dm_control</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">yield from</span> <span class="n">_get_envs</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lib</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">dm_control</span>
+
+        <span class="k">return</span> <span class="n">dm_control</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -521,6 +526,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pixels_only</span> <span class="o">=</span> <span class="n">pixels_only</span>
 
         <span class="k">if</span> <span class="n">from_pixels</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">dm_control.suite.wrappers</span> <span class="kn">import</span> <span class="n">pixels</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_egl_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">render_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;camera_id&quot;</span><span class="p">:</span> <span class="n">camera_id</span><span class="p">}</span>
             <span class="k">if</span> <span class="n">render_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -550,6 +557,9 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_check_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="n">dm_control</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lib</span>
+        <span class="kn">from</span> <span class="nn">dm_control.suite.wrappers</span> <span class="kn">import</span> <span class="n">pixels</span>
+
         <span class="k">if</span> <span class="s2">&quot;env&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Could not find environment key &#39;env&#39; in kwargs.&quot;</span><span class="p">)</span>
         <span class="n">env</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;env&quot;</span><span class="p">]</span>
@@ -577,6 +587,8 @@
         <span class="k">return</span> <span class="n">seed</span>
 
     <span class="k">def</span> <span class="nf">_set_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="kn">from</span> <span class="nn">dm_control.suite.wrappers</span> <span class="kn">import</span> <span class="n">pixels</span>
+
         <span class="k">if</span> <span class="n">_seed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">random_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">_seed</span><span class="p">)</span>
@@ -608,7 +620,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="DMControlEnv"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.dm_control.DMControlEnv.html#torchrl.envs.libs.dm_control.DMControlEnv">[docs]</a><span class="k">class</span> <span class="nc">DMControlEnv</span><span class="p">(</span><span class="n">DMControlWrapper</span><span class="p">):</span>
+<div class="viewcode-block" id="DMControlEnv"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.DMControlEnv.html#torchrl.envs.DMControlEnv">[docs]</a><span class="k">class</span> <span class="nc">DMControlEnv</span><span class="p">(</span><span class="n">DMControlWrapper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;DeepMind Control lab environment wrapper.</span>
 
 <span class="sd">    Args:</span>
@@ -632,7 +644,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_dmc</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
                 <span class="s2">&quot;dm_control python package was not found. Please install this dependency.&quot;</span>
-            <span class="p">)</span> <span class="kn">from</span> <span class="nn">IMPORT_ERR</span>
+            <span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;env_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">env_name</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;task_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_name</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -644,6 +656,8 @@
         <span class="n">_seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">dm_control</span> <span class="kn">import</span> <span class="n">suite</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">env_name</span> <span class="o">=</span> <span class="n">env_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task_name</span> <span class="o">=</span> <span class="n">task_name</span>
 
@@ -655,7 +669,7 @@
             <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;pixels_only&quot;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_dmc</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;dm_control not found, unable to create </span><span class="si">{</span><span class="n">env_name</span><span class="si">}</span><span class="s2">:&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">. Consider downloading and installing &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;dm_control from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">git_url</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -684,9 +698,10 @@
             <span class="n">env_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;env_name&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="s2">&quot;task_name&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                 <span class="n">task_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;task_name&quot;</span><span class="p">]</span>
+                <span class="n">available_envs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">available_envs</span><span class="p">)</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">env_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_envs</span>
-                    <span class="ow">or</span> <span class="n">task_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_envs</span><span class="p">[</span><span class="n">env_name</span><span class="p">]</span>
+                    <span class="n">env_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_envs</span>
+                    <span class="ow">or</span> <span class="n">task_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_envs</span><span class="p">[</span><span class="n">env_name</span><span class="p">]</span>
                 <span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">env_name</span><span class="si">}</span><span class="s2"> with task </span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2"> is unknown in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">libname</span><span class="si">}</span><span class="s2">&quot;</span>

@@ -398,15 +398,15 @@
 <span class="n">_has_pettingzoo</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;pettingzoo&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">_get_envs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">_get_envs</span><span class="p">():</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_pettingzoo</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;PettingZoo is not installed in your virtual environment.&quot;</span><span class="p">)</span>
     <span class="kn">from</span> <span class="nn">pettingzoo.utils.all_modules</span> <span class="kn">import</span> <span class="n">all_environments</span>
 
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_environments</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
 
-<div class="viewcode-block" id="PettingZooWrapper"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.pettingzoo.PettingZooWrapper.html#torchrl.envs.libs.pettingzoo.PettingZooWrapper">[docs]</a><span class="k">class</span> <span class="nc">PettingZooWrapper</span><span class="p">(</span><span class="n">_EnvWrapper</span><span class="p">):</span>
+<div class="viewcode-block" id="PettingZooWrapper"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.PettingZooWrapper.html#torchrl.envs.PettingZooWrapper">[docs]</a><span class="k">class</span> <span class="nc">PettingZooWrapper</span><span class="p">(</span><span class="n">_EnvWrapper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;PettingZoo environment wrapper.</span>
 
 <span class="sd">    To install petting zoo follow the guide `here &lt;https://github.com/Farama-Foundation/PettingZoo#installation&gt;__`.</span>
@@ -515,6 +515,8 @@
 
     <span class="nd">@_classproperty</span>
     <span class="k">def</span> <span class="nf">available_envs</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_pettingzoo</span><span class="p">:</span>
+            <span class="k">return</span>
         <span class="k">yield from</span> <span class="n">_get_envs</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -1078,7 +1080,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="PettingZooEnv"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.pettingzoo.PettingZooEnv.html#torchrl.envs.libs.pettingzoo.PettingZooEnv">[docs]</a><span class="k">class</span> <span class="nc">PettingZooEnv</span><span class="p">(</span><span class="n">PettingZooWrapper</span><span class="p">):</span>
+<div class="viewcode-block" id="PettingZooEnv"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.PettingZooEnv.html#torchrl.envs.PettingZooEnv">[docs]</a><span class="k">class</span> <span class="nc">PettingZooEnv</span><span class="p">(</span><span class="n">PettingZooWrapper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;PettingZoo Environment.</span>
 
 <span class="sd">    To install petting zoo follow the guide `here &lt;https://github.com/Farama-Foundation/PettingZoo#installation&gt;__`.</span>
