@@ -570,7 +570,7 @@ an assertion error whenever the preallocated buffer and the collected data misma
 serially. This is mostly useful for testing purposes, when one wants to assess the
 behaviour of a <a class="reference internal" href="generated/torchrl.envs.ParallelEnv.html#torchrl.envs.ParallelEnv" title="torchrl.envs.ParallelEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelEnv</span></code></a> without launching the subprocesses.</p>
 <p>In addition to <a class="reference internal" href="generated/torchrl.envs.ParallelEnv.html#torchrl.envs.ParallelEnv" title="torchrl.envs.ParallelEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelEnv</span></code></a>, which offers process-based parallelism, we also provide a way to create
-multithreaded environments with <a class="reference internal" href="generated/torchrl.envs.MultiThreadedEnv.html#torchrl.envs.MultiThreadedEnv" title="torchrl.envs.MultiThreadedEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiThreadedEnv</span></code></a>. This class uses <a class="reference external" href="https://github.com/sail-sg/envpool">EnvPool</a>
+multithreaded environments with <a class="reference internal" href="generated/torchrl.envs.libs.envpool.MultiThreadedEnv.html#torchrl.envs.libs.envpool.MultiThreadedEnv" title="torchrl.envs.libs.envpool.MultiThreadedEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiThreadedEnv</span></code></a>. This class uses <a class="reference external" href="https://github.com/sail-sg/envpool">EnvPool</a>
 library underneath, which allows for higher performance, but at the same time restricts flexibility - one can only
 create environments implemented in <code class="docutils literal notranslate"><span class="pre">EnvPool</span></code>. This covers many popular RL environments types (Atari, Classic Control,
 etc.), but one can not use an arbitrary TorchRL environment, as it is possible with <a class="reference internal" href="generated/torchrl.envs.ParallelEnv.html#torchrl.envs.ParallelEnv" title="torchrl.envs.ParallelEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelEnv</span></code></a>. Run
@@ -583,10 +583,7 @@ etc.), but one can not use an arbitrary TorchRL environment, as it is possible w
 <tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.ParallelEnv.html#torchrl.envs.ParallelEnv" title="torchrl.envs.ParallelEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParallelEnv</span></code></a>(*args[, _inplace_update, ...])</p></td>
 <td><p>Creates one environment per process.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.MultiThreadedEnv.html#torchrl.envs.MultiThreadedEnv" title="torchrl.envs.MultiThreadedEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiThreadedEnv</span></code></a>(*args[, _inplace_update, ...])</p></td>
-<td><p>Multithreaded execution of environments based on EnvPool.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.EnvCreator.html#torchrl.envs.EnvCreator" title="torchrl.envs.EnvCreator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EnvCreator</span></code></a>(create_env_fn[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.EnvCreator.html#torchrl.envs.EnvCreator" title="torchrl.envs.EnvCreator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EnvCreator</span></code></a>(create_env_fn[, ...])</p></td>
 <td><p>Environment creator class.</p></td>
 </tr>
 </tbody>
@@ -1141,6 +1138,12 @@ the following function will return <code class="docutils literal notranslate"><s
 <tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.dm_control.DMControlWrapper.html#torchrl.envs.libs.dm_control.DMControlWrapper" title="torchrl.envs.libs.dm_control.DMControlWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dm_control.DMControlWrapper</span></code></a>(*args, **kwargs)</p></td>
 <td><p>DeepMind Control lab environment wrapper.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.envpool.MultiThreadedEnv.html#torchrl.envs.libs.envpool.MultiThreadedEnv" title="torchrl.envs.libs.envpool.MultiThreadedEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">envpool.MultiThreadedEnv</span></code></a>(*args[, ...])</p></td>
+<td><p>Multithreaded execution of environments based on EnvPool.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.envpool.MultiThreadedEnvWrapper.html#torchrl.envs.libs.envpool.MultiThreadedEnvWrapper" title="torchrl.envs.libs.envpool.MultiThreadedEnvWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">envpool.MultiThreadedEnvWrapper</span></code></a>(*args[, ...])</p></td>
+<td><p>Wrapper for envpool-based multithreaded environments.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.gym.GymEnv.html#torchrl.envs.libs.gym.GymEnv" title="torchrl.envs.libs.gym.GymEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gym.GymEnv</span></code></a>(*args, **kwargs)</p></td>
 <td><p>OpenAI Gym environment wrapper.</p></td>
 </tr>
@@ -1162,6 +1165,12 @@ the following function will return <code class="docutils literal notranslate"><s
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.habitat.HabitatEnv.html#torchrl.envs.libs.habitat.HabitatEnv" title="torchrl.envs.libs.habitat.HabitatEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">habitat.HabitatEnv</span></code></a>(*args, **kwargs)</p></td>
 <td><p>A wrapper for habitat envs.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.isaacgym.IsaacGymWrapper.html#torchrl.envs.libs.isaacgym.IsaacGymWrapper" title="torchrl.envs.libs.isaacgym.IsaacGymWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">isaacgym.IsaacGymWrapper</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Wrapper for IsaacGymEnvs environments.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.isaacgym.IsaacGymEnv.html#torchrl.envs.libs.isaacgym.IsaacGymEnv" title="torchrl.envs.libs.isaacgym.IsaacGymEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">isaacgym.IsaacGymEnv</span></code></a>(*args, **kwargs)</p></td>
+<td><p>A TorchRL Env interface for IsaacGym environments.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.jumanji.JumanjiEnv.html#torchrl.envs.libs.jumanji.JumanjiEnv" title="torchrl.envs.libs.jumanji.JumanjiEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jumanji.JumanjiEnv</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Jumanji environment wrapper.</p></td>
 </tr>
@@ -1177,16 +1186,19 @@ the following function will return <code class="docutils literal notranslate"><s
 <tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.pettingzoo.PettingZooWrapper.html#torchrl.envs.libs.pettingzoo.PettingZooWrapper" title="torchrl.envs.libs.pettingzoo.PettingZooWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pettingzoo.PettingZooWrapper</span></code></a>(*args[, ...])</p></td>
 <td><p>PettingZoo environment wrapper.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.smacv2.SMACv2Env.html#torchrl.envs.libs.smacv2.SMACv2Env" title="torchrl.envs.libs.smacv2.SMACv2Env"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smacv2.SMACv2Env</span></code></a>(*args[, _inplace_update, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.robohive.RoboHiveEnv.html#torchrl.envs.libs.robohive.RoboHiveEnv" title="torchrl.envs.libs.robohive.RoboHiveEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">robohive.RoboHiveEnv</span></code></a>(*args, **kwargs)</p></td>
+<td><p>A wrapper for RoboHive gym environments.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.smacv2.SMACv2Env.html#torchrl.envs.libs.smacv2.SMACv2Env" title="torchrl.envs.libs.smacv2.SMACv2Env"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smacv2.SMACv2Env</span></code></a>(*args[, _inplace_update, ...])</p></td>
 <td><p>SMACv2 (StarCraft Multi-Agent Challenge v2) environment wrapper.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.smacv2.SMACv2Wrapper.html#torchrl.envs.libs.smacv2.SMACv2Wrapper" title="torchrl.envs.libs.smacv2.SMACv2Wrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smacv2.SMACv2Wrapper</span></code></a>(*args[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.smacv2.SMACv2Wrapper.html#torchrl.envs.libs.smacv2.SMACv2Wrapper" title="torchrl.envs.libs.smacv2.SMACv2Wrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smacv2.SMACv2Wrapper</span></code></a>(*args[, ...])</p></td>
 <td><p>SMACv2 (StarCraft Multi-Agent Challenge v2) environment wrapper.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.vmas.VmasEnv.html#torchrl.envs.libs.vmas.VmasEnv" title="torchrl.envs.libs.vmas.VmasEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmas.VmasEnv</span></code></a>(*args[, _inplace_update, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.vmas.VmasEnv.html#torchrl.envs.libs.vmas.VmasEnv" title="torchrl.envs.libs.vmas.VmasEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmas.VmasEnv</span></code></a>(*args[, _inplace_update, ...])</p></td>
 <td><p>Vmas environment wrapper.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.vmas.VmasWrapper.html#torchrl.envs.libs.vmas.VmasWrapper" title="torchrl.envs.libs.vmas.VmasWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmas.VmasWrapper</span></code></a>(*args[, _inplace_update, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.vmas.VmasWrapper.html#torchrl.envs.libs.vmas.VmasWrapper" title="torchrl.envs.libs.vmas.VmasWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmas.VmasWrapper</span></code></a>(*args[, _inplace_update, ...])</p></td>
 <td><p>Vmas environment wrapper.</p></td>
 </tr>
 </tbody>

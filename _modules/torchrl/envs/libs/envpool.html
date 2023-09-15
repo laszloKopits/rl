@@ -394,7 +394,7 @@
 <span class="n">_has_envpool</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;envpool&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
 
-<span class="k">class</span> <span class="nc">MultiThreadedEnvWrapper</span><span class="p">(</span><span class="n">_EnvWrapper</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiThreadedEnvWrapper"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.envpool.MultiThreadedEnvWrapper.html#torchrl.envs.libs.envpool.MultiThreadedEnvWrapper">[docs]</a><span class="k">class</span> <span class="nc">MultiThreadedEnvWrapper</span><span class="p">(</span><span class="n">_EnvWrapper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper for envpool-based multithreaded environments.&quot;&quot;&quot;</span>
 
     <span class="n">_verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -614,10 +614,10 @@
             <span class="nb">print</span><span class="p">(</span>
                 <span class="s2">&quot;MultiThreadedEnvWrapper._set_seed ignored, as setting seed in an existing envorinment is not</span><span class="se">\</span>
 <span class="s2">                   supported by envpool. Please create a new environment, passing the seed to the constructor.&quot;</span>
-            <span class="p">)</span>
+            <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MultiThreadedEnv"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.MultiThreadedEnv.html#torchrl.envs.MultiThreadedEnv">[docs]</a><span class="k">class</span> <span class="nc">MultiThreadedEnv</span><span class="p">(</span><span class="n">MultiThreadedEnvWrapper</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiThreadedEnv"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.libs.envpool.MultiThreadedEnv.html#torchrl.envs.libs.envpool.MultiThreadedEnv">[docs]</a><span class="k">class</span> <span class="nc">MultiThreadedEnv</span><span class="p">(</span><span class="n">MultiThreadedEnvWrapper</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Multithreaded execution of environments based on EnvPool.</span>
 
 <span class="sd">    An alternative to ParallelEnv based on multithreading. It&#39;s faster, as it doesn&#39;t require new process spawning, but</span>
