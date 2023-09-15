@@ -952,6 +952,52 @@ to be able to create this other composition:</p>
 </table>
 </section>
 </section>
+<section id="environments-with-masked-actions">
+<h2>Environments with masked actions<a class="headerlink" href="#environments-with-masked-actions" title="Permalink to this heading">¶</a></h2>
+<p>In some environments with discrete actions, the actions available to the agent might change throughout execution.
+In such cases the environments will output an action mask (under the <code class="docutils literal notranslate"><span class="pre">&quot;action_mask&quot;</span></code> key by default).
+This mask needs to be used to filter out unavailable actions for that step.</p>
+<p>If you are using a custom policy you can pass this mask to your probability distribution like so:</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">Categorical policy with action mask</span><a class="headerlink" href="#id12" title="Permalink to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>     <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">tensordict.nn</span> <span class="kn">import</span> <span class="n">TensorDictModule</span><span class="p">,</span> <span class="n">ProbabilisticTensorDictModule</span><span class="p">,</span> <span class="n">TensorDictSequential</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">torchrl.modules</span> <span class="kn">import</span> <span class="n">MaskedCategorical</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="n">module</span> <span class="o">=</span> <span class="n">TensorDictModule</span><span class="p">(</span>
+     <span class="o">&gt;&gt;&gt;</span>     <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_feats</span><span class="p">,</span> <span class="n">out_feats</span><span class="p">),</span>
+     <span class="o">&gt;&gt;&gt;</span>     <span class="n">in_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;observation&quot;</span><span class="p">],</span>
+     <span class="o">&gt;&gt;&gt;</span>     <span class="n">out_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;logits&quot;</span><span class="p">],</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="p">)</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">ProbabilisticTensorDictModule</span><span class="p">(</span>
+     <span class="o">&gt;&gt;&gt;</span>     <span class="n">in_keys</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;logits&quot;</span><span class="p">:</span> <span class="s2">&quot;logits&quot;</span><span class="p">,</span> <span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="s2">&quot;action_mask&quot;</span><span class="p">},</span>
+     <span class="o">&gt;&gt;&gt;</span>     <span class="n">out_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">],</span>
+     <span class="o">&gt;&gt;&gt;</span>     <span class="n">distribution_class</span><span class="o">=</span><span class="n">MaskedCategorical</span><span class="p">,</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="p">)</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="n">actor</span> <span class="o">=</span> <span class="n">TensorDictSequential</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">dist</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>If you want to use a default policy, you will need to wrap your environment in the <a class="reference internal" href="generated/torchrl.envs.transforms.ActionMask.html#torchrl.envs.transforms.ActionMask" title="torchrl.envs.transforms.ActionMask"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActionMask</span></code></a>
+transform. This transform can take care of updating the action mask in the action spec in order for the default policy
+to always know what the latest available actions are. You can do this like so:</p>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">How to use the action mask transform</span><a class="headerlink" href="#id13" title="Permalink to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>     <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">tensordict.nn</span> <span class="kn">import</span> <span class="n">TensorDictModule</span><span class="p">,</span> <span class="n">ProbabilisticTensorDictModule</span><span class="p">,</span> <span class="n">TensorDictSequential</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">torchrl.envs.transforms</span> <span class="kn">import</span> <span class="n">TransformedEnv</span><span class="p">,</span> <span class="n">ActionMask</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="n">env</span> <span class="o">=</span> <span class="n">TransformedEnv</span><span class="p">(</span>
+     <span class="o">&gt;&gt;&gt;</span>     <span class="n">your_base_env</span>
+     <span class="o">&gt;&gt;&gt;</span>     <span class="n">ActionMask</span><span class="p">(</span><span class="n">action_key</span><span class="o">=</span><span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="n">mask_key</span><span class="o">=</span><span class="s2">&quot;action_mask&quot;</span><span class="p">),</span>
+     <span class="o">&gt;&gt;&gt;</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In case you are using a parallel environment it is important to add the transform to the parallel enviornment itself
+and not to its sub-environments.</p>
+</div>
+</section>
 <section id="recorders">
 <h2>Recorders<a class="headerlink" href="#recorders" title="Permalink to this heading">¶</a></h2>
 <p>Recorders are transforms that register data as they come in, for logging purposes.</p>
@@ -1131,6 +1177,12 @@ the following function will return <code class="docutils literal notranslate"><s
 <tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.pettingzoo.PettingZooWrapper.html#torchrl.envs.libs.pettingzoo.PettingZooWrapper" title="torchrl.envs.libs.pettingzoo.PettingZooWrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pettingzoo.PettingZooWrapper</span></code></a>(*args[, ...])</p></td>
 <td><p>PettingZoo environment wrapper.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.smacv2.SMACv2Env.html#torchrl.envs.libs.smacv2.SMACv2Env" title="torchrl.envs.libs.smacv2.SMACv2Env"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smacv2.SMACv2Env</span></code></a>(*args[, _inplace_update, ...])</p></td>
+<td><p>SMACv2 (StarCraft Multi-Agent Challenge v2) environment wrapper.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.smacv2.SMACv2Wrapper.html#torchrl.envs.libs.smacv2.SMACv2Wrapper" title="torchrl.envs.libs.smacv2.SMACv2Wrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smacv2.SMACv2Wrapper</span></code></a>(*args[, ...])</p></td>
+<td><p>SMACv2 (StarCraft Multi-Agent Challenge v2) environment wrapper.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.libs.vmas.VmasEnv.html#torchrl.envs.libs.vmas.VmasEnv" title="torchrl.envs.libs.vmas.VmasEnv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmas.VmasEnv</span></code></a>(*args[, _inplace_update, ...])</p></td>
 <td><p>Vmas environment wrapper.</p></td>
 </tr>
@@ -1192,6 +1244,7 @@ the following function will return <code class="docutils literal notranslate"><s
 <li><a class="reference internal" href="#cloning-transforms">Cloning transforms</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#environments-with-masked-actions">Environments with masked actions</a></li>
 <li><a class="reference internal" href="#recorders">Recorders</a></li>
 <li><a class="reference internal" href="#helpers">Helpers</a></li>
 <li><a class="reference internal" href="#domain-specific">Domain-specific</a></li>

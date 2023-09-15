@@ -417,6 +417,15 @@
 <span class="n">DONE_AFTER_RESET_ERROR</span> <span class="o">=</span> <span class="ne">RuntimeError</span><span class="p">(</span>
     <span class="s2">&quot;Env was done after reset on specified &#39;_reset&#39; dimensions. This is (currently) not allowed.&quot;</span>
 <span class="p">)</span>
+<span class="n">ACTION_MASK_ERROR</span> <span class="o">=</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+    <span class="s2">&quot;An out-of-bounds actions has been provided to an env with an &#39;action_mask&#39; output.&quot;</span>
+    <span class="s2">&quot; If you are using a custom policy, make sure to take the action mask into account when computing the output.&quot;</span>
+    <span class="s2">&quot; If you are using a default policy, please add the torchrl.envs.transforms.ActionMask transform to your environment.&quot;</span>
+    <span class="s2">&quot;If you are using a ParallelEnv or another batched inventor, &quot;</span>
+    <span class="s2">&quot;make sure to add the transform to the ParallelEnv (and not to the sub-environments).&quot;</span>
+    <span class="s2">&quot; For more info on using action masks, see the docs at: &quot;</span>
+    <span class="s2">&quot;https://pytorch.org/rl/reference/envs.html#environments-with-masked-actions&quot;</span>
+<span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_convert_exploration_type</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">exploration_mode</span><span class="p">,</span> <span class="n">exploration_type</span><span class="p">):</span>
@@ -789,8 +798,9 @@
 <span class="sd">    of an experiment and as such should be kept out of training scripts.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-    <span class="n">env</span><span class="o">.</span><span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="n">fake_tensordict</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">fake_tensordict</span><span class="p">()</span>
     <span class="n">real_tensordict</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">rollout</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">return_contiguous</span><span class="o">=</span><span class="n">return_contiguous</span><span class="p">)</span>
