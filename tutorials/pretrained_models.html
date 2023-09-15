@@ -422,6 +422,48 @@ the corresponding action.</p>
 <a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictSequential.html#tensordict.nn.TensorDictSequential" title="tensordict.nn.TensorDictSequential" class="sphx-glr-backref-module-tensordict-nn sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">policy</span></a> <span class="o">=</span> <a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.nn.TensorDictModule.html#tensordict.nn.TensorDictModule" title="tensordict.nn.TensorDictModule" class="sphx-glr-backref-module-tensordict-nn sphx-glr-backref-type-py-class"><span class="n">Actor</span></a><span class="p">(</span><a href="https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html#torch.nn.Sequential" title="torch.nn.Sequential" class="sphx-glr-backref-module-torch-nn sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">net</span></a><span class="p">,</span> <span class="n">in_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;r3m_vec&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Downloading: &quot;https://pytorch.s3.amazonaws.com/models/rl/r3m/r3m_50.pt&quot; to /github/home/.cache/torch/hub/checkpoints/r3m_50.pt
+
+  0%|          | 0.00/374M [00:00&lt;?, ?B/s]
+  4%|▍         | 14.8M/374M [00:00&lt;00:04, 80.0MB/s]
+  6%|▌         | 22.4M/374M [00:00&lt;00:05, 61.6MB/s]
+  9%|▉         | 32.8M/374M [00:00&lt;00:05, 65.4MB/s]
+ 13%|█▎        | 49.1M/374M [00:00&lt;00:04, 81.7MB/s]
+ 17%|█▋        | 64.0M/374M [00:00&lt;00:03, 95.9MB/s]
+ 20%|█▉        | 73.5M/374M [00:00&lt;00:03, 80.0MB/s]
+ 22%|██▏       | 81.9M/374M [00:01&lt;00:04, 68.6MB/s]
+ 26%|██▌       | 97.6M/374M [00:01&lt;00:03, 89.4MB/s]
+ 29%|██▊       | 107M/374M [00:01&lt;00:03, 71.6MB/s]
+ 31%|███       | 115M/374M [00:01&lt;00:03, 67.9MB/s]
+ 35%|███▍      | 130M/374M [00:01&lt;00:03, 81.9MB/s]
+ 37%|███▋      | 139M/374M [00:01&lt;00:03, 66.7MB/s]
+ 39%|███▉      | 147M/374M [00:02&lt;00:03, 63.6MB/s]
+ 43%|████▎     | 162M/374M [00:02&lt;00:02, 77.3MB/s]
+ 46%|████▌     | 170M/374M [00:02&lt;00:03, 66.5MB/s]
+ 47%|████▋     | 177M/374M [00:02&lt;00:03, 52.6MB/s]
+ 49%|████▉     | 183M/374M [00:02&lt;00:04, 44.4MB/s]
+ 52%|█████▏    | 195M/374M [00:03&lt;00:03, 52.9MB/s]
+ 54%|█████▎    | 201M/374M [00:03&lt;00:03, 45.6MB/s]
+ 57%|█████▋    | 212M/374M [00:03&lt;00:03, 49.2MB/s]
+ 58%|█████▊    | 217M/374M [00:03&lt;00:03, 43.7MB/s]
+ 61%|██████▏   | 229M/374M [00:03&lt;00:02, 52.0MB/s]
+ 65%|██████▍   | 243M/374M [00:03&lt;00:02, 68.2MB/s]
+ 67%|██████▋   | 250M/374M [00:04&lt;00:02, 53.0MB/s]
+ 70%|██████▉   | 261M/374M [00:04&lt;00:02, 51.6MB/s]
+ 71%|███████▏  | 267M/374M [00:04&lt;00:02, 50.0MB/s]
+ 74%|███████▍  | 279M/374M [00:04&lt;00:01, 53.9MB/s]
+ 78%|███████▊  | 293M/374M [00:04&lt;00:01, 67.3MB/s]
+ 80%|████████  | 300M/374M [00:05&lt;00:01, 55.6MB/s]
+ 83%|████████▎ | 310M/374M [00:05&lt;00:01, 65.0MB/s]
+ 85%|████████▍ | 317M/374M [00:05&lt;00:01, 45.5MB/s]
+ 88%|████████▊ | 328M/374M [00:05&lt;00:00, 51.4MB/s]
+ 92%|█████████▏| 342M/374M [00:05&lt;00:00, 53.6MB/s]
+ 93%|█████████▎| 348M/374M [00:06&lt;00:00, 48.5MB/s]
+ 96%|█████████▋| 360M/374M [00:06&lt;00:00, 61.7MB/s]
+100%|█████████▉| 373M/374M [00:06&lt;00:00, 70.3MB/s]
+100%|██████████| 374M/374M [00:06&lt;00:00, 61.4MB/s]
+</pre></div>
+</div>
 <p>Let’s check the number of parameters of the policy:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;number of params:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><a href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.parameters" title="torch.nn.Module.parameters" class="sphx-glr-backref-module-torch-nn sphx-glr-backref-type-py-method"><span class="n">policy</span><span class="o">.</span><span class="n">parameters</span></a><span class="p">())))</span>
 </pre></div>
@@ -555,8 +597,8 @@ In this way, we can train an algorithm offline on a dataset made of images:</p>
     is_shared=False)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 16.066 seconds)</p>
-<p><strong>Estimated memory usage:</strong>  2109 MB</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 40.595 seconds)</p>
+<p><strong>Estimated memory usage:</strong>  3826 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-pretrained-models-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/ae7b3885bfc446e5c7ca2102306be4c2/pretrained_models.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">pretrained_models.py</span></code></a></p>
