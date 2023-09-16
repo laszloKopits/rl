@@ -394,6 +394,7 @@
     <span class="n">LazyMapping</span><span class="p">,</span>
     <span class="n">SquashDims</span><span class="p">,</span>
     <span class="n">Squeeze2dLayer</span><span class="p">,</span>
+    <span class="n">SqueezeLayer</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -578,7 +579,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cells</span><span class="p">)</span> <span class="o">==</span> <span class="n">depth</span> <span class="ow">or</span> <span class="n">depth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                 <span class="s2">&quot;depth and num_cells length conflict, </span><span class="se">\</span>
-<span class="s2">            consider matching or specifying a constan num_cells argument together with a a desired depth&quot;</span>
+<span class="s2">            consider matching or specifying a constant num_cells argument together with a a desired depth&quot;</span>
             <span class="p">)</span>
         <span class="n">layers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_net</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span>
@@ -781,7 +782,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_field</span><span class="p">))</span> <span class="o">==</span> <span class="n">_depth</span> <span class="ow">or</span> <span class="n">_depth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;depth=</span><span class="si">{</span><span class="n">depth</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">_field</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_field</span><span class="p">))</span><span class="si">}</span><span class="s2"> length conflict, &quot;</span>
-                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;consider matching or specifying a constan </span><span class="si">{</span><span class="n">_field</span><span class="si">}</span><span class="s2"> argument together with a a desired depth&quot;</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;consider matching or specifying a constant </span><span class="si">{</span><span class="n">_field</span><span class="si">}</span><span class="s2"> argument together with a a desired depth&quot;</span>
                 <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">out_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cells</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -854,6 +855,230 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span></div></div>
+
+
+<span class="n">Conv2dNet</span> <span class="o">=</span> <span class="n">ConvNet</span>
+
+
+<span class="k">class</span> <span class="nc">Conv3dNet</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A 3D-convolutional neural network.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        in_features (int, optional): number of input features. A lazy implementation that automatically retrieves</span>
+<span class="sd">            the input size will be used if none is provided.</span>
+<span class="sd">        depth (int, optional): depth of the network. A depth of 1 will produce a single linear layer network with the</span>
+<span class="sd">            desired input size, and with an output size equal to the last element of the num_cells argument.</span>
+<span class="sd">            If no depth is indicated, the depth information should be contained in the num_cells argument (see below).</span>
+<span class="sd">            If num_cells is an iterable and depth is indicated, both should match: len(num_cells) must be equal to</span>
+<span class="sd">            the depth.</span>
+<span class="sd">        num_cells (int or Sequence[int], optional): number of cells of every layer in between the input and output. If</span>
+<span class="sd">            an integer is provided, every layer will have the same number of cells. If an iterable is provided,</span>
+<span class="sd">            the linear layers out_features will match the content of num_cells.</span>
+<span class="sd">            default: ``[32, 32, 32]`` or ``[32] * depth` is depth is not ``None``.</span>
+<span class="sd">        kernel_sizes (int, Sequence[Union[int, Sequence[int]]]): Kernel size(s) of the conv network. If iterable, the length must match the</span>
+<span class="sd">            depth, defined by the num_cells or depth arguments.</span>
+<span class="sd">        strides (int or Sequence[int]): Stride(s) of the conv network. If iterable, the length must match the</span>
+<span class="sd">            depth, defined by the num_cells or depth arguments.</span>
+<span class="sd">        activation_class (Type[nn.Module]): activation class to be used.</span>
+<span class="sd">            default: nn.Tanh</span>
+<span class="sd">        activation_kwargs (dict, optional): kwargs to be used with the activation class;</span>
+<span class="sd">        norm_class (Type, optional): normalization class, if any;</span>
+<span class="sd">        norm_kwargs (dict, optional): kwargs to be used with the normalization layers;</span>
+<span class="sd">        bias_last_layer (bool): if ``True``, the last Linear layer will have a bias parameter.</span>
+<span class="sd">            default: True;</span>
+<span class="sd">        aggregator_class (Type[nn.Module]): aggregator to use at the end of the chain.</span>
+<span class="sd">            default:  SquashDims;</span>
+<span class="sd">        aggregator_kwargs (dict, optional): kwargs for the aggregator_class;</span>
+<span class="sd">        squeeze_output (bool): whether the output should be squeezed of its singleton dimensions.</span>
+<span class="sd">            default: False.</span>
+<span class="sd">        device (Optional[DEVICE_TYPING]): device to create the module on.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; # All of the following examples provide valid, working MLPs</span>
+<span class="sd">        &gt;&gt;&gt; cnet = Conv3dNet(in_features=3, depth=1, num_cells=[32,])</span>
+<span class="sd">        &gt;&gt;&gt; print(cnet)</span>
+<span class="sd">        Conv3dNet(</span>
+<span class="sd">            (0): Conv3d(3, 32, kernel_size=(3, 3, 3), stride=(1, 1, 1))</span>
+<span class="sd">            (1): ELU(alpha=1.0)</span>
+<span class="sd">            (2): SquashDims()</span>
+<span class="sd">        )</span>
+<span class="sd">        &gt;&gt;&gt; cnet = Conv3dNet(in_features=3, depth=4, num_cells=32)</span>
+<span class="sd">        &gt;&gt;&gt; print(cnet)</span>
+<span class="sd">        Conv3dNet(</span>
+<span class="sd">            (0): Conv3d(3, 32, kernel_size=(3, 3, 3), stride=(1, 1, 1))</span>
+<span class="sd">            (1): ELU(alpha=1.0)</span>
+<span class="sd">            (2): Conv3d(32, 32, kernel_size=(3, 3, 3), stride=(1, 1, 1))</span>
+<span class="sd">            (3): ELU(alpha=1.0)</span>
+<span class="sd">            (4): Conv3d(32, 32, kernel_size=(3, 3, 3), stride=(1, 1, 1))</span>
+<span class="sd">            (5): ELU(alpha=1.0)</span>
+<span class="sd">            (6): Conv3d(32, 32, kernel_size=(3, 3, 3), stride=(1, 1, 1))</span>
+<span class="sd">            (7): ELU(alpha=1.0)</span>
+<span class="sd">            (8): SquashDims()</span>
+<span class="sd">        )</span>
+<span class="sd">        &gt;&gt;&gt; cnet = Conv3dNet(in_features=3, num_cells=[32, 33, 34, 35])  # defines the depth by the num_cells arg</span>
+<span class="sd">        &gt;&gt;&gt; print(cnet)</span>
+<span class="sd">        Conv3dNet(</span>
+<span class="sd">            (0): Conv3d(3, 32, kernel_size=(3, 3, 3), stride=(1, 1, 1))</span>
+<span class="sd">            (1): ELU(alpha=1.0)</span>
+<span class="sd">            (2): Conv3d(32, 33, kernel_size=(3, 3, 3), stride=(1, 1, 1))</span>
+<span class="sd">            (3): ELU(alpha=1.0)</span>
+<span class="sd">            (4): Conv3d(33, 34, kernel_size=(3, 3, 3), stride=(1, 1, 1))</span>
+<span class="sd">            (5): ELU(alpha=1.0)</span>
+<span class="sd">            (6): Conv3d(34, 35, kernel_size=(3, 3, 3), stride=(1, 1, 1))</span>
+<span class="sd">            (7): ELU(alpha=1.0)</span>
+<span class="sd">            (8): SquashDims()</span>
+<span class="sd">        )</span>
+<span class="sd">        &gt;&gt;&gt; cnet = Conv3dNet(in_features=3, num_cells=[32, 33, 34, 35], kernel_sizes=[3, 4, 5, (2, 3, 4)])  # defines kernels, possibly rectangular</span>
+<span class="sd">        &gt;&gt;&gt; print(cnet)</span>
+<span class="sd">        Conv3dNet(</span>
+<span class="sd">            (0): Conv3d(3, 32, kernel_size=(3, 3, 3), stride=(1, 1, 1))</span>
+<span class="sd">            (1): ELU(alpha=1.0)</span>
+<span class="sd">            (2): Conv3d(32, 33, kernel_size=(4, 4, 4), stride=(1, 1, 1))</span>
+<span class="sd">            (3): ELU(alpha=1.0)</span>
+<span class="sd">            (4): Conv3d(33, 34, kernel_size=(5, 5, 5), stride=(1, 1, 1))</span>
+<span class="sd">            (5): ELU(alpha=1.0)</span>
+<span class="sd">            (6): Conv3d(34, 35, kernel_size=(2, 3, 4), stride=(1, 1, 1))</span>
+<span class="sd">            (7): ELU(alpha=1.0)</span>
+<span class="sd">            (8): SquashDims()</span>
+<span class="sd">        )</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">in_features</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_cells</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_sizes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]],</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">strides</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">paddings</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">activation_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ELU</span><span class="p">,</span>
+        <span class="n">activation_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">norm_class</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">norm_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bias_last_layer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">aggregator_class</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]]</span> <span class="o">=</span> <span class="n">SquashDims</span><span class="p">,</span>
+        <span class="n">aggregator_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">squeeze_output</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DEVICE_TYPING</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">num_cells</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">depth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">num_cells</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">num_cells</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">*</span> <span class="n">depth</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_features</span> <span class="o">=</span> <span class="n">in_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_class</span> <span class="o">=</span> <span class="n">activation_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">activation_kwargs</span> <span class="k">if</span> <span class="n">activation_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_class</span> <span class="o">=</span> <span class="n">norm_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm_kwargs</span> <span class="o">=</span> <span class="n">norm_kwargs</span> <span class="k">if</span> <span class="n">norm_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bias_last_layer</span> <span class="o">=</span> <span class="n">bias_last_layer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aggregator_class</span> <span class="o">=</span> <span class="n">aggregator_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aggregator_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">aggregator_kwargs</span> <span class="k">if</span> <span class="n">aggregator_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;ndims_in&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">squeeze_output</span> <span class="o">=</span> <span class="n">squeeze_output</span>
+        <span class="c1"># self.single_bias_last_layer = single_bias_last_layer</span>
+
+        <span class="n">depth</span> <span class="o">=</span> <span class="n">_find_depth</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">num_cells</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">strides</span><span class="p">,</span> <span class="n">paddings</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">=</span> <span class="n">depth</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Null depth is not permitted with Conv3dNet.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_field</span><span class="p">,</span> <span class="n">_value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;num_cells&quot;</span><span class="p">,</span> <span class="s2">&quot;kernel_sizes&quot;</span><span class="p">,</span> <span class="s2">&quot;strides&quot;</span><span class="p">,</span> <span class="s2">&quot;paddings&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">num_cells</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">strides</span><span class="p">,</span> <span class="n">paddings</span><span class="p">],</span>
+        <span class="p">):</span>
+            <span class="n">_depth</span> <span class="o">=</span> <span class="n">depth</span>
+            <span class="nb">setattr</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">_field</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">_value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_value</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">_value</span><span class="p">]</span> <span class="o">*</span> <span class="n">_depth</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_field</span><span class="p">))</span> <span class="o">==</span> <span class="n">_depth</span> <span class="ow">or</span> <span class="n">_depth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;depth=</span><span class="si">{</span><span class="n">depth</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">_field</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_field</span><span class="p">))</span><span class="si">}</span><span class="s2"> length conflict, &quot;</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;consider matching or specifying a constant </span><span class="si">{</span><span class="n">_field</span><span class="si">}</span><span class="s2"> argument together with a a desired depth&quot;</span>
+                <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cells</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_sizes</span><span class="p">)</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_net</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_net</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DEVICE_TYPING</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">:</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">in_features</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">in_features</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cells</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">]</span>
+        <span class="n">out_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cells</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_features</span><span class="p">]</span>
+        <span class="n">kernel_sizes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_sizes</span>
+        <span class="n">strides</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strides</span>
+        <span class="n">paddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paddings</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">_in</span><span class="p">,</span> <span class="n">_out</span><span class="p">,</span> <span class="n">_kernel</span><span class="p">,</span> <span class="n">_stride</span><span class="p">,</span> <span class="n">_padding</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="n">in_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">,</span> <span class="n">kernel_sizes</span><span class="p">,</span> <span class="n">strides</span><span class="p">,</span> <span class="n">paddings</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">_bias</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_features</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias_last_layer</span>
+            <span class="k">if</span> <span class="n">_in</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">Conv3d</span><span class="p">(</span>
+                        <span class="n">_in</span><span class="p">,</span>
+                        <span class="n">_out</span><span class="p">,</span>
+                        <span class="n">kernel_size</span><span class="o">=</span><span class="n">_kernel</span><span class="p">,</span>
+                        <span class="n">stride</span><span class="o">=</span><span class="n">_stride</span><span class="p">,</span>
+                        <span class="n">bias</span><span class="o">=</span><span class="n">_bias</span><span class="p">,</span>
+                        <span class="n">padding</span><span class="o">=</span><span class="n">_padding</span><span class="p">,</span>
+                        <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">LazyConv3d</span><span class="p">(</span>
+                        <span class="n">_out</span><span class="p">,</span>
+                        <span class="n">kernel_size</span><span class="o">=</span><span class="n">_kernel</span><span class="p">,</span>
+                        <span class="n">stride</span><span class="o">=</span><span class="n">_stride</span><span class="p">,</span>
+                        <span class="n">bias</span><span class="o">=</span><span class="n">_bias</span><span class="p">,</span>
+                        <span class="n">padding</span><span class="o">=</span><span class="n">_padding</span><span class="p">,</span>
+                        <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">create_on_device</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">activation_class</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">activation_kwargs</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">create_on_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_class</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_kwargs</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregator_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">create_on_device</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">aggregator_class</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">aggregator_kwargs</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">squeeze_output</span><span class="p">:</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SqueezeLayer</span><span class="p">((</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">layers</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="o">*</span><span class="n">batch</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The input value of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> must have at least 4 dimensions, got </span><span class="si">{</span><span class="n">inputs</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2"> instead.&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
 
 
 <span class="k">class</span> <span class="nc">DuelingMlpDQNet</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
