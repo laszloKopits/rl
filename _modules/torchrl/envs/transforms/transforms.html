@@ -1027,7 +1027,9 @@
     <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TensorDictBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">tensordict</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">recurse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">out_tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tensordict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">out_tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_env</span><span class="o">.</span><span class="n">_reset</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tensordict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_tensordict</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">out_tensordict</span><span class="p">)</span>
         <span class="n">out_tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">out_tensordict</span><span class="p">)</span>
 
         <span class="n">mt_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">missing_tolerance</span>
@@ -5549,6 +5551,87 @@
             <span class="p">)</span>
         <span class="n">action_spec</span><span class="o">.</span><span class="n">update_mask</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">tensordict</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">VecGymEnvTransform</span><span class="p">(</span><span class="n">Transform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A transform for GymWrapper subclasses that handles the auto-reset in a consistent way.</span>
+
+<span class="sd">    Gym, gymnasium and SB3 provide vectorized (read, parallel or batched) environments</span>
+<span class="sd">    that are automatically reset. When this occurs, the actual observation resulting</span>
+<span class="sd">    from the action is saved within a key in the info.</span>
+<span class="sd">    The class :class:`torchrl.envs.libs.gym.terminal_obs_reader` reads that observation</span>
+<span class="sd">    and stores it in a ``&quot;final&quot;`` key within the output tensordict.</span>
+<span class="sd">    In turn, this transform reads that final data, swaps it with the observation</span>
+<span class="sd">    written in its place that results from the actual reset, and saves the</span>
+<span class="sd">    reset output in a private container. The resulting data truly reflects</span>
+<span class="sd">    the output of the step.</span>
+
+<span class="sd">    Then, when calling `env.reset`, the saved data is written back where it belongs</span>
+<span class="sd">    (and the `reset` is a no-op).</span>
+
+<span class="sd">    This transform is automatically appended to the gym env whenever the wrapper</span>
+<span class="sd">    is created with an async env.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        final_name (str, optional): the name of the final observation in the dict.</span>
+<span class="sd">            Defaults to `&quot;final&quot;`.</span>
+
+<span class="sd">    .. note:: In general, this class should not be handled directly. It is</span>
+<span class="sd">        created whenever a vectorized environment is placed within a :class:`GymWrapper`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">final_name</span><span class="o">=</span><span class="s2">&quot;final&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_name</span> <span class="o">=</span> <span class="n">final_name</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="p">[])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_memo</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">_step</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">next_tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
+        <span class="c1"># save the final info</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_memo</span><span class="p">[</span><span class="s2">&quot;done&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span>
+        <span class="n">final</span> <span class="o">=</span> <span class="n">next_tensordict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;final&quot;</span><span class="p">)</span>
+        <span class="c1"># if anything&#39;s done, we need to swap the final obs</span>
+        <span class="k">if</span> <span class="n">done</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="n">done</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">saved_next</span> <span class="o">=</span> <span class="n">next_tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="n">final</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="n">next_tensordict</span><span class="p">[</span><span class="n">done</span><span class="p">]</span> <span class="o">=</span> <span class="n">final</span><span class="p">[</span><span class="n">done</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_memo</span><span class="p">[</span><span class="s2">&quot;saved_done&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">saved_next</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_memo</span><span class="p">[</span><span class="s2">&quot;saved_done&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">next_tensordict</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_memo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">reset</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_reset&quot;</span><span class="p">,</span> <span class="n">done</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">done</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="n">done</span><span class="o">.</span><span class="n">view_as</span><span class="p">(</span><span class="n">reset</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">reset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">done</span>
+            <span class="ow">and</span> <span class="p">(</span><span class="n">reset</span> <span class="o">!=</span> <span class="n">done</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">reset</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">reset</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Cannot partially reset a gym(nasium) async env with a reset mask that does not match the done mask. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Got reset=</span><span class="si">{</span><span class="n">reset</span><span class="si">}</span><span class="se">\n</span><span class="s2">and done=</span><span class="si">{</span><span class="n">done</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># if not reset.any(), we don&#39;t need to do anything.</span>
+        <span class="c1"># if reset.all(), we don&#39;t either (bc GymWrapper will call a plain reset).</span>
+        <span class="k">if</span> <span class="n">reset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">reset</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">reset</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">saved_done</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_memo</span><span class="p">[</span><span class="s2">&quot;saved_done&quot;</span><span class="p">]</span>
+            <span class="n">reset</span> <span class="o">=</span> <span class="n">reset</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">updated_td</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                <span class="o">~</span><span class="n">reset</span><span class="p">,</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="n">saved_done</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)),</span> <span class="n">saved_done</span>
+            <span class="p">)</span>
+            <span class="n">tensordict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">updated_td</span><span class="p">)</span>
+            <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">fill_</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">tensordict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;final&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensordict</span>
+
+    <span class="k">def</span> <span class="nf">transform_observation_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_spec</span><span class="p">:</span> <span class="n">TensorSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">observation_spec</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">final_name</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">observation_spec</span>
 </pre></div>
 
              </article>
