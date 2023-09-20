@@ -625,7 +625,7 @@ computed using</p>
 <p>Our network is wrapped in a <code class="xref py py-class docutils literal notranslate"><span class="pre">QValueActor</span></code>,
 which will read the state-action
 values, pick up the one with the maximum value and write all those results
-in the input <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+a721766 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a>.</p>
+in the input <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+785d11f ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_model</span><span class="p">(</span><span class="n">dummy_env</span><span class="p">):</span>
     <span class="n">cnn_kwargs</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;num_cells&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>
@@ -912,7 +912,7 @@ variable.</p></li>
         [[0.0737]],
 
         [[0.0737]]]))])
-self.log_dir: /tmp/tmpux4gdsg6/dqn_exp_0bd25258-57a3-11ee-89bf-0242ac120002
+self.log_dir: /tmp/tmpkmj8pyh9/dqn_exp_4a3ce13c-57a5-11ee-a595-0242ac130002
 </pre></div>
 </div>
 <p>We can control how often the scalars should be logged. Here we set this
@@ -1068,8 +1068,8 @@ of the documentation.</p></li>
 for more information).</p></li>
 <li><p>More fancy exploration techniques, such as <a class="reference internal" href="../reference/generated/torchrl.modules.NoisyLinear.html#torchrl.modules.NoisyLinear" title="torchrl.modules.NoisyLinear"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoisyLinear</span></code></a> layers and such.</p></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 29.894 seconds)</p>
-<p><strong>Estimated memory usage:</strong>  4182 MB</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 31.085 seconds)</p>
+<p><strong>Estimated memory usage:</strong>  4208 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-coding-dqn-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/be66e8850a06844c91f6264538ad69e8/coding_dqn.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">coding_dqn.py</span></code></a></p>

@@ -423,11 +423,11 @@ For example, with agents <code class="docutils literal notranslate"><span class=
 <span class="go">            batch_size=torch.Size([3]))},</span>
 <span class="go">        adversary: TensorDict(</span>
 <span class="go">            fields={</span>
-<span class="go">                action: Tensor(shape=torch.Size([9]), device=cpu, dtype=torch.int64, is_shared=False),</span>
-<span class="go">                action_mask: Tensor(shape=torch.Size([9]), device=cpu, dtype=torch.bool, is_shared=False),</span>
-<span class="go">                done: Tensor(shape=torch.Size([1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
-<span class="go">                observation: Tensor(shape=torch.Size([3, 3, 2]), device=cpu, dtype=torch.int8, is_shared=False)},</span>
-<span class="go">            batch_size=torch.Size([]))},</span>
+<span class="go">                action: Tensor(shape=torch.Size([1, 9]), device=cpu, dtype=torch.int64, is_shared=False),</span>
+<span class="go">                action_mask: Tensor(shape=torch.Size([1, 9]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="go">                done: Tensor(shape=torch.Size([1, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="go">                observation: Tensor(shape=torch.Size([1, 3, 3, 2]), device=cpu, dtype=torch.int8, is_shared=False)},</span>
+<span class="go">            batch_size=torch.Size([1]))},</span>
 <span class="go">    batch_size=torch.Size([]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">group_map</span><span class="p">)</span>
 <span class="go">{&quot;agent&quot;: [&quot;agent_0&quot;, &quot;agent_1&quot;, &quot;agent_2&quot;], &quot;adversary&quot;: [&quot;adversary_0&quot;]}</span>

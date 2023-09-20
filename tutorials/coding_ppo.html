@@ -392,7 +392,7 @@ control library</a>.</p>
 <p>Key learnings:</p>
 <ul class="simple">
 <li><p>How to create an environment in TorchRL, transform its outputs, and collect data from this env;</p></li>
-<li><p>How to make your classes talk to each other using <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+a721766 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a>;</p></li>
+<li><p>How to make your classes talk to each other using <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+785d11f ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a>;</p></li>
 <li><p>The basics of building your training loop with TorchRL:</p>
 <ul>
 <li><p>How to compute the advantage signal for policy gradient methods;</p></li>
@@ -461,7 +461,7 @@ to configure our loss module.</p></li>
 <li><p>Finally, we will run our training loop and analyze the results.</p></li>
 </ol>
 <p>Throughout this tutorial, we’ll be using the <code class="xref py py-mod docutils literal notranslate"><span class="pre">tensordict</span></code> library.
-<a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+a721766 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> is the lingua franca of TorchRL: it helps us abstract
+<a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+785d11f ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> is the lingua franca of TorchRL: it helps us abstract
 what a module reads and writes and care less about the specific data
 description and more about the algorithm itself.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
@@ -598,7 +598,7 @@ convert double entries to single-precision numbers, ready to be read by the
 policy. The <code class="xref py py-class docutils literal notranslate"><span class="pre">StepCounter</span></code> transform will be used to count the steps before
 the environment is terminated. We will use this measure as a supplementary measure
 of performance.</p>
-<p>As we will see later, many of the TorchRL’s classes rely on <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+a721766 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a>
+<p>As we will see later, many of the TorchRL’s classes rely on <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+785d11f ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a>
 to communicate. You could think of it as a python dictionary with some extra
 tensor features. In practice, this means that many modules we will be working
 with need to be told what key to read (<code class="docutils literal notranslate"><span class="pre">in_keys</span></code>) and what key to write
@@ -724,9 +724,9 @@ domain, so you don’t need to care about designing a random sampler.</p>
 action as input, and outputs an observation, a reward and a done state. The
 observation may be composite, meaning that it could be composed of more than one
 tensor. This is not a problem for TorchRL, since the whole set of observations
-is automatically packed in the output <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+a721766 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a>. After executing a rollout
+is automatically packed in the output <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+785d11f ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a>. After executing a rollout
 (ie a sequence of environment steps and random action generations) over a given
-number of steps, we will retrieve a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+a721766 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> instance with a shape
+number of steps, we will retrieve a <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+785d11f ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> instance with a shape
 that matches this trajectory length:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="tensordict.TensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rollout</span></a> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="tensordict.TensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rollout</span></a><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;rollout of three steps:&quot;</span><span class="p">,</span> <a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="tensordict.TensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rollout</span></a><span class="p">)</span>
@@ -910,8 +910,8 @@ Other data collectors (<code class="docutils literal notranslate"><span class="p
 <code class="docutils literal notranslate"><span class="pre">MultiaSyncDataCollector</span></code>) will execute the same operations in synchronous
 and asynchronous manner over a set of multiprocessed workers.</p>
 <p>As for the policy and environment before, the data collector will return
-<a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+a721766 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> instances with a total number of elements that will
-match <code class="docutils literal notranslate"><span class="pre">frames_per_batch</span></code>. Using <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+a721766 ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> to pass data to the
+<a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+785d11f ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> instances with a total number of elements that will
+match <code class="docutils literal notranslate"><span class="pre">frames_per_batch</span></code>. Using <a class="reference external" href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+785d11f ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> to pass data to the
 training loop allows you to write dataloading pipelines
 that are 100% oblivious to the actual specificities of the rollout content.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">collector</span> <span class="o">=</span> <a href="https://pytorch.org/docs/stable/data.html#torch.utils.data.IterableDataset" title="torch.utils.data.IterableDataset" class="sphx-glr-backref-module-torch-utils-data sphx-glr-backref-type-py-class"><span class="n">SyncDataCollector</span></a><span class="p">(</span>
@@ -1080,26 +1080,26 @@ The steps include:</p>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/10000 [00:00&lt;?, ?it/s]
- 10%|█         | 1000/10000 [00:02&lt;00:19, 458.00it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.0848 (init= 9.0848), step count (max): 12, lr policy:  0.0003:  10%|█         | 1000/10000 [00:02&lt;00:19, 458.00it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.0848 (init= 9.0848), step count (max): 12, lr policy:  0.0003:  20%|██        | 2000/10000 [00:04&lt;00:17, 459.16it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.1133 (init= 9.0848), step count (max): 13, lr policy:  0.0003:  20%|██        | 2000/10000 [00:04&lt;00:17, 459.16it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.1133 (init= 9.0848), step count (max): 13, lr policy:  0.0003:  30%|███       | 3000/10000 [00:06&lt;00:15, 462.71it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.1581 (init= 9.0848), step count (max): 18, lr policy:  0.0003:  30%|███       | 3000/10000 [00:06&lt;00:15, 462.71it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.1581 (init= 9.0848), step count (max): 18, lr policy:  0.0003:  40%|████      | 4000/10000 [00:08&lt;00:12, 465.00it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.1748 (init= 9.0848), step count (max): 20, lr policy:  0.0002:  40%|████      | 4000/10000 [00:08&lt;00:12, 465.00it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.1748 (init= 9.0848), step count (max): 20, lr policy:  0.0002:  50%|█████     | 5000/10000 [00:10&lt;00:10, 466.79it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.1993 (init= 9.0848), step count (max): 24, lr policy:  0.0002:  50%|█████     | 5000/10000 [00:10&lt;00:10, 466.79it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.1993 (init= 9.0848), step count (max): 24, lr policy:  0.0002:  60%|██████    | 6000/10000 [00:13&lt;00:08, 457.09it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.2176 (init= 9.0848), step count (max): 31, lr policy:  0.0001:  60%|██████    | 6000/10000 [00:13&lt;00:08, 457.09it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.2176 (init= 9.0848), step count (max): 31, lr policy:  0.0001:  70%|███████   | 7000/10000 [00:15&lt;00:06, 461.82it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.2364 (init= 9.0848), step count (max): 35, lr policy:  0.0001:  70%|███████   | 7000/10000 [00:15&lt;00:06, 461.82it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.2364 (init= 9.0848), step count (max): 35, lr policy:  0.0001:  80%|████████  | 8000/10000 [00:17&lt;00:04, 465.17it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.2412 (init= 9.0848), step count (max): 42, lr policy:  0.0001:  80%|████████  | 8000/10000 [00:17&lt;00:04, 465.17it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.2412 (init= 9.0848), step count (max): 42, lr policy:  0.0001:  90%|█████████ | 9000/10000 [00:19&lt;00:02, 467.42it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.2512 (init= 9.0848), step count (max): 51, lr policy:  0.0000:  90%|█████████ | 9000/10000 [00:19&lt;00:02, 467.42it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.2512 (init= 9.0848), step count (max): 51, lr policy:  0.0000: 100%|██████████| 10000/10000 [00:21&lt;00:00, 468.68it/s]
-eval cumulative reward:  128.9604 (init:  128.9604), eval step-count: 13, average reward= 9.2492 (init= 9.0848), step count (max): 34, lr policy:  0.0000: 100%|██████████| 10000/10000 [00:21&lt;00:00, 468.68it/s]
+ 10%|█         | 1000/10000 [00:02&lt;00:19, 463.14it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.0868 (init= 9.0868), step count (max): 11, lr policy:  0.0003:  10%|█         | 1000/10000 [00:02&lt;00:19, 463.14it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.0868 (init= 9.0868), step count (max): 11, lr policy:  0.0003:  20%|██        | 2000/10000 [00:04&lt;00:17, 463.81it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.0992 (init= 9.0868), step count (max): 11, lr policy:  0.0003:  20%|██        | 2000/10000 [00:04&lt;00:17, 463.81it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.0992 (init= 9.0868), step count (max): 11, lr policy:  0.0003:  30%|███       | 3000/10000 [00:06&lt;00:14, 467.18it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.1411 (init= 9.0868), step count (max): 15, lr policy:  0.0003:  30%|███       | 3000/10000 [00:06&lt;00:14, 467.18it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.1411 (init= 9.0868), step count (max): 15, lr policy:  0.0003:  40%|████      | 4000/10000 [00:08&lt;00:12, 470.03it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.1807 (init= 9.0868), step count (max): 17, lr policy:  0.0002:  40%|████      | 4000/10000 [00:08&lt;00:12, 470.03it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.1807 (init= 9.0868), step count (max): 17, lr policy:  0.0002:  50%|█████     | 5000/10000 [00:10&lt;00:10, 472.36it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.1971 (init= 9.0868), step count (max): 30, lr policy:  0.0002:  50%|█████     | 5000/10000 [00:10&lt;00:10, 472.36it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.1971 (init= 9.0868), step count (max): 30, lr policy:  0.0002:  60%|██████    | 6000/10000 [00:12&lt;00:08, 462.50it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.2053 (init= 9.0868), step count (max): 26, lr policy:  0.0001:  60%|██████    | 6000/10000 [00:12&lt;00:08, 462.50it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.2053 (init= 9.0868), step count (max): 26, lr policy:  0.0001:  70%|███████   | 7000/10000 [00:14&lt;00:06, 467.76it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.2288 (init= 9.0868), step count (max): 30, lr policy:  0.0001:  70%|███████   | 7000/10000 [00:14&lt;00:06, 467.76it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.2288 (init= 9.0868), step count (max): 30, lr policy:  0.0001:  80%|████████  | 8000/10000 [00:17&lt;00:04, 471.44it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.2328 (init= 9.0868), step count (max): 30, lr policy:  0.0001:  80%|████████  | 8000/10000 [00:17&lt;00:04, 471.44it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.2328 (init= 9.0868), step count (max): 30, lr policy:  0.0001:  90%|█████████ | 9000/10000 [00:19&lt;00:02, 474.43it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.2403 (init= 9.0868), step count (max): 37, lr policy:  0.0000:  90%|█████████ | 9000/10000 [00:19&lt;00:02, 474.43it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.2403 (init= 9.0868), step count (max): 37, lr policy:  0.0000: 100%|██████████| 10000/10000 [00:21&lt;00:00, 476.82it/s]
+eval cumulative reward:  73.2734 (init:  73.2734), eval step-count: 7, average reward= 9.2414 (init= 9.0868), step count (max): 35, lr policy:  0.0000: 100%|██████████| 10000/10000 [00:21&lt;00:00, 476.82it/s]
 </pre></div>
 </div>
 </section>
@@ -1143,7 +1143,7 @@ the environment after asking for rendering to get a visual rendering of the
 inverted pendulum in action. Check <code class="xref py py-mod docutils literal notranslate"><span class="pre">torchrl.record</span></code> to
 know more.</p></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 34.944 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 35.629 seconds)</p>
 <p><strong>Estimated memory usage:</strong>  12 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-coding-ppo-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
