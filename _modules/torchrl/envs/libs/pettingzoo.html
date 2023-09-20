@@ -742,9 +742,9 @@
     <span class="k">def</span> <span class="nf">_init_env</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
         <span class="c1"># Add info</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel</span><span class="p">:</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_parallel</span><span class="p">()</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_parallel</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_aec</span><span class="p">()</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_aec</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">group</span><span class="p">,</span> <span class="n">agents</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">info_specs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -810,8 +810,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cached_step_output_zero</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">zero</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cached_step_output_zero</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">zero</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">_set_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="nf">_set_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TensorDictBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
@@ -819,10 +820,10 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel</span><span class="p">:</span>
             <span class="c1"># This resets when any is done</span>
-            <span class="n">observation_dict</span><span class="p">,</span> <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_parallel</span><span class="p">()</span>
+            <span class="n">observation_dict</span><span class="p">,</span> <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_parallel</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># This resets when all are done</span>
-            <span class="n">observation_dict</span><span class="p">,</span> <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_aec</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
+            <span class="n">observation_dict</span><span class="p">,</span> <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_aec</span><span class="p">(</span><span class="n">tensordict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># We start with zeroed data and fill in the data for alive agents</span>
         <span class="n">tensordict_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached_reset_output_zero</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
@@ -851,7 +852,7 @@
 
         <span class="k">return</span> <span class="n">tensordict_out</span>
 
-    <span class="k">def</span> <span class="nf">_reset_aec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_reset_aec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
         <span class="n">all_done</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_resets</span> <span class="o">=</span> <span class="p">[]</span>
@@ -870,7 +871,7 @@
                         <span class="k">break</span>
 
         <span class="k">if</span> <span class="n">all_done</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">observation_dict</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">agent</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span> <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_agents</span>
@@ -878,10 +879,8 @@
         <span class="n">info_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">infos</span>
         <span class="k">return</span> <span class="n">observation_dict</span><span class="p">,</span> <span class="n">info_dict</span>
 
-    <span class="k">def</span> <span class="nf">_reset_parallel</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_reset_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_step</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
