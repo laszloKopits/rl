@@ -448,9 +448,15 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
+    <span class="nd">@_classproperty</span>
+    <span class="k">def</span> <span class="nf">available_envs</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_robohive</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">RoboHiveEnv</span><span class="o">.</span><span class="n">register_envs</span><span class="p">()</span>
+        <span class="k">yield from</span> <span class="bp">cls</span><span class="o">.</span><span class="n">env_list</span>
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_envs</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_robohive</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
                 <span class="s2">&quot;Cannot load robohive from the current virtual environment.&quot;</span>
@@ -703,10 +709,6 @@
         <span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">env_name</span><span class="p">)</span>
         <span class="n">cams</span> <span class="o">=</span> <span class="p">[</span><span class="n">env</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">id2name</span><span class="p">(</span><span class="n">ic</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span> <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ncam</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">cams</span></div>
-
-
-<span class="k">if</span> <span class="n">_has_robohive</span><span class="p">:</span>
-    <span class="n">RoboHiveEnv</span><span class="o">.</span><span class="n">register_envs</span><span class="p">()</span>
 </pre></div>
 
              </article>
