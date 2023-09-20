@@ -401,6 +401,7 @@
 <span class="kn">from</span> <span class="nn">torchrl._utils</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_check_for_faulty_process</span><span class="p">,</span>
     <span class="n">accept_remote_rref_udf_invocation</span><span class="p">,</span>
+    <span class="n">_ProcessNoWarn</span><span class="p">,</span>
     <span class="n">prod</span><span class="p">,</span>
     <span class="n">RL_WARNINGS</span><span class="p">,</span>
     <span class="n">VERBOSE</span><span class="p">,</span>
@@ -1705,7 +1706,7 @@
                 <span class="s2">&quot;idx&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span>
                 <span class="s2">&quot;interruptor&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interruptor</span><span class="p">,</span>
             <span class="p">}</span>
-            <span class="n">proc</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">_main_async_collector</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">_ProcessNoWarn</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">_main_async_collector</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># proc.daemon can&#39;t be set as daemonic processes may be launched by the process itself</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">proc</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>

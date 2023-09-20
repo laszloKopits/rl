@@ -383,8 +383,8 @@
 
 <span class="kn">import</span> <span class="nn">torch.cuda</span>
 <span class="kn">from</span> <span class="nn">tensordict</span> <span class="kn">import</span> <span class="n">TensorDict</span>
-<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">multiprocessing</span> <span class="k">as</span> <span class="n">mp</span><span class="p">,</span> <span class="n">nn</span>
-<span class="kn">from</span> <span class="nn">torchrl._utils</span> <span class="kn">import</span> <span class="n">VERBOSE</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">torchrl._utils</span> <span class="kn">import</span> <span class="n">_ProcessNoWarn</span><span class="p">,</span> <span class="n">VERBOSE</span>
 
 <span class="kn">from</span> <span class="nn">torchrl.collectors</span> <span class="kn">import</span> <span class="n">MultiaSyncDataCollector</span>
 <span class="kn">from</span> <span class="nn">torchrl.collectors.collectors</span> <span class="kn">import</span> <span class="p">(</span>
@@ -767,7 +767,7 @@
         <span class="n">env_make</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_constructors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env_make</span><span class="p">,</span> <span class="p">(</span><span class="n">EnvBase</span><span class="p">,</span> <span class="n">EnvCreator</span><span class="p">)):</span>
             <span class="n">env_make</span> <span class="o">=</span> <span class="n">CloudpickleWrapper</span><span class="p">(</span><span class="n">env_make</span><span class="p">)</span>
-        <span class="n">job</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
+        <span class="n">job</span> <span class="o">=</span> <span class="n">_ProcessNoWarn</span><span class="p">(</span>
             <span class="n">target</span><span class="o">=</span><span class="n">_distributed_init_collection_node</span><span class="p">,</span>
             <span class="n">args</span><span class="o">=</span><span class="p">(</span>
                 <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>

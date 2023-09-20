@@ -390,7 +390,7 @@
 <span class="kn">from</span> <span class="nn">tensordict._tensordict</span> <span class="kn">import</span> <span class="n">_unravel_key_to_tuple</span>
 <span class="kn">from</span> <span class="nn">tensordict.tensordict</span> <span class="kn">import</span> <span class="n">LazyStackedTensorDict</span><span class="p">,</span> <span class="n">TensorDictBase</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">multiprocessing</span> <span class="k">as</span> <span class="n">mp</span>
-<span class="kn">from</span> <span class="nn">torchrl._utils</span> <span class="kn">import</span> <span class="n">_check_for_faulty_process</span><span class="p">,</span> <span class="n">VERBOSE</span>
+<span class="kn">from</span> <span class="nn">torchrl._utils</span> <span class="kn">import</span> <span class="n">_check_for_faulty_process</span><span class="p">,</span> <span class="n">_ProcessNoWarn</span><span class="p">,</span> <span class="n">VERBOSE</span>
 <span class="kn">from</span> <span class="nn">torchrl.data.utils</span> <span class="kn">import</span> <span class="n">CloudpickleWrapper</span><span class="p">,</span> <span class="n">contains_lazy_spec</span><span class="p">,</span> <span class="n">DEVICE_TYPING</span>
 <span class="kn">from</span> <span class="nn">torchrl.envs.common</span> <span class="kn">import</span> <span class="n">EnvBase</span>
 <span class="kn">from</span> <span class="nn">torchrl.envs.env_creator</span> <span class="kn">import</span> <span class="n">get_env_metadata</span>
@@ -1085,7 +1085,7 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env_fun</span><span class="p">,</span> <span class="n">EnvCreator</span><span class="p">):</span>
                     <span class="n">env_fun</span> <span class="o">=</span> <span class="n">CloudpickleWrapper</span><span class="p">(</span><span class="n">env_fun</span><span class="p">)</span>
 
-                <span class="n">process</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
+                <span class="n">process</span> <span class="o">=</span> <span class="n">_ProcessNoWarn</span><span class="p">(</span>
                     <span class="n">target</span><span class="o">=</span><span class="n">_run_worker_pipe_shared_mem</span><span class="p">,</span>
                     <span class="n">args</span><span class="o">=</span><span class="p">(</span>
                         <span class="n">parent_pipe</span><span class="p">,</span>

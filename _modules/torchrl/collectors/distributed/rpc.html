@@ -402,10 +402,10 @@
     <span class="n">SUBMITIT_ERR</span> <span class="o">=</span> <span class="n">err</span>
 <span class="kn">import</span> <span class="nn">torch.cuda</span>
 <span class="kn">from</span> <span class="nn">tensordict</span> <span class="kn">import</span> <span class="n">TensorDict</span>
-<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">multiprocessing</span> <span class="k">as</span> <span class="n">mp</span><span class="p">,</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
 
 <span class="kn">from</span> <span class="nn">torch.distributed</span> <span class="kn">import</span> <span class="n">rpc</span>
-<span class="kn">from</span> <span class="nn">torchrl._utils</span> <span class="kn">import</span> <span class="n">VERBOSE</span>
+<span class="kn">from</span> <span class="nn">torchrl._utils</span> <span class="kn">import</span> <span class="n">_ProcessNoWarn</span><span class="p">,</span> <span class="n">VERBOSE</span>
 
 <span class="kn">from</span> <span class="nn">torchrl.collectors</span> <span class="kn">import</span> <span class="n">MultiaSyncDataCollector</span>
 <span class="kn">from</span> <span class="nn">torchrl.collectors.collectors</span> <span class="kn">import</span> <span class="p">(</span>
@@ -817,7 +817,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;job id&quot;</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">job_id</span><span class="p">)</span>  <span class="c1"># ID of your job</span>
             <span class="k">return</span> <span class="n">job</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span> <span class="o">==</span> <span class="s2">&quot;mp&quot;</span><span class="p">:</span>
-            <span class="n">job</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="n">_ProcessNoWarn</span><span class="p">(</span>
                 <span class="n">target</span><span class="o">=</span><span class="n">_rpc_init_collection_node</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="p">(</span>
                     <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>

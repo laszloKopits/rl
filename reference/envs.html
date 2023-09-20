@@ -507,6 +507,13 @@ Therefore, TorchRL offers its own, generic <a class="reference internal" href="g
 environments in parallel.
 As this class inherits from <a class="reference internal" href="generated/torchrl.envs.SerialEnv.html#torchrl.envs.SerialEnv" title="torchrl.envs.SerialEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">SerialEnv</span></code></a>, it enjoys the exact same API as other environment.
 Of course, a <a class="reference internal" href="generated/torchrl.envs.ParallelEnv.html#torchrl.envs.ParallelEnv" title="torchrl.envs.ParallelEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelEnv</span></code></a> will have a batch size that corresponds to its environment count:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Given the library’s many optional dependencies (eg, Gym, Gymnasium, and many others)
+warnings can quickly become quite annoying in multiprocessed / distributed settings.
+By default, TorchRL filters out these warnings in sub-processes. If one still wishes to
+see these warnings, they can be displayed by setting <code class="docutils literal notranslate"><span class="pre">torchrl.filter_warnings_subprocess=False</span></code>.</p>
+</div>
 <p>It is important that your environment specs match the input and output that it sends and receives, as
 <a class="reference internal" href="generated/torchrl.envs.ParallelEnv.html#torchrl.envs.ParallelEnv" title="torchrl.envs.ParallelEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParallelEnv</span></code></a> will create buffers from these specs to communicate with the spawn processes.
 Check the <a class="reference internal" href="generated/torchrl.envs.utils.check_env_specs.html#torchrl.envs.utils.check_env_specs" title="torchrl.envs.utils.check_env_specs"><code class="xref py py-func docutils literal notranslate"><span class="pre">check_env_specs()</span></code></a> method for a sanity check.</p>
