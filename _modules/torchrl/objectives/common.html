@@ -472,7 +472,6 @@
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">forward</span> <span class="o">=</span> <span class="n">set_exploration_type</span><span class="p">(</span><span class="n">ExplorationType</span><span class="o">.</span><span class="n">MODE</span><span class="p">)(</span><span class="bp">cls</span><span class="o">.</span><span class="n">forward</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_tensor_keys</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_AcceptedKeys</span><span class="p">()</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -483,6 +482,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_value_estimator</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_has_update_associated</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_value_estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tensor_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_AcceptedKeys</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_forward_pre_hook</span><span class="p">(</span><span class="n">_updater_check_forward_prehook</span><span class="p">)</span>
         <span class="c1"># self.register_forward_pre_hook(_parameters_to_tensordict)</span>
 
