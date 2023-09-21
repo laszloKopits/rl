@@ -1701,9 +1701,9 @@ The key takeaways are:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 40.413 seconds)
+   **Total running time of the script:** (1 minutes 40.175 seconds)
 
-**Estimated memory usage:**  3851 MB
+**Estimated memory usage:**  4230 MB
 
 
 .. _sphx_glr_download_tutorials_coding_ddpg.py:
