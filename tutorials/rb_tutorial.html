@@ -484,7 +484,7 @@ change the <code class="docutils literal notranslate"><span class="pre">collate_
 <span class="nb">print</span><span class="p">(</span><span class="n">buffer_list</span><span class="o">.</span><a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.LazyStackedTensorDict.html#tensordict.LazyStackedTensorDict" title="tensordict.LazyStackedTensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sample</span></a><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&#39;b&#39;, &#39;b&#39;, 0]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&#39;a&#39;, 0, 0]
 </pre></div>
 </div>
 <p>Because it is the one with the lowest amount of assumption, the
@@ -538,13 +538,13 @@ separate datapoints:</p>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>samples tensor([[ 8,  9, 10, 11],
         [ 0,  1,  2,  3],
-        [ 0,  1,  2,  3],
-        [ 0,  1,  2,  3],
-        [ 0,  1,  2,  3]]) tensor([[10, 11, 12, 13, 14],
+        [ 4,  5,  6,  7],
+        [ 8,  9, 10, 11],
+        [ 4,  5,  6,  7]]) tensor([[10, 11, 12, 13, 14],
         [ 0,  1,  2,  3,  4],
-        [ 0,  1,  2,  3,  4],
-        [ 0,  1,  2,  3,  4],
-        [ 0,  1,  2,  3,  4]])
+        [ 5,  6,  7,  8,  9],
+        [10, 11, 12, 13, 14],
+        [ 5,  6,  7,  8,  9]])
 </pre></div>
 </div>
 <p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">torchrl.data.LazyMemmapStorage</span></code> is created in the same manner:</p>
@@ -556,16 +556,16 @@ separate datapoints:</p>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>The buffer has 3 elements
-samples: a= tensor([[ 8,  9, 10, 11],
-        [ 4,  5,  6,  7],
+samples: a= tensor([[ 4,  5,  6,  7],
+        [ 8,  9, 10, 11],
         [ 8,  9, 10, 11],
         [ 0,  1,  2,  3],
-        [ 0,  1,  2,  3]])
-(&#39;b&#39;, &#39;c&#39;): tensor([[10, 11, 12, 13, 14],
-        [ 5,  6,  7,  8,  9],
+        [ 8,  9, 10, 11]])
+(&#39;b&#39;, &#39;c&#39;): tensor([[ 5,  6,  7,  8,  9],
+        [10, 11, 12, 13, 14],
         [10, 11, 12, 13, 14],
         [ 0,  1,  2,  3,  4],
-        [ 0,  1,  2,  3,  4]])
+        [10, 11, 12, 13, 14]])
 </pre></div>
 </div>
 <p>We can also customize the storage location on disk:</p>
@@ -633,7 +633,7 @@ Let us have a look at these indices:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.LazyStackedTensorDict.html#tensordict.LazyStackedTensorDict" title="tensordict.LazyStackedTensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sample</span></a><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([1, 2, 1, 2, 1, 0, 2, 1, 0, 1, 0, 0])
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([0, 1, 2, 1, 2, 0, 1, 2, 0, 0, 2, 1])
 </pre></div>
 </div>
 <section id="integration-with-tensorclass">
@@ -941,8 +941,8 @@ the priority signal should be fetched:</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.LazyStackedTensorDict.html#tensordict.LazyStackedTensorDict" title="tensordict.LazyStackedTensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sample</span></a><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_rb_tutorial_001.png" srcset="../_images/sphx_glr_rb_tutorial_001.png" alt="rb tutorial" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([ 22.,  53.,  65.,  77., 106., 118., 115., 141., 143., 184.]), array([  6. ,  18.1,  30.2,  42.3,  54.4,  66.5,  78.6,  90.7, 102.8,
-       114.9, 127. ]), &lt;BarContainer object of 10 artists&gt;)
+<img src="../_images/sphx_glr_rb_tutorial_001.png" srcset="../_images/sphx_glr_rb_tutorial_001.png" alt="rb tutorial" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([ 25.,  44.,  75.,  89.,  85.,  92., 140., 130., 157., 187.]), array([  4. ,  16.3,  28.6,  40.9,  53.2,  65.5,  77.8,  90.1, 102.4,
+       114.7, 127. ]), &lt;BarContainer object of 10 artists&gt;)
 </pre></div>
 </div>
 <p>Once we have worked with our sample, we update the priority key using
@@ -962,8 +962,8 @@ sampled items:</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.LazyStackedTensorDict.html#tensordict.LazyStackedTensorDict" title="tensordict.LazyStackedTensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sample</span></a><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_rb_tutorial_002.png" srcset="../_images/sphx_glr_rb_tutorial_002.png" alt="rb tutorial" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([120., 167., 165., 142., 125.,  89.,  93.,  62.,  38.,  23.]), array([  1. ,  13.6,  26.2,  38.8,  51.4,  64. ,  76.6,  89.2, 101.8,
-       114.4, 127. ]), &lt;BarContainer object of 10 artists&gt;)
+<img src="../_images/sphx_glr_rb_tutorial_002.png" srcset="../_images/sphx_glr_rb_tutorial_002.png" alt="rb tutorial" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([143., 142., 170., 126., 118., 103.,  74.,  68.,  48.,  32.]), array([  2. ,  14.4,  26.8,  39.2,  51.6,  64. ,  76.4,  88.8, 101.2,
+       113.6, 126. ]), &lt;BarContainer object of 10 artists&gt;)
 </pre></div>
 </div>
 </section>
@@ -1248,7 +1248,7 @@ You should now be able to:</p>
 <li><p>Choose the best storage type for your problem (list, memory or disk-based);</p></li>
 <li><p>Minimize the memory footprint of your buffer.</p></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 51.117 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 51.658 seconds)</p>
 <p><strong>Estimated memory usage:</strong>  343 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-rb-tutorial-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">

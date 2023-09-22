@@ -491,6 +491,15 @@
 <span class="sd">            It is assumed that all environments will run on the same device as a common shared</span>
 <span class="sd">            tensordict will be used to pass data from process to process. The device can be</span>
 <span class="sd">            changed after instantiation using :obj:`env.to(device)`.</span>
+<span class="sd">        num_threads (int, optional): number of threads for this process.</span>
+<span class="sd">            Defaults to the number of workers.</span>
+<span class="sd">            This parameter has no effect for the :class:`~SerialEnv` class.</span>
+<span class="sd">        num_sub_threads (int, optional): number of threads of the subprocesses.</span>
+<span class="sd">            Should be equal to one plus the number of processes launched within</span>
+<span class="sd">            each subprocess (or one if a single process is launched).</span>
+<span class="sd">            Defaults to 1 for safety: if none is indicated, launching multiple</span>
+<span class="sd">            workers may charge the cpu load too much and harm performance.</span>
+<span class="sd">            This parameter has no effect for the :class:`~SerialEnv` class.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -514,6 +523,8 @@
         <span class="n">policy_proof</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DEVICE_TYPING</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">allow_step_when_done</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">num_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_sub_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -524,6 +535,10 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_closed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">num_threads</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_threads</span> <span class="o">=</span> <span class="n">num_workers</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># 1 more thread for this proc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_sub_threads</span> <span class="o">=</span> <span class="n">num_sub_threads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="n">num_threads</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cache_in_keys</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_single_task</span> <span class="o">=</span> <span class="nb">callable</span><span class="p">(</span><span class="n">create_env_fn</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">create_env_fn</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
@@ -1062,6 +1077,8 @@
     <span class="k">def</span> <span class="nf">_start_workers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">torchrl.envs.env_creator</span> <span class="kn">import</span> <span class="n">EnvCreator</span>
 
+        <span class="n">torch</span><span class="o">.</span><span class="n">set_num_threads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_threads</span><span class="p">)</span>
+
         <span class="n">ctx</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">get_context</span><span class="p">(</span><span class="s2">&quot;spawn&quot;</span><span class="p">)</span>
 
         <span class="n">_num_workers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span>
@@ -1087,6 +1104,7 @@
 
                 <span class="n">process</span> <span class="o">=</span> <span class="n">_ProcessNoWarn</span><span class="p">(</span>
                     <span class="n">target</span><span class="o">=</span><span class="n">_run_worker_pipe_shared_mem</span><span class="p">,</span>
+                    <span class="n">num_threads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_sub_threads</span><span class="p">,</span>
                     <span class="n">args</span><span class="o">=</span><span class="p">(</span>
                         <span class="n">parent_pipe</span><span class="p">,</span>
                         <span class="n">child_pipe</span><span class="p">,</span>

@@ -381,10 +381,10 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
-
 <span class="kn">from</span> <span class="nn">tensordict.nn</span> <span class="kn">import</span> <span class="n">dispatch</span><span class="p">,</span> <span class="n">make_functional</span><span class="p">,</span> <span class="n">repopulate_module</span><span class="p">,</span> <span class="n">TensorDictModule</span>
 <span class="kn">from</span> <span class="nn">tensordict.tensordict</span> <span class="kn">import</span> <span class="n">TensorDict</span><span class="p">,</span> <span class="n">TensorDictBase</span>
-<span class="kn">from</span> <span class="nn">tensordict.utils</span> <span class="kn">import</span> <span class="n">NestedKey</span>
+
+<span class="kn">from</span> <span class="nn">tensordict.utils</span> <span class="kn">import</span> <span class="n">NestedKey</span><span class="p">,</span> <span class="n">unravel_key</span>
 <span class="kn">from</span> <span class="nn">torchrl.modules.tensordict_module.actors</span> <span class="kn">import</span> <span class="n">ActorCriticWrapper</span>
 <span class="kn">from</span> <span class="nn">torchrl.objectives.common</span> <span class="kn">import</span> <span class="n">LossModule</span>
 <span class="kn">from</span> <span class="nn">torchrl.objectives.utils</span> <span class="kn">import</span> <span class="p">(</span>
@@ -586,6 +586,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_critic</span><span class="o">.</span><span class="n">module</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_network</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">actor_in_keys</span> <span class="o">=</span> <span class="n">actor_network</span><span class="o">.</span><span class="n">in_keys</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_exclusive_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_in_keys</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="o">.</span><span class="n">out_keys</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">loss_function</span>
 
@@ -603,14 +606,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_in_keys</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_set_in_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">reward</span><span class="p">),</span>
-            <span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">done</span><span class="p">),</span>
+        <span class="n">in_keys</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">unravel_key</span><span class="p">((</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">reward</span><span class="p">)),</span>
+            <span class="n">unravel_key</span><span class="p">((</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">done</span><span class="p">)),</span>
             <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_in_keys</span><span class="p">,</span>
-            <span class="o">*</span><span class="p">[(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_in_keys</span><span class="p">],</span>
+            <span class="o">*</span><span class="p">[</span><span class="n">unravel_key</span><span class="p">((</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_in_keys</span><span class="p">],</span>
             <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">value_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">,</span>
-        <span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_in_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">))</span>
+            <span class="o">*</span><span class="p">[</span><span class="n">unravel_key</span><span class="p">((</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">in_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -663,7 +667,9 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="n">td_copy</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_in_keys</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="n">td_copy</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_in_keys</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">value_exclusive_keys</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
         <span class="n">td_copy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="p">(</span>
             <span class="n">td_copy</span><span class="p">,</span>
             <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_network_params</span><span class="p">,</span>

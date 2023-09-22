@@ -1468,6 +1468,14 @@
 <span class="sd">            Defaults to ``False``.</span>
 <span class="sd">        preemptive_threshold (float, optional): a value between 0.0 and 1.0 that specifies the ratio of workers</span>
 <span class="sd">            that will be allowed to finished collecting their rollout before the rest are forced to end early.</span>
+<span class="sd">        num_threads (int, optional): number of threads for this process.</span>
+<span class="sd">            Defaults to the number of workers.</span>
+<span class="sd">        num_sub_threads (int, optional): number of threads of the subprocesses.</span>
+<span class="sd">            Should be equal to one plus the number of processes launched within</span>
+<span class="sd">            each subprocess (or one if a single process is launched).</span>
+<span class="sd">            Defaults to 1 for safety: if none is indicated, launching multiple</span>
+<span class="sd">            workers may charge the cpu load too much and harm performance.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -1497,11 +1505,17 @@
         <span class="n">update_at_each_batch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">devices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">storing_devices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_sub_threads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">exploration_type</span> <span class="o">=</span> <span class="n">_convert_exploration_type</span><span class="p">(</span>
             <span class="n">exploration_mode</span><span class="o">=</span><span class="n">exploration_mode</span><span class="p">,</span> <span class="n">exploration_type</span><span class="o">=</span><span class="n">exploration_type</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">num_threads</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_threads</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">create_env_fn</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># 1 more thread for this proc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_sub_threads</span> <span class="o">=</span> <span class="n">num_sub_threads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="n">num_threads</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">create_env_fn</span> <span class="o">=</span> <span class="n">create_env_fn</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">create_env_fn</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">create_env_kwargs</span> <span class="o">=</span> <span class="p">(</span>
@@ -1678,6 +1692,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
     <span class="k">def</span> <span class="nf">_run_processes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">set_num_threads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_threads</span><span class="p">)</span>
         <span class="n">queue_out</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_queue_len</span><span class="p">)</span>  <span class="c1"># sends data from proc to main</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">procs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pipes</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1709,7 +1724,11 @@
                 <span class="s2">&quot;idx&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span>
                 <span class="s2">&quot;interruptor&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interruptor</span><span class="p">,</span>
             <span class="p">}</span>
-            <span class="n">proc</span> <span class="o">=</span> <span class="n">_ProcessNoWarn</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">_main_async_collector</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">_ProcessNoWarn</span><span class="p">(</span>
+                <span class="n">target</span><span class="o">=</span><span class="n">_main_async_collector</span><span class="p">,</span>
+                <span class="n">num_threads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_sub_threads</span><span class="p">,</span>
+                <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="c1"># proc.daemon can&#39;t be set as daemonic processes may be launched by the process itself</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">proc</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
