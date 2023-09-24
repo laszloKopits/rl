@@ -2000,9 +2000,9 @@ The library is on PyPI: *pip install torchrl*
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (4 minutes 7.184 seconds)
+   **Total running time of the script:** (4 minutes 5.532 seconds)
 
-**Estimated memory usage:**  201 MB
+**Estimated memory usage:**  106 MB
 
 
 .. _sphx_glr_download_tutorials_torchrl_demo.py:
