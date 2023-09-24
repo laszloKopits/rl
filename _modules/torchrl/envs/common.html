@@ -1563,10 +1563,9 @@
                 <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="n">done</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_type_checks</span><span class="p">:</span>
-            <span class="c1"># TODO: check these errors</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_observation_keys</span><span class="p">(</span><span class="n">next_tensordict_out</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_spec</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">obs</span> <span class="o">=</span> <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">observation_spec</span><span class="o">.</span><span class="n">type_check</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                <span class="n">spec</span><span class="o">.</span><span class="n">type_check</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">reward_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reward_keys</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span>
@@ -1583,10 +1582,10 @@
             <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">:</span>
                 <span class="k">if</span> <span class="p">(</span>
                     <span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span>
-                    <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span>
+                    <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">,</span> <span class="n">done_key</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
                 <span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;expected done.dtype to be torch.bool but got </span><span class="si">{</span><span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;expected done.dtype to be </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s1">&#39;full_done_spec&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">done_key</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2"> but got </span><span class="si">{</span><span class="n">next_tensordict_out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="p">)</span>
         <span class="k">return</span> <span class="n">next_tensordict_out</span>
 

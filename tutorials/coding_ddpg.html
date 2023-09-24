@@ -1472,9 +1472,9 @@ modules we need.</p>
 <span class="w">    </span><span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
   File <span class="nb">&quot;/__w/rl/rl/torchrl/trainers/trainers.py&quot;</span>, line <span class="m">1212</span>, in <span class="n">__call__</span>
 <span class="w">    </span><span class="n">td_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">rollout</span><span class="p">(</span>
-  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/common.py&quot;</span>, line <span class="m">1618</span>, in <span class="n">rollout</span>
+  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/common.py&quot;</span>, line <span class="m">1617</span>, in <span class="n">rollout</span>
 <span class="w">    </span><span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><a href="https://pytorch-labs.github.io/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="tensordict.TensorDict" class="sphx-glr-backref-module-tensordict sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tensordict</span></a><span class="p">)</span>
-  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/common.py&quot;</span>, line <span class="m">1321</span>, in <span class="n">reset</span>
+  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/common.py&quot;</span>, line <span class="m">1320</span>, in <span class="n">reset</span>
 <span class="w">    </span><span class="k">raise</span> <span class="n">DONE_AFTER_RESET_ERROR</span>
 <span class="gr">RuntimeError</span>: <span class="n">Env was done after reset on specified &#39;_reset&#39; dimensions. This is (currently) not allowed.</span>
 </pre></div>
@@ -1512,8 +1512,8 @@ loss component;</p></li>
 <li><p>How to use (or not) a target network, and how to update its parameters;</p></li>
 <li><p>How to create an optimizer associated with a loss module.</p></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 36.740 seconds)</p>
-<p><strong>Estimated memory usage:</strong>  2730 MB</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 40.644 seconds)</p>
+<p><strong>Estimated memory usage:</strong>  4205 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-coding-ddpg-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/0dfdb6ef4cc9782fdb39c4a9d0900d37/coding_ddpg.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">coding_ddpg.py</span></code></a></p>

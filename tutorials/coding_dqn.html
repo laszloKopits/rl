@@ -912,7 +912,7 @@ variable.</p></li>
         [[0.0737]],
 
         [[0.0737]]]))])
-self.log_dir: /tmp/tmpqaozeph2/dqn_exp_187455f4-5ac5-11ee-a970-0242ac120002
+self.log_dir: /tmp/tmpda9cg2j3/dqn_exp_2dcafb3c-5ac6-11ee-843f-0242ac120002
 </pre></div>
 </div>
 <p>We can control how often the scalars should be logged. Here we set this
@@ -1008,9 +1008,9 @@ Check the <a class="reference internal" href="../reference/generated/torchrl.tra
 <span class="w">    </span><span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
   File <span class="nb">&quot;/__w/rl/rl/torchrl/trainers/trainers.py&quot;</span>, line <span class="m">1212</span>, in <span class="n">__call__</span>
 <span class="w">    </span><span class="n">td_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">rollout</span><span class="p">(</span>
-  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/common.py&quot;</span>, line <span class="m">1618</span>, in <span class="n">rollout</span>
+  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/common.py&quot;</span>, line <span class="m">1617</span>, in <span class="n">rollout</span>
 <span class="w">    </span><span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
-  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/common.py&quot;</span>, line <span class="m">1321</span>, in <span class="n">reset</span>
+  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/common.py&quot;</span>, line <span class="m">1320</span>, in <span class="n">reset</span>
 <span class="w">    </span><span class="k">raise</span> <span class="n">DONE_AFTER_RESET_ERROR</span>
 <span class="gr">RuntimeError</span>: <span class="n">Env was done after reset on specified &#39;_reset&#39; dimensions. This is (currently) not allowed.</span>
 </pre></div>
@@ -1068,8 +1068,8 @@ of the documentation.</p></li>
 for more information).</p></li>
 <li><p>More fancy exploration techniques, such as <a class="reference internal" href="../reference/generated/torchrl.modules.NoisyLinear.html#torchrl.modules.NoisyLinear" title="torchrl.modules.NoisyLinear"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoisyLinear</span></code></a> layers and such.</p></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 24.389 seconds)</p>
-<p><strong>Estimated memory usage:</strong>  2764 MB</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 27.590 seconds)</p>
+<p><strong>Estimated memory usage:</strong>  4190 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-coding-dqn-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/be66e8850a06844c91f6264538ad69e8/coding_dqn.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">coding_dqn.py</span></code></a></p>

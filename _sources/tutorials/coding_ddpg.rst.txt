@@ -1645,9 +1645,9 @@ modules we need.
         return func(*args, **kwargs)
       File "/__w/rl/rl/torchrl/trainers/trainers.py", line 1212, in __call__
         td_record = self.environment.rollout(
-      File "/__w/rl/rl/torchrl/envs/common.py", line 1618, in rollout
+      File "/__w/rl/rl/torchrl/envs/common.py", line 1617, in rollout
         self.reset(tensordict)
-      File "/__w/rl/rl/torchrl/envs/common.py", line 1321, in reset
+      File "/__w/rl/rl/torchrl/envs/common.py", line 1320, in reset
         raise DONE_AFTER_RESET_ERROR
     RuntimeError: Env was done after reset on specified '_reset' dimensions. This is (currently) not allowed.
 
@@ -1701,9 +1701,9 @@ The key takeaways are:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 36.740 seconds)
+   **Total running time of the script:** (1 minutes 40.644 seconds)
 
-**Estimated memory usage:**  2730 MB
+**Estimated memory usage:**  4205 MB
 
 
 .. _sphx_glr_download_tutorials_coding_ddpg.py:

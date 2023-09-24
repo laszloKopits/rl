@@ -861,7 +861,7 @@ following keyword-only arguments:
             [[0.0737]],
 
             [[0.0737]]]))])
-    self.log_dir: /tmp/tmpqaozeph2/dqn_exp_187455f4-5ac5-11ee-a970-0242ac120002
+    self.log_dir: /tmp/tmpda9cg2j3/dqn_exp_2dcafb3c-5ac6-11ee-843f-0242ac120002
 
 
 
@@ -1024,9 +1024,9 @@ Here we are, ready to train our algorithm! A simple call to
         return func(*args, **kwargs)
       File "/__w/rl/rl/torchrl/trainers/trainers.py", line 1212, in __call__
         td_record = self.environment.rollout(
-      File "/__w/rl/rl/torchrl/envs/common.py", line 1618, in rollout
+      File "/__w/rl/rl/torchrl/envs/common.py", line 1617, in rollout
         self.reset(tensordict)
-      File "/__w/rl/rl/torchrl/envs/common.py", line 1321, in reset
+      File "/__w/rl/rl/torchrl/envs/common.py", line 1320, in reset
         raise DONE_AFTER_RESET_ERROR
     RuntimeError: Env was done after reset on specified '_reset' dimensions. This is (currently) not allowed.
 
@@ -1099,9 +1099,9 @@ Possible improvements to this tutorial could include:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 24.389 seconds)
+   **Total running time of the script:** (1 minutes 27.590 seconds)
 
-**Estimated memory usage:**  2764 MB
+**Estimated memory usage:**  4190 MB
 
 
 .. _sphx_glr_download_tutorials_coding_dqn.py:
