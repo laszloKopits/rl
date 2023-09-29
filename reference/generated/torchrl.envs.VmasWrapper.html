@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="torchrl.modules package" href="../modules.html" />
+    <link rel="next" title="gym_backend" href="torchrl.envs.gym_backend.html" />
     <link rel="prev" title="VmasEnv" href="torchrl.envs.VmasEnv.html" />
   <!-- Google Analytics -->
   
@@ -380,7 +380,7 @@
 <h1>VmasWrapper<a class="headerlink" href="#vmaswrapper" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="torchrl.envs.VmasWrapper">
-<span class="sig-prename descclassname"><span class="pre">torchrl.envs.</span></span><span class="sig-name descname"><span class="pre">VmasWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_inplace_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_batch_locked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/libs/vmas.html#VmasWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.VmasWrapper" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">torchrl.envs.</span></span><span class="sig-name descname"><span class="pre">VmasWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/libs/vmas.html#VmasWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.VmasWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Vmas environment wrapper.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">env</span> <span class="o">=</span> <span class="n">VmasWrapper</span><span class="p">(</span>
@@ -398,18 +398,9 @@
 <span class="gp">&gt;&gt;&gt; </span> <span class="nb">print</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">rollout</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 <span class="go">TensorDict(</span>
 <span class="go">    fields={</span>
-<span class="go">        action: Tensor(shape=torch.Size([32, 10, 5, 2]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="go">        done: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
-<span class="go">        info: TensorDict(</span>
+<span class="go">        agents: TensorDict(</span>
 <span class="go">            fields={</span>
-<span class="go">                agent_collision_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="go">                agent_distance_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
-<span class="go">            batch_size=torch.Size([32, 10, 5]),</span>
-<span class="go">            device=cpu,</span>
-<span class="go">            is_shared=False),</span>
-<span class="go">        next: TensorDict(</span>
-<span class="go">            fields={</span>
-<span class="go">                done: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="go">                action: Tensor(shape=torch.Size([32, 10, 5, 2]), device=cpu, dtype=torch.float32, is_shared=False),</span>
 <span class="go">                info: TensorDict(</span>
 <span class="go">                    fields={</span>
 <span class="go">                        agent_collision_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
@@ -417,13 +408,33 @@
 <span class="go">                    batch_size=torch.Size([32, 10, 5]),</span>
 <span class="go">                    device=cpu,</span>
 <span class="go">                    is_shared=False),</span>
-<span class="go">                observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="go">                reward: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">                observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">            batch_size=torch.Size([32, 10, 5]),</span>
+<span class="go">            device=cpu,</span>
+<span class="go">            is_shared=False),</span>
+<span class="go">        done: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="go">        next: TensorDict(</span>
+<span class="go">            fields={</span>
+<span class="go">                agents: TensorDict(</span>
+<span class="go">                    fields={</span>
+<span class="go">                        info: TensorDict(</span>
+<span class="go">                            fields={</span>
+<span class="go">                                agent_collision_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="go">                                agent_distance_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">                            batch_size=torch.Size([32, 10, 5]),</span>
+<span class="go">                            device=cpu,</span>
+<span class="go">                            is_shared=False),</span>
+<span class="go">                        observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="go">                        reward: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">                    batch_size=torch.Size([32, 10, 5]),</span>
+<span class="go">                    device=cpu,</span>
+<span class="go">                    is_shared=False),</span>
+<span class="go">                done: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="go">                terminated: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="go">            batch_size=torch.Size([32, 10]),</span>
 <span class="go">            device=cpu,</span>
 <span class="go">            is_shared=False),</span>
-<span class="go">        observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="go">        reward: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">        terminated: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="go">    batch_size=torch.Size([32, 10]),</span>
 <span class="go">    device=cpu,</span>
 <span class="go">    is_shared=False)</span>
@@ -441,7 +452,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../modules.html" class="btn btn-neutral float-right" title="torchrl.modules package" accesskey="n" rel="next">Next <img src="../../_static/images/chevron-right-orange.svg" class="next-page"></a>
+        <a href="torchrl.envs.gym_backend.html" class="btn btn-neutral float-right" title="gym_backend" accesskey="n" rel="next">Next <img src="../../_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
         <a href="torchrl.envs.VmasEnv.html" class="btn btn-neutral" title="VmasEnv" accesskey="p" rel="prev"><img src="../../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>

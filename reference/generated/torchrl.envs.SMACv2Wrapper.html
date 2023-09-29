@@ -380,7 +380,7 @@
 <h1>SMACv2Wrapper<a class="headerlink" href="#smacv2wrapper" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="torchrl.envs.SMACv2Wrapper">
-<span class="sig-prename descclassname"><span class="pre">torchrl.envs.</span></span><span class="sig-name descname"><span class="pre">SMACv2Wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_inplace_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_batch_locked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/libs/smacv2.html#SMACv2Wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.SMACv2Wrapper" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">torchrl.envs.</span></span><span class="sig-name descname"><span class="pre">SMACv2Wrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/libs/smacv2.html#SMACv2Wrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.SMACv2Wrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>SMACv2 (StarCraft Multi-Agent Challenge v2) environment wrapper.</p>
 <p>To install the environment follow the following <a class="reference external" href="https://github.com/oxwhirl/smacv2#getting-started">guide</a>.</p>
 <p class="rubric">Examples</p>
@@ -433,11 +433,13 @@
 <span class="go">                    device=cpu,</span>
 <span class="go">                    is_shared=False),</span>
 <span class="go">                reward: Tensor(shape=torch.Size([5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="go">                state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">                state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="go">                terminated: Tensor(shape=torch.Size([5, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="go">            batch_size=torch.Size([5]),</span>
 <span class="go">            device=cpu,</span>
 <span class="go">            is_shared=False),</span>
-<span class="go">        state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">        state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="go">        terminated: Tensor(shape=torch.Size([5, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="go">    batch_size=torch.Size([5]),</span>
 <span class="go">    device=cpu,</span>
 <span class="go">    is_shared=False)</span>
@@ -507,11 +509,13 @@
 <span class="go">                    device=cpu,</span>
 <span class="go">                    is_shared=False),</span>
 <span class="go">                reward: Tensor(shape=torch.Size([4, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="go">                state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">                state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="go">                terminated: Tensor(shape=torch.Size([4, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="go">            batch_size=torch.Size([4]),</span>
 <span class="go">            device=cpu,</span>
 <span class="go">            is_shared=False),</span>
-<span class="go">        state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">        state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="go">        terminated: Tensor(shape=torch.Size([4, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="go">    batch_size=torch.Size([4]),</span>
 <span class="go">    device=cpu,</span>
 <span class="go">    is_shared=False)</span>

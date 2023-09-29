@@ -342,12 +342,19 @@ There are four specs to look at:
         device=cpu,
         dtype=torch.float32,
         domain=continuous)
-    done_spec: DiscreteTensorSpec(
-        shape=torch.Size([60, 1]),
-        space=DiscreteBox(n=2),
-        device=cpu,
-        dtype=torch.bool,
-        domain=discrete)
+    done_spec: CompositeSpec(
+        done: DiscreteTensorSpec(
+            shape=torch.Size([60, 1]),
+            space=DiscreteBox(n=2),
+            device=cpu,
+            dtype=torch.bool,
+            domain=discrete),
+        terminated: DiscreteTensorSpec(
+            shape=torch.Size([60, 1]),
+            space=DiscreteBox(n=2),
+            device=cpu,
+            dtype=torch.bool,
+            domain=discrete), device=cpu, shape=torch.Size([60]))
     observation_spec: CompositeSpec(
         agents: CompositeSpec(
             observation: UnboundedContinuousTensorSpec(
@@ -435,6 +442,12 @@ To access the full structure of the specs we can use
             space=DiscreteBox(n=2),
             device=cpu,
             dtype=torch.bool,
+            domain=discrete),
+        terminated: DiscreteTensorSpec(
+            shape=torch.Size([60, 1]),
+            space=DiscreteBox(n=2),
+            device=cpu,
+            dtype=torch.bool,
             domain=discrete), device=cpu, shape=torch.Size([60]))
 
 
@@ -463,15 +476,16 @@ This info will be useful in order to tell all other TorchRL components where to 
 
 
 
-
-
 .. rst-class:: sphx-glr-script-out
 
- .. code-block:: none
+.. code-block:: pytb
 
-    action_key: ('agents', 'action')
-    reward_key: ('agents', 'reward')
-    done_key: done
+    Traceback (most recent call last):
+      File "/__w/rl/rl/docs/source/reference/generated/tutorials/multiagent_ppo.py", line 293, in <module>
+        print("done_key:", env.done_key)
+      File "/__w/rl/rl/torchrl/envs/common.py", line 919, in done_key
+        raise KeyError(
+    KeyError: 'done_key requested but more than one key present in the environment'
 
 
 
@@ -489,12 +503,6 @@ To tie it all together, we can see that passing these keys to the full specs giv
     assert env.action_spec == env.input_spec["full_action_spec"][env.action_key]
     assert env.reward_spec == env.output_spec["full_reward_spec"][env.reward_key]
     assert env.done_spec == env.output_spec["full_done_spec"][env.done_key]
-
-
-
-
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 304-317
@@ -526,12 +534,6 @@ of transforms it contains.
 
 
 
-
-
-
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 326-329
 
 the :func:`check_env_specs` function runs a small rollout and compares its output against the environment
@@ -543,18 +545,6 @@ specs. If no error is raised, we can be confident that the specs are properly de
 .. code-block:: default
 
     check_env_specs(env)
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    check_env_specs succeeded!
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 332-340
@@ -576,62 +566,6 @@ domain.
     rollout = env.rollout(n_rollout_steps)
     print("rollout of three steps:", rollout)
     print("Shape of the rollout TensorDict:", rollout.batch_size)
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    rollout of three steps: TensorDict(
-        fields={
-            agents: TensorDict(
-                fields={
-                    action: Tensor(shape=torch.Size([60, 5, 3, 2]), device=cpu, dtype=torch.float32, is_shared=False),
-                    episode_reward: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                    info: TensorDict(
-                        fields={
-                            agent_collisions: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                            final_rew: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                            pos_rew: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
-                        batch_size=torch.Size([60, 5, 3]),
-                        device=cpu,
-                        is_shared=False),
-                    observation: Tensor(shape=torch.Size([60, 5, 3, 18]), device=cpu, dtype=torch.float32, is_shared=False)},
-                batch_size=torch.Size([60, 5, 3]),
-                device=cpu,
-                is_shared=False),
-            done: Tensor(shape=torch.Size([60, 5, 1]), device=cpu, dtype=torch.bool, is_shared=False),
-            next: TensorDict(
-                fields={
-                    agents: TensorDict(
-                        fields={
-                            episode_reward: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                            info: TensorDict(
-                                fields={
-                                    agent_collisions: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                                    final_rew: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                                    pos_rew: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
-                                batch_size=torch.Size([60, 5, 3]),
-                                device=cpu,
-                                is_shared=False),
-                            observation: Tensor(shape=torch.Size([60, 5, 3, 18]), device=cpu, dtype=torch.float32, is_shared=False),
-                            reward: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
-                        batch_size=torch.Size([60, 5, 3]),
-                        device=cpu,
-                        is_shared=False),
-                    done: Tensor(shape=torch.Size([60, 5, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
-                batch_size=torch.Size([60, 5]),
-                device=cpu,
-                is_shared=False)},
-        batch_size=torch.Size([60, 5]),
-        device=cpu,
-        is_shared=False)
-    Shape of the rollout TensorDict: torch.Size([60, 5])
-
-
-
 
 .. GENERATED FROM PYTHON SOURCE LINES 345-407
 
@@ -723,12 +657,6 @@ multiple agents, with much customisation available.
     )
 
 
-
-
-
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 428-437
 
 **Second**: wrap the neural network in a :class:`TensorDictModule`
@@ -750,12 +678,6 @@ additional ``n_agents`` dimension.
         in_keys=[("agents", "observation")],
         out_keys=[("agents", "loc"), ("agents", "scale")],
     )
-
-
-
-
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 444-456
@@ -791,12 +713,6 @@ the :class:`TensorDictModule` above) has to end with the
         return_log_prob=True,
         log_prob_key=("agents", "sample_log_prob"),
     )  # we'll need the log-prob for the PPO loss
-
-
-
-
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 472-505
@@ -862,12 +778,6 @@ all the values along the ``n_agents`` dimension will be identical.
     )
 
 
-
-
-
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 528-536
 
 Let us try our policy and critic modules. As pointed earlier, the usage of
@@ -885,64 +795,6 @@ components as in single-agent learning. Isn't this fantastic?**
 
     print("Running policy:", policy(env.reset()))
     print("Running value:", critic(env.reset()))
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    Running policy: TensorDict(
-        fields={
-            agents: TensorDict(
-                fields={
-                    action: Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, is_shared=False),
-                    episode_reward: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                    info: TensorDict(
-                        fields={
-                            agent_collisions: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                            final_rew: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                            pos_rew: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
-                        batch_size=torch.Size([60, 3]),
-                        device=cpu,
-                        is_shared=False),
-                    loc: Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, is_shared=False),
-                    observation: Tensor(shape=torch.Size([60, 3, 18]), device=cpu, dtype=torch.float32, is_shared=False),
-                    sample_log_prob: Tensor(shape=torch.Size([60, 3]), device=cpu, dtype=torch.float32, is_shared=False),
-                    scale: Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, is_shared=False)},
-                batch_size=torch.Size([60, 3]),
-                device=cpu,
-                is_shared=False),
-            done: Tensor(shape=torch.Size([60, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
-        batch_size=torch.Size([60]),
-        device=cpu,
-        is_shared=False)
-    Running value: TensorDict(
-        fields={
-            agents: TensorDict(
-                fields={
-                    episode_reward: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                    info: TensorDict(
-                        fields={
-                            agent_collisions: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                            final_rew: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                            pos_rew: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
-                        batch_size=torch.Size([60, 3]),
-                        device=cpu,
-                        is_shared=False),
-                    observation: Tensor(shape=torch.Size([60, 3, 18]), device=cpu, dtype=torch.float32, is_shared=False),
-                    state_value: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
-                batch_size=torch.Size([60, 3]),
-                device=cpu,
-                is_shared=False),
-            done: Tensor(shape=torch.Size([60, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
-        batch_size=torch.Size([60]),
-        device=cpu,
-        is_shared=False)
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 540-552
@@ -974,12 +826,6 @@ with the only difference that it will auto reset done states until the desired f
     )
 
 
-
-
-
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 562-574
 
 Replay buffer
@@ -1007,12 +853,6 @@ makes it easy for us to build the inner training loop in a reproducible way.
         sampler=SamplerWithoutReplacement(),
         batch_size=minibatch_size,  # We will sample minibatches of this size
     )
-
-
-
-
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 584-605
@@ -1065,12 +905,6 @@ return the policy and value losses.
     GAE = loss_module.value_estimator
 
     optim = torch.optim.Adam(loss_module.parameters(), lr)
-
-
-
-
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 629-646
@@ -1151,17 +985,6 @@ The steps include:
         pbar.update()
 
 
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    episode_reward_mean = 0:   0%|          | 0/10 [00:00<?, ?it/s]    episode_reward_mean = -0.3641679584980011:  10%|█         | 1/10 [00:08<01:20,  8.94s/it]    episode_reward_mean = 0.4940122067928314:  20%|██        | 2/10 [00:17<01:11,  8.92s/it]     episode_reward_mean = 1.0600677728652954:  30%|███       | 3/10 [00:26<01:02,  8.92s/it]    episode_reward_mean = 1.4344534873962402:  40%|████      | 4/10 [00:35<00:53,  8.93s/it]    episode_reward_mean = 2.1100871562957764:  50%|█████     | 5/10 [00:44<00:44,  8.90s/it]    episode_reward_mean = 2.304917335510254:  60%|██████    | 6/10 [00:53<00:35,  8.91s/it]     episode_reward_mean = 2.6943857669830322:  70%|███████   | 7/10 [01:02<00:26,  8.91s/it]    episode_reward_mean = 2.871443748474121:  80%|████████  | 8/10 [01:11<00:17,  9.00s/it]     episode_reward_mean = 2.8500826358795166:  90%|█████████ | 9/10 [01:20<00:09,  9.13s/it]    episode_reward_mean = 2.759843587875366: 100%|██████████| 10/10 [01:30<00:00,  9.35s/it]
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 700-707
 
 Results
@@ -1181,17 +1004,6 @@ To make training last longer, increase the ``n_iters`` hyperparameter.
     plt.ylabel("Reward")
     plt.title("Episode reward mean")
     plt.show()
-
-
-
-
-.. image-sg:: /tutorials/images/sphx_glr_multiagent_ppo_001.png
-   :alt: Episode reward mean
-   :srcset: /tutorials/images/sphx_glr_multiagent_ppo_001.png
-   :class: sphx-glr-single-img
-
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 714-768
@@ -1286,9 +1098,9 @@ Here are a few videos of some possible scenarios you can try in VMAS.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 42.589 seconds)
+   **Total running time of the script:** (0 minutes 22.324 seconds)
 
-**Estimated memory usage:**  28 MB
+**Estimated memory usage:**  4153 MB
 
 
 .. _sphx_glr_download_tutorials_multiagent_ppo.py:

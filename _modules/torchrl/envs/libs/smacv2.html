@@ -457,11 +457,13 @@
 <span class="sd">                            device=cpu,</span>
 <span class="sd">                            is_shared=False),</span>
 <span class="sd">                        reward: Tensor(shape=torch.Size([5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="sd">                        state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                        state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                        terminated: Tensor(shape=torch.Size([5, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="sd">                    batch_size=torch.Size([5]),</span>
 <span class="sd">                    device=cpu,</span>
 <span class="sd">                    is_shared=False),</span>
-<span class="sd">                state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                terminated: Tensor(shape=torch.Size([5, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="sd">            batch_size=torch.Size([5]),</span>
 <span class="sd">            device=cpu,</span>
 <span class="sd">            is_shared=False)</span>
@@ -531,11 +533,13 @@
 <span class="sd">                            device=cpu,</span>
 <span class="sd">                            is_shared=False),</span>
 <span class="sd">                        reward: Tensor(shape=torch.Size([4, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="sd">                        state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                        state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                        terminated: Tensor(shape=torch.Size([4, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="sd">                    batch_size=torch.Size([4]),</span>
 <span class="sd">                    device=cpu,</span>
 <span class="sd">                    is_shared=False),</span>
-<span class="sd">                state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                terminated: Tensor(shape=torch.Size([4, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="sd">            batch_size=torch.Size([4]),</span>
 <span class="sd">            device=cpu,</span>
 <span class="sd">            is_shared=False)</span>
@@ -771,6 +775,7 @@
                 <span class="s2">&quot;info&quot;</span><span class="p">:</span> <span class="n">info</span><span class="p">,</span>
                 <span class="s2">&quot;reward&quot;</span><span class="p">:</span> <span class="n">reward</span><span class="p">,</span>
                 <span class="s2">&quot;done&quot;</span><span class="p">:</span> <span class="n">done</span><span class="p">,</span>
+                <span class="s2">&quot;terminated&quot;</span><span class="p">:</span> <span class="n">done</span><span class="o">.</span><span class="n">clone</span><span class="p">(),</span>
             <span class="p">},</span>
             <span class="n">batch_size</span><span class="o">=</span><span class="p">(),</span>
             <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
@@ -887,11 +892,13 @@
 <span class="sd">                            device=cpu,</span>
 <span class="sd">                            is_shared=False),</span>
 <span class="sd">                        reward: Tensor(shape=torch.Size([5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="sd">                        state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                        state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                        terminated: Tensor(shape=torch.Size([5, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="sd">                    batch_size=torch.Size([5]),</span>
 <span class="sd">                    device=cpu,</span>
 <span class="sd">                    is_shared=False),</span>
-<span class="sd">                state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                state: Tensor(shape=torch.Size([5, 322]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                terminated: Tensor(shape=torch.Size([5, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="sd">            batch_size=torch.Size([5]),</span>
 <span class="sd">            device=cpu,</span>
 <span class="sd">            is_shared=False)</span>
@@ -960,11 +967,13 @@
 <span class="sd">                            device=cpu,</span>
 <span class="sd">                            is_shared=False),</span>
 <span class="sd">                        reward: Tensor(shape=torch.Size([4, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="sd">                        state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                        state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                        terminated: Tensor(shape=torch.Size([4, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="sd">                    batch_size=torch.Size([4]),</span>
 <span class="sd">                    device=cpu,</span>
 <span class="sd">                    is_shared=False),</span>
-<span class="sd">                state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                state: Tensor(shape=torch.Size([4, 131]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                terminated: Tensor(shape=torch.Size([4, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="sd">            batch_size=torch.Size([4]),</span>
 <span class="sd">            device=cpu,</span>
 <span class="sd">            is_shared=False)</span>

@@ -440,6 +440,14 @@ module.</p></li>
 <dd><p>Sets the function in its module, if it exists already.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="torchrl._utils.implement_for.reset">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setters_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#torchrl._utils.implement_for" title="torchrl._utils.implement_for"><span class="pre">implement_for</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/_utils.html#implement_for.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl._utils.implement_for.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets the setters in setter_dict.</p>
+<p><code class="docutils literal notranslate"><span class="pre">setter_dict</span></code> is a copy of implementations. We just need to iterate through its
+values and call <a class="reference internal" href="#torchrl._utils.implement_for.module_set" title="torchrl._utils.implement_for.module_set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">module_set()</span></code></a> for each.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>

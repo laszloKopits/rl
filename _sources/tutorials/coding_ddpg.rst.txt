@@ -1630,27 +1630,13 @@ modules we need.
 
 
 
+
+
 .. rst-class:: sphx-glr-script-out
 
-.. code-block:: pytb
+ .. code-block:: none
 
-    Traceback (most recent call last):
-      File "/__w/rl/rl/docs/source/reference/generated/tutorials/coding_dqn.py", line 660, in <module>
-        trainer.train()
-      File "/__w/rl/rl/torchrl/trainers/trainers.py", line 454, in train
-        self._post_steps_log_hook(batch)
-      File "/__w/rl/rl/torchrl/trainers/trainers.py", line 430, in _post_steps_log_hook
-        result = op(batch, **kwargs)
-      File "/usr/local/lib/python3.8/dist-packages/torch/utils/_contextlib.py", line 115, in decorate_context
-        return func(*args, **kwargs)
-      File "/__w/rl/rl/torchrl/trainers/trainers.py", line 1212, in __call__
-        td_record = self.environment.rollout(
-      File "/__w/rl/rl/torchrl/envs/common.py", line 1617, in rollout
-        self.reset(tensordict)
-      File "/__w/rl/rl/torchrl/envs/common.py", line 1320, in reset
-        raise DONE_AFTER_RESET_ERROR
-    RuntimeError: Env was done after reset on specified '_reset' dimensions. This is (currently) not allowed.
-
+      0%|          | 0/10000 [00:00<?, ?it/s]      8%|▊         | 800/10000 [00:00<00:04, 2098.35it/s]     16%|█▌        | 1600/10000 [00:01<00:09, 847.25it/s]     24%|██▍       | 2400/10000 [00:01<00:05, 1279.55it/s]     40%|████      | 4000/10000 [00:02<00:02, 2284.26it/s]     48%|████▊     | 4800/10000 [00:02<00:01, 2865.40it/s]     56%|█████▌    | 5600/10000 [00:02<00:01, 3167.76it/s]    reward: -2.43 (r0 = -2.29), reward eval: reward:  0.00, reward normalized=-2.10/6.35, grad norm= 103.97, loss_value= 416.57, loss_actor= 12.77, target value: -13.29:  56%|█████▌    | 5600/10000 [00:04<00:01, 3167.76it/s]    reward: -2.43 (r0 = -2.29), reward eval: reward:  0.00, reward normalized=-2.10/6.35, grad norm= 103.97, loss_value= 416.57, loss_actor= 12.77, target value: -13.29:  64%|██████▍   | 6400/10000 [00:04<00:03, 922.96it/s]     reward: -1.85 (r0 = -2.29), reward eval: reward:  0.00, reward normalized=-2.84/5.93, grad norm= 128.62, loss_value= 281.24, loss_actor= 14.60, target value: -19.85:  64%|██████▍   | 6400/10000 [00:07<00:03, 922.96it/s]    reward: -1.85 (r0 = -2.29), reward eval: reward:  0.00, reward normalized=-2.84/5.93, grad norm= 128.62, loss_value= 281.24, loss_actor= 14.60, target value: -19.85:  72%|███████▏  | 7200/10000 [00:07<00:04, 627.61it/s]    reward: -1.95 (r0 = -2.29), reward eval: reward:  0.00, reward normalized=-2.50/6.05, grad norm= 101.00, loss_value= 294.88, loss_actor= 11.59, target value: -14.84:  72%|███████▏  | 7200/10000 [00:09<00:04, 627.61it/s]    reward: -1.95 (r0 = -2.29), reward eval: reward:  0.00, reward normalized=-2.50/6.05, grad norm= 101.00, loss_value= 294.88, loss_actor= 11.59, target value: -14.84:  80%|████████  | 8000/10000 [00:09<00:03, 516.92it/s]    reward: -4.50 (r0 = -2.29), reward eval: reward:  0.00, reward normalized=-3.77/5.82, grad norm= 368.69, loss_value= 326.36, loss_actor= 18.85, target value: -24.68:  80%|████████  | 8000/10000 [00:11<00:03, 516.92it/s]    reward: -4.50 (r0 = -2.29), reward eval: reward:  0.00, reward normalized=-3.77/5.82, grad norm= 368.69, loss_value= 326.36, loss_actor= 18.85, target value: -24.68:  88%|████████▊ | 8800/10000 [00:11<00:02, 459.83it/s]    reward: -4.86 (r0 = -2.29), reward eval: reward: -4.21, reward normalized=-2.70/6.16, grad norm= 128.21, loss_value= 300.24, loss_actor= 17.86, target value: -16.85:  88%|████████▊ | 8800/10000 [00:14<00:02, 459.83it/s]    reward: -4.86 (r0 = -2.29), reward eval: reward: -4.21, reward normalized=-2.70/6.16, grad norm= 128.21, loss_value= 300.24, loss_actor= 17.86, target value: -16.85:  96%|█████████▌| 9600/10000 [00:15<00:01, 353.35it/s]    reward: -4.81 (r0 = -2.29), reward eval: reward: -4.21, reward normalized=-2.45/5.67, grad norm= 117.42, loss_value= 258.43, loss_actor= 14.99, target value: -17.99:  96%|█████████▌| 9600/10000 [00:17<00:01, 353.35it/s]    reward: -4.81 (r0 = -2.29), reward eval: reward: -4.21, reward normalized=-2.45/5.67, grad norm= 117.42, loss_value= 258.43, loss_actor= 14.99, target value: -17.99: : 10400it [00:17, 355.49it/s]                            reward: -4.29 (r0 = -2.29), reward eval: reward: -4.21, reward normalized=-2.07/5.77, grad norm= 271.03, loss_value= 277.17, loss_actor= 16.37, target value: -14.66: : 10400it [00:19, 355.49it/s]
 
 
 
@@ -1682,6 +1668,17 @@ that our policy learned quite well to solve the task.
     plt.tight_layout()
 
 
+
+
+.. image-sg:: /tutorials/images/sphx_glr_coding_ddpg_001.png
+   :alt: coding ddpg
+   :srcset: /tutorials/images/sphx_glr_coding_ddpg_001.png
+   :class: sphx-glr-single-img
+
+
+
+
+
 .. GENERATED FROM PYTHON SOURCE LINES 1195-1208
 
 Conclusion
@@ -1701,9 +1698,9 @@ The key takeaways are:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 41.211 seconds)
+   **Total running time of the script:** (2 minutes 7.561 seconds)
 
-**Estimated memory usage:**  3796 MB
+**Estimated memory usage:**  13 MB
 
 
 .. _sphx_glr_download_tutorials_coding_ddpg.py:

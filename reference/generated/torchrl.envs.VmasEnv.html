@@ -380,7 +380,7 @@
 <h1>VmasEnv<a class="headerlink" href="#vmasenv" title="Permalink to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="torchrl.envs.VmasEnv">
-<span class="sig-prename descclassname"><span class="pre">torchrl.envs.</span></span><span class="sig-name descname"><span class="pre">VmasEnv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_inplace_update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_batch_locked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/libs/vmas.html#VmasEnv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.VmasEnv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">torchrl.envs.</span></span><span class="sig-name descname"><span class="pre">VmasEnv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/libs/vmas.html#VmasEnv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.VmasEnv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Vmas environment wrapper.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">env</span> <span class="o">=</span> <span class="n">VmasEnv</span><span class="p">(</span>
@@ -396,35 +396,44 @@
 <span class="gp">&gt;&gt;&gt; </span> <span class="nb">print</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">rollout</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 <span class="go">TensorDict(</span>
 <span class="go">    fields={</span>
-<span class="go">        action: Tensor(torch.Size([5, 32, 10, 2]), dtype=torch.float64),</span>
-<span class="go">        done: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.bool),</span>
-<span class="go">        info: TensorDict(</span>
+<span class="go">        agents: TensorDict(</span>
 <span class="go">            fields={</span>
-<span class="go">                cohesion_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="go">                collision_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="go">                separation_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="go">                velocity_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32)},</span>
-<span class="go">            batch_size=torch.Size([5, 32, 10]),</span>
-<span class="go">            device=cpu,</span>
-<span class="go">            is_shared=False),</span>
-<span class="go">        next: TensorDict(</span>
-<span class="go">            fields={</span>
+<span class="go">                action: Tensor(shape=torch.Size([32, 10, 5, 2]), device=cpu, dtype=torch.float32, is_shared=False),</span>
 <span class="go">                info: TensorDict(</span>
 <span class="go">                    fields={</span>
-<span class="go">                        cohesion_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="go">                        collision_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="go">                        separation_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="go">                        velocity_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32)},</span>
-<span class="go">                    batch_size=torch.Size([5, 32, 10]),</span>
+<span class="go">                        agent_collision_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="go">                        agent_distance_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">                    batch_size=torch.Size([32, 10, 5]),</span>
 <span class="go">                    device=cpu,</span>
 <span class="go">                    is_shared=False),</span>
-<span class="go">                observation: Tensor(torch.Size([5, 32, 10, 18]), dtype=torch.float32)},</span>
-<span class="go">            batch_size=torch.Size([5, 32, 10]),</span>
+<span class="go">                observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">            batch_size=torch.Size([32, 10, 5]),</span>
 <span class="go">            device=cpu,</span>
 <span class="go">            is_shared=False),</span>
-<span class="go">        observation: Tensor(torch.Size([5, 32, 10, 18]), dtype=torch.float32),</span>
-<span class="go">        reward: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32)},</span>
-<span class="go">    batch_size=torch.Size([5, 32, 10]),</span>
+<span class="go">        done: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="go">        next: TensorDict(</span>
+<span class="go">            fields={</span>
+<span class="go">                agents: TensorDict(</span>
+<span class="go">                    fields={</span>
+<span class="go">                        info: TensorDict(</span>
+<span class="go">                            fields={</span>
+<span class="go">                                agent_collision_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="go">                                agent_distance_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">                            batch_size=torch.Size([32, 10, 5]),</span>
+<span class="go">                            device=cpu,</span>
+<span class="go">                            is_shared=False),</span>
+<span class="go">                        observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="go">                        reward: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="go">                    batch_size=torch.Size([32, 10, 5]),</span>
+<span class="go">                    device=cpu,</span>
+<span class="go">                    is_shared=False),</span>
+<span class="go">                done: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="go">                terminated: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
+<span class="go">            batch_size=torch.Size([32, 10]),</span>
+<span class="go">            device=cpu,</span>
+<span class="go">            is_shared=False),</span>
+<span class="go">        terminated: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
+<span class="go">    batch_size=torch.Size([32, 10]),</span>
 <span class="go">    device=cpu,</span>
 <span class="go">    is_shared=False)</span>
 </pre></div>

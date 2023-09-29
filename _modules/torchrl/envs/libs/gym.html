@@ -372,16 +372,16 @@
 <span class="c1">#</span>
 <span class="c1"># This source code is licensed under the MIT license found in the</span>
 <span class="c1"># LICENSE file in the root directory of this source tree.</span>
-<span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">ModuleType</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
 
 <span class="kn">from</span> <span class="nn">tensordict</span> <span class="kn">import</span> <span class="n">TensorDictBase</span>
 
@@ -399,6 +399,7 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">torchrl.data.utils</span> <span class="kn">import</span> <span class="n">numpy_to_torch_dtype_dict</span>
 <span class="kn">from</span> <span class="nn">torchrl.envs.batched_envs</span> <span class="kn">import</span> <span class="n">CloudpickleWrapper</span>
+<span class="kn">from</span> <span class="nn">torchrl.envs.common</span> <span class="kn">import</span> <span class="n">_EnvPostInit</span>
 
 <span class="kn">from</span> <span class="nn">torchrl.envs.gym_like</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BaseInfoDictReader</span><span class="p">,</span>
@@ -424,7 +425,7 @@
 <span class="n">_has_sb3</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;stable_baselines3&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
 
-<span class="k">class</span> <span class="nc">set_gym_backend</span><span class="p">(</span><span class="n">_DecoratorContextManager</span><span class="p">):</span>
+<div class="viewcode-block" id="set_gym_backend"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.set_gym_backend.html#torchrl.envs.set_gym_backend">[docs]</a><span class="k">class</span> <span class="nc">set_gym_backend</span><span class="p">(</span><span class="n">_DecoratorContextManager</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets the gym-backend to a certain value.</span>
 
 <span class="sd">    Args:</span>
@@ -471,12 +472,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span>
 
     <span class="k">def</span> <span class="nf">_call</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the backend as default.&quot;&quot;&quot;</span>
         <span class="k">global</span> <span class="n">DEFAULT_GYM</span>
         <span class="n">DEFAULT_GYM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span>
-        <span class="c1"># implement_for.reset()</span>
-        <span class="n">setters</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">implement_for</span><span class="o">.</span><span class="n">_setters</span><span class="p">)</span>
         <span class="n">found_setter</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">for</span> <span class="n">setter</span> <span class="ow">in</span> <span class="n">setters</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">setter</span> <span class="ow">in</span> <span class="n">copy</span><span class="p">(</span><span class="n">implement_for</span><span class="o">.</span><span class="n">_setters</span><span class="p">):</span>
             <span class="n">check_module</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="nb">callable</span><span class="p">(</span><span class="n">setter</span><span class="o">.</span><span class="n">module_name</span><span class="p">)</span>
                 <span class="ow">and</span> <span class="n">setter</span><span class="o">.</span><span class="n">module_name</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="vm">__name__</span>
@@ -485,21 +485,26 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span> <span class="n">setter</span><span class="o">.</span><span class="n">from_version</span><span class="p">,</span> <span class="n">setter</span><span class="o">.</span><span class="n">to_version</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">check_module</span> <span class="ow">and</span> <span class="n">check_version</span><span class="p">:</span>
-                <span class="n">setter</span><span class="p">(</span><span class="n">setter</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
+                <span class="n">setter</span><span class="o">.</span><span class="n">module_set</span><span class="p">()</span>
                 <span class="n">found_setter</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># we keep only the setters we need. This is safe because a copy is saved under self._setters_saved</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">found_setter</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;could not set anything related to gym backend &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> with version=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> with version=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Check that the gym versions match!&quot;</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_setters</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">implement_for</span><span class="o">.</span><span class="n">_setters</span><span class="p">)</span>
+        <span class="c1"># we save a complete list of setters as well as whether they should be set.</span>
+        <span class="c1"># we want the full list becasue we want to be able to nest the calls to set_gym_backend.</span>
+        <span class="c1"># we also want to keep track of which ones are set to reproduce what was set before.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setters_saved</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">implement_for</span><span class="o">.</span><span class="n">_implementations</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
-        <span class="n">implement_for</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">setters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setters</span><span class="p">)</span>
-        <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_setters&quot;</span><span class="p">)</span>
+        <span class="n">implement_for</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">setters_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setters_saved</span><span class="p">)</span>
+        <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_setters_saved&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># override this method if your children class takes __init__ parameters</span>
@@ -515,10 +520,10 @@
 
     <span class="nd">@backend</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">backend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
-<span class="k">def</span> <span class="nf">gym_backend</span><span class="p">(</span><span class="n">submodule</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="gym_backend"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.gym_backend.html#torchrl.envs.gym_backend">[docs]</a><span class="k">def</span> <span class="nf">gym_backend</span><span class="p">(</span><span class="n">submodule</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the gym backend, or a sumbodule of it.</span>
 
 <span class="sd">    Args:</span>
@@ -553,7 +558,7 @@
             <span class="n">submodule</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">submodule</span>
             <span class="n">submodule</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">submodule</span><span class="p">,</span> <span class="n">package</span><span class="o">=</span><span class="n">DEFAULT_GYM</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">submodule</span>
-    <span class="k">return</span> <span class="n">DEFAULT_GYM</span>
+    <span class="k">return</span> <span class="n">DEFAULT_GYM</span></div>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GymWrapper&quot;</span><span class="p">,</span> <span class="s2">&quot;GymEnv&quot;</span><span class="p">]</span>
@@ -577,8 +582,8 @@
 <span class="sd">        remap_state_to_observation: whether to rename the &#39;state&#39; key of Dict specs to &quot;observation&quot;. Default is true.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">gym</span> <span class="o">=</span> <span class="n">gym_backend</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">tuple</span><span class="o">.</span><span class="n">Tuple</span><span class="p">):</span>
+    <span class="n">gym_spaces</span> <span class="o">=</span> <span class="n">gym_backend</span><span class="p">(</span><span class="s2">&quot;spaces&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym_spaces</span><span class="o">.</span><span class="n">tuple</span><span class="o">.</span><span class="n">Tuple</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="n">_gym_to_torchrl_spec_transform</span><span class="p">(</span>
@@ -591,7 +596,7 @@
             <span class="p">],</span>
             <span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">discrete</span><span class="o">.</span><span class="n">Discrete</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym_spaces</span><span class="o">.</span><span class="n">discrete</span><span class="o">.</span><span class="n">Discrete</span><span class="p">):</span>
         <span class="n">action_space_cls</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">DiscreteTensorSpec</span>
             <span class="k">if</span> <span class="n">categorical_action_encoding</span>
@@ -603,11 +608,11 @@
             <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">long</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">action_space_cls</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">multi_binary</span><span class="o">.</span><span class="n">MultiBinary</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym_spaces</span><span class="o">.</span><span class="n">multi_binary</span><span class="o">.</span><span class="n">MultiBinary</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">BinaryDiscreteTensorSpec</span><span class="p">(</span>
             <span class="n">spec</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy_to_torch_dtype_dict</span><span class="p">[</span><span class="n">spec</span><span class="o">.</span><span class="n">dtype</span><span class="p">]</span>
         <span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">multi_discrete</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym_spaces</span><span class="o">.</span><span class="n">multi_discrete</span><span class="o">.</span><span class="n">MultiDiscrete</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nvec</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nvec</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">dtype</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">numpy_to_torch_dtype_dict</span><span class="p">[</span><span class="n">spec</span><span class="o">.</span><span class="n">dtype</span><span class="p">]</span>
@@ -635,7 +640,7 @@
             <span class="p">],</span>
             <span class="mi">0</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym_spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">):</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">shape</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
             <span class="n">shape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
@@ -676,7 +681,7 @@
                 <span class="n">remap_state_to_observation</span><span class="o">=</span><span class="n">remap_state_to_observation</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">CompositeSpec</span><span class="p">(</span><span class="o">**</span><span class="n">spec_out</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">dict</span><span class="o">.</span><span class="n">Dict</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">gym_spaces</span><span class="o">.</span><span class="n">dict</span><span class="o">.</span><span class="n">Dict</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_gym_to_torchrl_spec_transform</span><span class="p">(</span>
             <span class="n">spec</span><span class="o">.</span><span class="n">spaces</span><span class="p">,</span>
             <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
@@ -751,10 +756,13 @@
     <span class="k">return</span> <span class="kc">False</span>
 
 
-<span class="k">class</span> <span class="nc">_AsyncMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">_AsyncMeta</span><span class="p">(</span><span class="n">_EnvPostInit</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">instance</span><span class="p">:</span> <span class="n">GymWrapper</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># before gym 0.22, there was no final_observation</span>
         <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">_is_batched</span><span class="p">:</span>
+            <span class="n">gym_backend</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">get_library_name</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">_env</span><span class="p">)</span>
             <span class="kn">from</span> <span class="nn">torchrl.envs.transforms.transforms</span> <span class="kn">import</span> <span class="p">(</span>
                 <span class="n">TransformedEnv</span><span class="p">,</span>
                 <span class="n">VecGymEnvTransform</span><span class="p">,</span>
@@ -769,9 +777,26 @@
                     <span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;gym&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">backend</span> <span class="o">=</span> <span class="s2">&quot;gym&quot;</span>
-            <span class="n">instance</span><span class="o">.</span><span class="n">set_info_dict_reader</span><span class="p">(</span>
-                <span class="n">terminal_obs_reader</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">observation_spec</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
-            <span class="p">)</span>
+
+            <span class="c1"># we need 3 checks: the backend is not sb3 (if so, gymnasium is used),</span>
+            <span class="c1"># it is gym and not gymnasium and the version is before 0.22.0</span>
+            <span class="n">add_info_dict</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;gym&quot;</span> <span class="ow">and</span> <span class="n">gym_backend</span> <span class="o">==</span> <span class="s2">&quot;gym&quot;</span><span class="p">:</span>  <span class="c1"># check gym against gymnasium</span>
+                <span class="kn">import</span> <span class="nn">gym</span>
+
+                <span class="k">if</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;0.22.0&quot;</span><span class="p">):</span>
+                    <span class="n">warn</span><span class="p">(</span>
+                        <span class="s2">&quot;A batched gym environment is being wrapped in a GymWrapper with gym version &lt; 0.22. &quot;</span>
+                        <span class="s2">&quot;This implies that the next-observation is wrongly tracked (as the batched environment auto-resets &quot;</span>
+                        <span class="s2">&quot;and discards the true next observation to return the result of the step). &quot;</span>
+                        <span class="s2">&quot;This isn&#39;t compatible with TorchRL API and should be used with caution.&quot;</span><span class="p">,</span>
+                        <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">add_info_dict</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">add_info_dict</span><span class="p">:</span>
+                <span class="n">instance</span><span class="o">.</span><span class="n">set_info_dict_reader</span><span class="p">(</span>
+                    <span class="n">terminal_obs_reader</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">observation_spec</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">return</span> <span class="n">TransformedEnv</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">VecGymEnvTransform</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">instance</span>
 
@@ -792,20 +817,32 @@
     <span class="n">libname</span> <span class="o">=</span> <span class="s2">&quot;gym&quot;</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get_library_name</span><span class="p">(</span><span class="n">env</span><span class="p">):</span>
-        <span class="c1"># try gym</span>
+    <span class="k">def</span> <span class="nf">get_library_name</span><span class="p">(</span><span class="n">env</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Given a gym environment, returns the backend name (either gym or gymnasium).</span>
+
+<span class="sd">        This can be used to set the appropriate backend when needed:</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; env = gymnasium.make(&quot;Pendulum-v1&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; with set_gym_backend(env):</span>
+<span class="sd">            ...    env = GymWrapper(env)</span>
+
+<span class="sd">        :class:`~GymWrapper` and similar use this method to set their method</span>
+<span class="sd">        to the right backend during instantiation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">gym</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">gym</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">Space</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">gym</span>
+                <span class="k">return</span> <span class="s2">&quot;gym&quot;</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">gymnasium</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="p">,</span> <span class="n">gymnasium</span><span class="o">.</span><span class="n">spaces</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">Space</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">gymnasium</span>
+                <span class="k">return</span> <span class="s2">&quot;gymnasium&quot;</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
@@ -818,10 +855,36 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_seed_calls_reset</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_categorical_action_encoding</span> <span class="o">=</span> <span class="n">categorical_action_encoding</span>
         <span class="k">if</span> <span class="s2">&quot;env&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">set_gym_backend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_library_name</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;env&quot;</span><span class="p">])):</span>
+            <span class="k">if</span> <span class="s2">&quot;EnvCompatibility&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;env&quot;</span><span class="p">]</span>
+            <span class="p">):</span>  <span class="c1"># a hacky way of knowing if EnvCompatibility is part of the wrappers of env</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;GymWrapper does not support the gym.wrapper.compatibility.EnvCompatibility wrapper. &quot;</span>
+                    <span class="s2">&quot;If this feature is needed, detail your use case in an issue of &quot;</span>
+                    <span class="s2">&quot;https://github.com/pytorch/rl/issues.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">libname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_library_name</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;env&quot;</span><span class="p">])</span>
+            <span class="k">with</span> <span class="n">set_gym_backend</span><span class="p">(</span><span class="n">libname</span><span class="p">):</span>
                 <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_post_init</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_post_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># writes the functions that are gym-version specific to the instance</span>
+        <span class="c1"># once and for all. This is aimed at avoiding the need of decorating code</span>
+        <span class="c1"># with set_gym_backend + allowing for parallel execution (which would</span>
+        <span class="c1"># be troublesome when both an old version of gym and recent gymnasium</span>
+        <span class="c1"># are present within the same virtual env).</span>
+        <span class="c1">#</span>
+        <span class="c1"># These calls seemingly do nothing but they actually get rid of the @implement_for decorator.</span>
+        <span class="c1"># We execute them within the set_gym_backend context manager to make sure we get</span>
+        <span class="c1"># the right implementation.</span>
+        <span class="c1">#</span>
+        <span class="c1"># This method is executed by the metaclass of GymWrapper.</span>
+        <span class="k">with</span> <span class="n">set_gym_backend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_library_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reset_output_transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_output_transform</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_output_transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_transform</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_is_batched</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -975,7 +1038,12 @@
 
         <span class="k">return</span> <span class="n">seed</span>
 
-    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gym&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;0.19.0&quot;</span><span class="p">)</span>
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gym&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;0.15.0&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_set_seed_initial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: F811</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed_calls_reset</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gym&quot;</span><span class="p">,</span> <span class="s2">&quot;0.15.0&quot;</span><span class="p">,</span> <span class="s2">&quot;0.19.0&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_set_seed_initial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: F811</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_seed_calls_reset</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_env</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
@@ -1046,12 +1114,147 @@
             <span class="n">observation_spec</span> <span class="o">=</span> <span class="n">observation_spec</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
                 <span class="o">*</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">observation_spec</span><span class="o">.</span><span class="n">shape</span>
             <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_done_spec</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_spec</span> <span class="o">=</span> <span class="n">action_spec</span>
         <span class="k">if</span> <span class="n">reward_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reward_spec</span> <span class="o">=</span> <span class="n">reward_spec</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">*</span><span class="n">reward_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reward_spec</span> <span class="o">=</span> <span class="n">reward_spec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observation_spec</span> <span class="o">=</span> <span class="n">observation_spec</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gym&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;0.26&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_make_done_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+        <span class="k">return</span> <span class="n">CompositeSpec</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;done&quot;</span><span class="p">:</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;terminated&quot;</span><span class="p">:</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;truncated&quot;</span><span class="p">:</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">},</span>
+            <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gym&quot;</span><span class="p">,</span> <span class="s2">&quot;0.26&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_make_done_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+        <span class="k">return</span> <span class="n">CompositeSpec</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;done&quot;</span><span class="p">:</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;terminated&quot;</span><span class="p">:</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;truncated&quot;</span><span class="p">:</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">},</span>
+            <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gymnasium&quot;</span><span class="p">,</span> <span class="s2">&quot;0.27&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_make_done_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+        <span class="k">return</span> <span class="n">CompositeSpec</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;done&quot;</span><span class="p">:</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;terminated&quot;</span><span class="p">:</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="s2">&quot;truncated&quot;</span><span class="p">:</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">},</span>
+            <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gym&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;0.26&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_reset_output_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_data</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+        <span class="k">return</span> <span class="n">reset_data</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gym&quot;</span><span class="p">,</span> <span class="s2">&quot;0.26&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_reset_output_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_data</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+        <span class="k">return</span> <span class="n">reset_data</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gymnasium&quot;</span><span class="p">,</span> <span class="s2">&quot;0.27&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_reset_output_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_data</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+        <span class="k">return</span> <span class="n">reset_data</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gym&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;0.24&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_output_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_outputs_tuple</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+        <span class="n">observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">step_outputs_tuple</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_batched</span><span class="p">:</span>
+            <span class="c1"># info needs to be flipped</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">_flip_info_tuple</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+        <span class="c1"># The variable naming follows torchrl&#39;s convention here.</span>
+        <span class="c1"># A done is interpreted the union of terminated and truncated.</span>
+        <span class="c1"># (as in earlier versions of gym).</span>
+        <span class="n">truncated</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;TimeLimit.truncated&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">done</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">truncated</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="c1"># if bool is an array, make truncated an array</span>
+            <span class="n">truncated</span> <span class="o">=</span> <span class="p">[</span><span class="n">truncated</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">done</span><span class="p">)</span>
+            <span class="n">truncated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">truncated</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">truncated</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="c1"># make sure it&#39;s a boolean np.array</span>
+            <span class="n">truncated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">truncated</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;bool&quot;</span><span class="p">))</span>
+        <span class="n">terminated</span> <span class="o">=</span> <span class="n">done</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">truncated</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">terminated</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="c1"># if it&#39;s not a ndarray, we must return bool</span>
+            <span class="c1"># since it&#39;s not a bool, we make it so</span>
+            <span class="n">terminated</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">terminated</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gym&quot;</span><span class="p">,</span> <span class="s2">&quot;0.24&quot;</span><span class="p">,</span> <span class="s2">&quot;0.26&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_output_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_outputs_tuple</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+        <span class="n">observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">step_outputs_tuple</span>
+        <span class="c1"># The variable naming follows torchrl&#39;s convention here.</span>
+        <span class="c1"># A done is interpreted the union of terminated and truncated.</span>
+        <span class="c1"># (as in earlier versions of gym).</span>
+        <span class="n">truncated</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;TimeLimit.truncated&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">done</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">truncated</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="c1"># if bool is an array, make truncated an array</span>
+            <span class="n">truncated</span> <span class="o">=</span> <span class="p">[</span><span class="n">truncated</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">done</span><span class="p">)</span>
+            <span class="n">truncated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">truncated</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">truncated</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="c1"># make sure it&#39;s a boolean np.array</span>
+            <span class="n">truncated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">truncated</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;bool&quot;</span><span class="p">))</span>
+        <span class="n">terminated</span> <span class="o">=</span> <span class="n">done</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">truncated</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">terminated</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="c1"># if it&#39;s not a ndarray, we must return bool</span>
+            <span class="c1"># since it&#39;s not a bool, we make it so</span>
+            <span class="n">terminated</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">terminated</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gym&quot;</span><span class="p">,</span> <span class="s2">&quot;0.26&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_output_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_outputs_tuple</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+        <span class="c1"># The variable naming follows torchrl&#39;s convention here.</span>
+        <span class="n">observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">step_outputs_tuple</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">observations</span><span class="p">,</span>
+            <span class="n">reward</span><span class="p">,</span>
+            <span class="n">terminated</span><span class="p">,</span>
+            <span class="n">truncated</span><span class="p">,</span>
+            <span class="n">terminated</span> <span class="o">|</span> <span class="n">truncated</span><span class="p">,</span>
+            <span class="n">info</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@implement_for</span><span class="p">(</span><span class="s2">&quot;gymnasium&quot;</span><span class="p">,</span> <span class="s2">&quot;0.27&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_output_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_outputs_tuple</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
+        <span class="c1"># The variable naming follows torchrl&#39;s convention here.</span>
+        <span class="n">observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">terminated</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">step_outputs_tuple</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">observations</span><span class="p">,</span>
+            <span class="n">reward</span><span class="p">,</span>
+            <span class="n">terminated</span><span class="p">,</span>
+            <span class="n">truncated</span><span class="p">,</span>
+            <span class="n">terminated</span> <span class="o">|</span> <span class="n">truncated</span><span class="p">,</span>
+            <span class="n">info</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_init_env</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
@@ -1344,6 +1547,18 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_read_obs</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">final_obs</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
             <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">final_obs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tensordict</span>
+
+
+<span class="k">def</span> <span class="nf">_flip_info_tuple</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]:</span>
+    <span class="c1"># In Gym &lt; 0.24, batched envs returned tuples of dict, and not dict of tuples.</span>
+    <span class="c1"># We patch this by flipping the tuple -&gt; dict order.</span>
+    <span class="n">info_example</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">info</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">info_example</span> <span class="o">=</span> <span class="n">info_example</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">info_example</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">_info</span> <span class="ow">in</span> <span class="n">info</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
 </pre></div>
 
              </article>

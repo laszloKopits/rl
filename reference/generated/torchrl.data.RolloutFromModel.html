@@ -485,9 +485,11 @@ each time step</p></li>
 part of the inputs that will be used for generating the next token.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">(&quot;next&quot;,</span> <span class="pre">&quot;attention_mask&quot;)</span></code>: updated attention_mask after token has been
 generated. Passed to the generative model on the next time step</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">(&quot;next&quot;,</span> <span class="pre">&quot;done&quot;)</span></code>: Boolean array indicating whether we’ve reached a
+<li><p><code class="docutils literal notranslate"><span class="pre">(&quot;next&quot;,</span> <span class="pre">&quot;terminated&quot;)</span></code>: Boolean array indicating whether we’ve reached a
 terminal state (either because we generated EOS token or because we
 reached the token limit)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(&quot;next&quot;,</span> <span class="pre">&quot;done&quot;)</span></code>: Boolean array indicating whether we’ve reached a
+final state. Currently a copy of <code class="docutils literal notranslate"><span class="pre">&quot;terminated&quot;</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">(&quot;next&quot;,</span> <span class="pre">&quot;reward&quot;)</span></code>: The reward received at each time step</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">(&quot;next&quot;,</span> <span class="pre">&quot;reward_raw&quot;)</span></code>: The raw reward from the reward model, without the
 KL term. This is mainly for debugging and logging, it is not used in

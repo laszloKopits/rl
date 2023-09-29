@@ -439,18 +439,9 @@
 <span class="sd">        &gt;&gt;&gt;  print(env.rollout(10))</span>
 <span class="sd">        TensorDict(</span>
 <span class="sd">            fields={</span>
-<span class="sd">                action: Tensor(shape=torch.Size([32, 10, 5, 2]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="sd">                done: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
-<span class="sd">                info: TensorDict(</span>
+<span class="sd">                agents: TensorDict(</span>
 <span class="sd">                    fields={</span>
-<span class="sd">                        agent_collision_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="sd">                        agent_distance_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
-<span class="sd">                    batch_size=torch.Size([32, 10, 5]),</span>
-<span class="sd">                    device=cpu,</span>
-<span class="sd">                    is_shared=False),</span>
-<span class="sd">                next: TensorDict(</span>
-<span class="sd">                    fields={</span>
-<span class="sd">                        done: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                        action: Tensor(shape=torch.Size([32, 10, 5, 2]), device=cpu, dtype=torch.float32, is_shared=False),</span>
 <span class="sd">                        info: TensorDict(</span>
 <span class="sd">                            fields={</span>
 <span class="sd">                                agent_collision_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
@@ -458,17 +449,36 @@
 <span class="sd">                            batch_size=torch.Size([32, 10, 5]),</span>
 <span class="sd">                            device=cpu,</span>
 <span class="sd">                            is_shared=False),</span>
-<span class="sd">                        observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="sd">                        reward: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                        observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                    batch_size=torch.Size([32, 10, 5]),</span>
+<span class="sd">                    device=cpu,</span>
+<span class="sd">                    is_shared=False),</span>
+<span class="sd">                done: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                next: TensorDict(</span>
+<span class="sd">                    fields={</span>
+<span class="sd">                        agents: TensorDict(</span>
+<span class="sd">                            fields={</span>
+<span class="sd">                                info: TensorDict(</span>
+<span class="sd">                                    fields={</span>
+<span class="sd">                                        agent_collision_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                                        agent_distance_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                                    batch_size=torch.Size([32, 10, 5]),</span>
+<span class="sd">                                    device=cpu,</span>
+<span class="sd">                                    is_shared=False),</span>
+<span class="sd">                                observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                                reward: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                            batch_size=torch.Size([32, 10, 5]),</span>
+<span class="sd">                            device=cpu,</span>
+<span class="sd">                            is_shared=False),</span>
+<span class="sd">                        done: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                        terminated: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="sd">                    batch_size=torch.Size([32, 10]),</span>
 <span class="sd">                    device=cpu,</span>
 <span class="sd">                    is_shared=False),</span>
-<span class="sd">                observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False),</span>
-<span class="sd">                reward: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                terminated: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
 <span class="sd">            batch_size=torch.Size([32, 10]),</span>
 <span class="sd">            device=cpu,</span>
 <span class="sd">            is_shared=False)</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">git_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/proroklab/VectorizedMultiAgentSimulator&quot;</span>
@@ -698,7 +708,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">het_specs</span><span class="p">:</span>
             <span class="n">agent_tds</span> <span class="o">=</span> <span class="n">agent_tds</span><span class="o">.</span><span class="n">to_tensordict</span><span class="p">()</span>
         <span class="n">tensordict_out</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">(</span>
-            <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;agents&quot;</span><span class="p">:</span> <span class="n">agent_tds</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">:</span> <span class="n">dones</span><span class="p">},</span>
+            <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;agents&quot;</span><span class="p">:</span> <span class="n">agent_tds</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">:</span> <span class="n">dones</span><span class="p">,</span> <span class="s2">&quot;terminated&quot;</span><span class="p">:</span> <span class="n">dones</span><span class="o">.</span><span class="n">clone</span><span class="p">()},</span>
             <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
             <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
         <span class="p">)</span>
@@ -738,7 +748,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">het_specs</span><span class="p">:</span>
             <span class="n">agent_tds</span> <span class="o">=</span> <span class="n">agent_tds</span><span class="o">.</span><span class="n">to_tensordict</span><span class="p">()</span>
         <span class="n">tensordict_out</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">(</span>
-            <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;agents&quot;</span><span class="p">:</span> <span class="n">agent_tds</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">:</span> <span class="n">dones</span><span class="p">},</span>
+            <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;agents&quot;</span><span class="p">:</span> <span class="n">agent_tds</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">:</span> <span class="n">dones</span><span class="p">,</span> <span class="s2">&quot;terminated&quot;</span><span class="p">:</span> <span class="n">dones</span><span class="o">.</span><span class="n">clone</span><span class="p">()},</span>
             <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
             <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
         <span class="p">)</span>
@@ -817,35 +827,44 @@
 <span class="sd">        &gt;&gt;&gt;  print(env.rollout(10))</span>
 <span class="sd">        TensorDict(</span>
 <span class="sd">            fields={</span>
-<span class="sd">                action: Tensor(torch.Size([5, 32, 10, 2]), dtype=torch.float64),</span>
-<span class="sd">                done: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.bool),</span>
-<span class="sd">                info: TensorDict(</span>
+<span class="sd">                agents: TensorDict(</span>
 <span class="sd">                    fields={</span>
-<span class="sd">                        cohesion_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="sd">                        collision_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="sd">                        separation_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="sd">                        velocity_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32)},</span>
-<span class="sd">                    batch_size=torch.Size([5, 32, 10]),</span>
-<span class="sd">                    device=cpu,</span>
-<span class="sd">                    is_shared=False),</span>
-<span class="sd">                next: TensorDict(</span>
-<span class="sd">                    fields={</span>
+<span class="sd">                        action: Tensor(shape=torch.Size([32, 10, 5, 2]), device=cpu, dtype=torch.float32, is_shared=False),</span>
 <span class="sd">                        info: TensorDict(</span>
 <span class="sd">                            fields={</span>
-<span class="sd">                                cohesion_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="sd">                                collision_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="sd">                                separation_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32),</span>
-<span class="sd">                                velocity_rew: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32)},</span>
-<span class="sd">                            batch_size=torch.Size([5, 32, 10]),</span>
+<span class="sd">                                agent_collision_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                                agent_distance_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                            batch_size=torch.Size([32, 10, 5]),</span>
 <span class="sd">                            device=cpu,</span>
 <span class="sd">                            is_shared=False),</span>
-<span class="sd">                        observation: Tensor(torch.Size([5, 32, 10, 18]), dtype=torch.float32)},</span>
-<span class="sd">                    batch_size=torch.Size([5, 32, 10]),</span>
+<span class="sd">                        observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                    batch_size=torch.Size([32, 10, 5]),</span>
 <span class="sd">                    device=cpu,</span>
 <span class="sd">                    is_shared=False),</span>
-<span class="sd">                observation: Tensor(torch.Size([5, 32, 10, 18]), dtype=torch.float32),</span>
-<span class="sd">                reward: Tensor(torch.Size([5, 32, 10, 1]), dtype=torch.float32)},</span>
-<span class="sd">            batch_size=torch.Size([5, 32, 10]),</span>
+<span class="sd">                done: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                next: TensorDict(</span>
+<span class="sd">                    fields={</span>
+<span class="sd">                        agents: TensorDict(</span>
+<span class="sd">                            fields={</span>
+<span class="sd">                                info: TensorDict(</span>
+<span class="sd">                                    fields={</span>
+<span class="sd">                                        agent_collision_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                                        agent_distance_rew: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                                    batch_size=torch.Size([32, 10, 5]),</span>
+<span class="sd">                                    device=cpu,</span>
+<span class="sd">                                    is_shared=False),</span>
+<span class="sd">                                observation: Tensor(shape=torch.Size([32, 10, 5, 18]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                                reward: Tensor(shape=torch.Size([32, 10, 5, 1]), device=cpu, dtype=torch.float32, is_shared=False)},</span>
+<span class="sd">                            batch_size=torch.Size([32, 10, 5]),</span>
+<span class="sd">                            device=cpu,</span>
+<span class="sd">                            is_shared=False),</span>
+<span class="sd">                        done: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                        terminated: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
+<span class="sd">                    batch_size=torch.Size([32, 10]),</span>
+<span class="sd">                    device=cpu,</span>
+<span class="sd">                    is_shared=False),</span>
+<span class="sd">                terminated: Tensor(shape=torch.Size([32, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
+<span class="sd">            batch_size=torch.Size([32, 10]),</span>
 <span class="sd">            device=cpu,</span>
 <span class="sd">            is_shared=False)</span>
 <span class="sd">    &quot;&quot;&quot;</span>

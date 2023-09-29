@@ -512,9 +512,11 @@
 <span class="sd">              part of the inputs that will be used for generating the next token.</span>
 <span class="sd">            - ``(&quot;next&quot;, &quot;attention_mask&quot;)``: updated attention_mask after token has been</span>
 <span class="sd">              generated. Passed to the generative model on the next time step</span>
-<span class="sd">            - ``(&quot;next&quot;, &quot;done&quot;)``: Boolean array indicating whether we&#39;ve reached a</span>
+<span class="sd">            - ``(&quot;next&quot;, &quot;terminated&quot;)``: Boolean array indicating whether we&#39;ve reached a</span>
 <span class="sd">              terminal state (either because we generated EOS token or because we</span>
 <span class="sd">              reached the token limit)</span>
+<span class="sd">            - ``(&quot;next&quot;, &quot;done&quot;)``: Boolean array indicating whether we&#39;ve reached a</span>
+<span class="sd">              final state. Currently a copy of ``&quot;terminated&quot;``.</span>
 <span class="sd">            - ``(&quot;next&quot;, &quot;reward&quot;)``: The reward received at each time step</span>
 <span class="sd">            - ``(&quot;next&quot;, &quot;reward_raw&quot;)``: The raw reward from the reward model, without the</span>
 <span class="sd">              KL term. This is mainly for debugging and logging, it is not used in</span>
@@ -548,6 +550,7 @@
                 <span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="n">rollout_generated</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">clone</span><span class="p">(),</span>
                 <span class="s2">&quot;attention_mask&quot;</span><span class="p">:</span> <span class="n">rollout_attention_mask</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">clone</span><span class="p">(),</span>
                 <span class="s2">&quot;done&quot;</span><span class="p">:</span> <span class="n">done</span><span class="p">,</span>
+                <span class="s2">&quot;terminated&quot;</span><span class="p">:</span> <span class="n">done</span><span class="o">.</span><span class="n">clone</span><span class="p">(),</span>
                 <span class="s2">&quot;reward&quot;</span><span class="p">:</span> <span class="n">reward</span><span class="p">,</span>
                 <span class="s2">&quot;reward_raw&quot;</span><span class="p">:</span> <span class="n">reward_raw</span><span class="p">,</span>
                 <span class="s2">&quot;reward_kl&quot;</span><span class="p">:</span> <span class="n">reward_kl</span><span class="p">,</span>
@@ -572,6 +575,7 @@
     <span class="k">def</span> <span class="nf">_get_done_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generated</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
         <span class="c1"># done is True when we either first sample an EOS token or reach the maximum number</span>
         <span class="c1"># of generated tokens</span>
+        <span class="c1"># TODO: differentiate truncated and terminal here</span>
         <span class="n">done_idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span>
             <span class="p">(</span><span class="n">generated</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EOS_TOKEN_ID</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">batch</span><span class="o">.</span><span class="n">prompt_rindex</span><span class="p">,</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_new_tokens</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>

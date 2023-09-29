@@ -384,7 +384,7 @@
 
 <span class="kn">import</span> <span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">tensordict</span> <span class="kn">import</span> <span class="n">is_tensor_collection</span><span class="p">,</span> <span class="n">unravel_key</span>
+<span class="kn">from</span> <span class="nn">tensordict</span> <span class="kn">import</span> <span class="n">is_tensor_collection</span><span class="p">,</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">unravel_key</span>
 <span class="kn">from</span> <span class="nn">tensordict.nn.probabilistic</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa</span>
     <span class="c1"># Note: the `set_interaction_mode` and their associated arg `default_interaction_mode` are being deprecated!</span>
     <span class="c1">#       Please use the `set_/interaction_type` ones above with the InteractionType enum instead.</span>
@@ -395,7 +395,7 @@
     <span class="n">set_interaction_mode</span> <span class="k">as</span> <span class="n">set_exploration_mode</span><span class="p">,</span>
     <span class="n">set_interaction_type</span> <span class="k">as</span> <span class="n">set_exploration_type</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">tensordict.tensordict</span> <span class="kn">import</span> <span class="n">LazyStackedTensorDict</span><span class="p">,</span> <span class="n">NestedKey</span><span class="p">,</span> <span class="n">TensorDictBase</span>
+<span class="kn">from</span> <span class="nn">tensordict.tensordict</span> <span class="kn">import</span> <span class="n">LazyStackedTensorDict</span><span class="p">,</span> <span class="n">NestedKey</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;exploration_mode&quot;</span><span class="p">,</span>
@@ -411,12 +411,9 @@
 <span class="p">]</span>
 
 
-<span class="kn">from</span> <span class="nn">torchrl.data</span> <span class="kn">import</span> <span class="n">CompositeSpec</span>
+<span class="kn">from</span> <span class="nn">torchrl.data</span> <span class="kn">import</span> <span class="n">CompositeSpec</span><span class="p">,</span> <span class="n">TensorSpec</span>
 <span class="kn">from</span> <span class="nn">torchrl.data.utils</span> <span class="kn">import</span> <span class="n">check_no_exclusive_keys</span>
 
-<span class="n">DONE_AFTER_RESET_ERROR</span> <span class="o">=</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-    <span class="s2">&quot;Env was done after reset on specified &#39;_reset&#39; dimensions. This is (currently) not allowed.&quot;</span>
-<span class="p">)</span>
 <span class="n">ACTION_MASK_ERROR</span> <span class="o">=</span> <span class="ne">RuntimeError</span><span class="p">(</span>
     <span class="s2">&quot;An out-of-bounds actions has been provided to an env with an &#39;action_mask&#39; output.&quot;</span>
     <span class="s2">&quot; If you are using a custom policy, make sure to take the action mask into account when computing the output.&quot;</span>
@@ -609,7 +606,9 @@
         <span class="k">return</span> <span class="n">out</span></div>
 
 
-<span class="k">def</span> <span class="nf">_set_single_key</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">clone</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_set_single_key</span><span class="p">(</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">clone</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">):</span>
     <span class="c1"># key should be already unraveled</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="p">,)</span>
@@ -1098,6 +1097,178 @@
     <span class="k">for</span> <span class="n">agent_name</span><span class="p">,</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">found_agents</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2"> not found in any group&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="terminated_or_truncated"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.utils.terminated_or_truncated.html#torchrl.envs.terminated_or_truncated">[docs]</a><span class="k">def</span> <span class="nf">terminated_or_truncated</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span>
+    <span class="n">full_done_spec</span><span class="p">:</span> <span class="n">TensorSpec</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;_reset&quot;</span><span class="p">,</span>
+    <span class="n">write_full_false</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads the done / terminated / truncated keys within a tensordict, and writes a new tensor where the values of both signals are aggregated.</span>
+
+<span class="sd">    The modification occurs in-place within the TensorDict instance provided.</span>
+<span class="sd">    This function can be used to compute the `&quot;_reset&quot;` signals in batched</span>
+<span class="sd">    or multiagent settings, hence the default name of the output key.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (TensorDictBase): the input data, generally resulting from a call</span>
+<span class="sd">            to :meth:`~torchrl.envs.EnvBase.step`.</span>
+<span class="sd">        full_done_spec (TensorSpec, optional): the done_spec from the env,</span>
+<span class="sd">            indicating where the done leaves have to be found.</span>
+<span class="sd">            If not provided, the default</span>
+<span class="sd">            ``&quot;done&quot;``, ``&quot;terminated&quot;`` and ``&quot;truncated&quot;`` entries will be</span>
+<span class="sd">            searched for in the data.</span>
+<span class="sd">        key (NestedKey, optional): where the aggregated result should be written.</span>
+<span class="sd">            If ``None``, then the function will not write any key but just output</span>
+<span class="sd">            whether any of the done values was true.</span>
+<span class="sd">            .. note:: if a value is already present for the ``key`` entry,</span>
+<span class="sd">                the previous value will prevail and no update will be achieved.</span>
+<span class="sd">        write_full_false (bool, optional): if ``True``, the reset keys will be</span>
+<span class="sd">            written even if the output is ``False`` (ie, no done is ``True``</span>
+<span class="sd">            in the provided data structure).</span>
+<span class="sd">            Defaults to ``False``.</span>
+
+<span class="sd">    Returns: a boolean value indicating whether any of the done states found in the data</span>
+<span class="sd">        contained a ``True``.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; from torchrl.data.tensor_specs import DiscreteTensorSpec</span>
+<span class="sd">        &gt;&gt;&gt; from tensordict import TensorDict</span>
+<span class="sd">        &gt;&gt;&gt; spec = CompositeSpec(</span>
+<span class="sd">        ...     done=DiscreteTensorSpec(2, dtype=torch.bool),</span>
+<span class="sd">        ...     truncated=DiscreteTensorSpec(2, dtype=torch.bool),</span>
+<span class="sd">        ...     nested=CompositeSpec(</span>
+<span class="sd">        ...         done=DiscreteTensorSpec(2, dtype=torch.bool),</span>
+<span class="sd">        ...         truncated=DiscreteTensorSpec(2, dtype=torch.bool),</span>
+<span class="sd">        ...     )</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; data = TensorDict({</span>
+<span class="sd">        ...     &quot;done&quot;: True, &quot;truncated&quot;: False,</span>
+<span class="sd">        ...     &quot;nested&quot;: {&quot;done&quot;: False, &quot;truncated&quot;: True}},</span>
+<span class="sd">        ...     batch_size=[]</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; data = terminated_or_truncated(data, spec)</span>
+<span class="sd">        &gt;&gt;&gt; print(data[&quot;_reset&quot;])</span>
+<span class="sd">        tensor(True)</span>
+<span class="sd">        &gt;&gt;&gt; print(data[&quot;nested&quot;, &quot;_reset&quot;])</span>
+<span class="sd">        tensor(True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">list_of_keys</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">inner_terminated_or_truncated</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">full_done_spec</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">curr_done_key</span><span class="o">=</span><span class="p">()):</span>
+        <span class="n">any_eot</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">aggregate</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">full_done_spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">eot_key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">eot_key</span> <span class="o">==</span> <span class="s2">&quot;done&quot;</span><span class="p">:</span>
+                    <span class="n">done</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">eot_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">done</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">done</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                            <span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">device</span>
+                        <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">aggregate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">aggregate</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">done</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                    <span class="n">aggregate</span> <span class="o">=</span> <span class="n">aggregate</span> <span class="o">|</span> <span class="n">done</span>
+                <span class="k">elif</span> <span class="n">eot_key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;terminated&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">):</span>
+                    <span class="n">done</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">eot_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">done</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">done</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                            <span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">device</span>
+                        <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">aggregate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">aggregate</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">done</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                    <span class="n">aggregate</span> <span class="o">=</span> <span class="n">aggregate</span> <span class="o">|</span> <span class="n">done</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">TensorDictBase</span><span class="p">):</span>
+                    <span class="n">any_eot</span> <span class="o">=</span> <span class="n">any_eot</span> <span class="o">|</span> <span class="n">inner_terminated_or_truncated</span><span class="p">(</span>
+                        <span class="n">data</span><span class="o">=</span><span class="n">item</span><span class="p">,</span>
+                        <span class="n">full_done_spec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+                        <span class="n">curr_done_key</span><span class="o">=</span><span class="n">curr_done_key</span> <span class="o">+</span> <span class="p">(</span><span class="n">eot_key</span><span class="p">,),</span>
+                    <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">eot_key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">full_done_spec</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">CompositeSpec</span><span class="p">):</span>
+                    <span class="n">any_eot</span> <span class="o">=</span> <span class="n">any_eot</span> <span class="o">|</span> <span class="n">inner_terminated_or_truncated</span><span class="p">(</span>
+                        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">eot_key</span><span class="p">),</span>
+                        <span class="n">full_done_spec</span><span class="o">=</span><span class="n">item</span><span class="p">,</span>
+                        <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+                        <span class="n">curr_done_key</span><span class="o">=</span><span class="n">curr_done_key</span> <span class="o">+</span> <span class="p">(</span><span class="n">eot_key</span><span class="p">,),</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sop</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">eot_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">sop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">sop</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                            <span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">device</span>
+                        <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">aggregate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">aggregate</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">sop</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                    <span class="n">aggregate</span> <span class="o">=</span> <span class="n">aggregate</span> <span class="o">|</span> <span class="n">sop</span>
+        <span class="k">if</span> <span class="n">aggregate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">aggregate</span><span class="p">)</span>
+                <span class="n">list_of_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr_done_key</span> <span class="o">+</span> <span class="p">(</span><span class="n">key</span><span class="p">,))</span>
+            <span class="n">any_eot</span> <span class="o">=</span> <span class="n">any_eot</span> <span class="o">|</span> <span class="n">aggregate</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">any_eot</span>
+
+    <span class="n">any_eot</span> <span class="o">=</span> <span class="n">inner_terminated_or_truncated</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">full_done_spec</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">any_eot</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">write_full_false</span><span class="p">:</span>
+        <span class="c1"># remove the list of reset keys</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="o">*</span><span class="n">list_of_keys</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">any_eot</span></div>
+
+
+<span class="n">PARTIAL_MISSING_ERR</span> <span class="o">=</span> <span class="s2">&quot;Some reset keys were present but not all. Either all the `&#39;_reset&#39;` entries must be present, or none.&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_aggregate_resets</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">reset_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="c1"># goes through the tensordict and brings the _reset information to</span>
+    <span class="c1"># a boolean tensor of the shape of the tensordict.</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">batch_size</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">reset_keys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reset</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">has_missing</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">reset_keys</span><span class="p">:</span>
+            <span class="n">local_reset</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">local_reset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">has_missing</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">PARTIAL_MISSING_ERR</span><span class="p">)</span>
+                <span class="n">has_missing</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">has_missing</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">PARTIAL_MISSING_ERR</span><span class="p">)</span>
+            <span class="n">has_missing</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">local_reset</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
+                <span class="n">local_reset</span> <span class="o">=</span> <span class="n">local_reset</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">local_reset</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">local_reset</span> <span class="o">=</span> <span class="n">local_reset</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">reset</span> <span class="o">=</span> <span class="n">reset</span> <span class="o">|</span> <span class="n">local_reset</span>
+        <span class="k">if</span> <span class="n">has_missing</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reset</span>
+
+    <span class="n">reset</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">skim_through</span><span class="p">(</span><span class="n">td</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="n">reset</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">td</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;_reset&quot;</span><span class="p">:</span>
+                <span class="n">local_reset</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">local_reset</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
+                    <span class="n">local_reset</span> <span class="o">=</span> <span class="n">local_reset</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">local_reset</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">local_reset</span> <span class="o">=</span> <span class="n">local_reset</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">reset</span> <span class="o">=</span> <span class="n">reset</span> <span class="o">|</span> <span class="n">local_reset</span>
+            <span class="c1"># we need to check the entry class without getting the value,</span>
+            <span class="c1"># because some lazy tensordicts may prevent calls to items().</span>
+            <span class="c1"># This introduces some slight overhead as when we encounter a</span>
+            <span class="c1"># tensordict item, we&#39;ll need to get it twice.</span>
+            <span class="k">elif</span> <span class="n">is_tensor_collection</span><span class="p">(</span><span class="n">td</span><span class="o">.</span><span class="n">entry_class</span><span class="p">(</span><span class="n">key</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">reset</span> <span class="o">=</span> <span class="n">skim_through</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="n">reset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reset</span>
+
+    <span class="n">reset</span> <span class="o">=</span> <span class="n">skim_through</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">reset</span>
 </pre></div>
 
              </article>

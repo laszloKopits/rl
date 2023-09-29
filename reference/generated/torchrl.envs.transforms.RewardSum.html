@@ -389,6 +389,12 @@ reward and be present in the env reward_spec.</p>
 <p>If no in_keys are specified, this transform assumes ´reward´ to be the input key. However, multiple rewards
 (e.g. reward1 and reward2) can also be specified. If ´in_keys´ are not present in the provided tensordict,
 this transform hos no effect.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#torchrl.envs.transforms.RewardSum" title="torchrl.envs.transforms.RewardSum"><code class="xref py py-class docutils literal notranslate"><span class="pre">RewardSum</span></code></a> currently only supports <code class="docutils literal notranslate"><span class="pre">&quot;done&quot;</span></code> signal at the root.
+Nested <code class="docutils literal notranslate"><span class="pre">&quot;done&quot;</span></code>, such as those found in MARL settings, are currently not supported.
+If this feature is needed, please raise an issue on TorchRL repo.</p>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="torchrl.envs.transforms.RewardSum.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensordict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TensorDictBase</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TensorDictBase</span></span></span><a class="reference internal" href="../../_modules/torchrl/envs/transforms/transforms.html#RewardSum.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.transforms.RewardSum.forward" title="Permalink to this definition">¶</a></dt>
