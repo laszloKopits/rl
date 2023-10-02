@@ -421,6 +421,7 @@ to this ReplayBuffer.  This is to be used when the sampler is of type
 <span class="gp">... </span>    <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">batch</span><span class="p">),</span>
 <span class="gp">... </span>    <span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="s2">&quot;observation&quot;</span><span class="p">):</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">batch</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">),</span>
 <span class="gp">... </span>    <span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">):</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="o">*</span><span class="n">batch</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="s2">&quot;terminated&quot;</span><span class="p">):</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="o">*</span><span class="n">batch</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">),</span>
 <span class="gp">... </span>    <span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">):</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">batch</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">},</span> <span class="n">batch</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">loss</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -435,7 +436,7 @@ to this ReplayBuffer.  This is to be used when the sampler is of type
 <p>This class is compatible with non-tensordict based modules too and can be
 used without recurring to any tensordict-related primitive. In this case,
 the expected keyword arguments are:
-<code class="docutils literal notranslate"><span class="pre">[&quot;observation&quot;,</span> <span class="pre">&quot;next_observation&quot;,</span> <span class="pre">&quot;action&quot;,</span> <span class="pre">&quot;next_reward&quot;,</span> <span class="pre">&quot;next_done&quot;]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">[&quot;observation&quot;,</span> <span class="pre">&quot;next_observation&quot;,</span> <span class="pre">&quot;action&quot;,</span> <span class="pre">&quot;next_reward&quot;,</span> <span class="pre">&quot;next_done&quot;,</span> <span class="pre">&quot;next_terminated&quot;]</span></code>,
 and a single loss value is returned.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">torchrl.objectives</span> <span class="kn">import</span> <span class="n">DQNLoss</span>
@@ -453,11 +454,13 @@ and a single loss value is returned.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">action</span> <span class="o">=</span> <span class="n">action_spec</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">next_reward</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">next_done</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">next_terminated</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">loss_val</span> <span class="o">=</span> <span class="n">dqn_loss</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">observation</span><span class="o">=</span><span class="n">observation</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">next_observation</span><span class="o">=</span><span class="n">next_observation</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">next_reward</span><span class="o">=</span><span class="n">next_reward</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">next_done</span><span class="o">=</span><span class="n">next_done</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">next_terminated</span><span class="o">=</span><span class="n">next_terminated</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -472,7 +475,7 @@ and a single loss value is returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>tensordict</strong> (<em>TensorDictBase</em>) – a tensordict with keys [“action”] and the in_keys of
-the value network (observations, “done”, “reward” in a “next” tensordict).</p>
+the value network (observations, “done”, “terminated”, “reward” in a “next” tensordict).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a tensor containing the DQN loss.</p>

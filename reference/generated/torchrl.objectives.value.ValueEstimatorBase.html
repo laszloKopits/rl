@@ -397,10 +397,14 @@ should be used instead.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tensordict</strong> (<em>TensorDictBase</em>) – A TensorDict containing the data
-(an observation key, “action”, (“next”, “reward”), (“next”, “done”) and “next” tensordict state
-as returned by the environment) necessary to compute the value estimates and the TDEstimate.
-The data passed to this module should be structured as <code class="xref py py-obj docutils literal notranslate"><span class="pre">[*B,</span> <span class="pre">T,</span> <span class="pre">F]</span></code> where <code class="xref py py-obj docutils literal notranslate"><span class="pre">B</span></code> are
-the batch size, <code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code> the time dimension and <code class="xref py py-obj docutils literal notranslate"><span class="pre">F</span></code> the feature dimension(s).</p></li>
+(an observation key, <code class="docutils literal notranslate"><span class="pre">&quot;action&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">(&quot;next&quot;,</span> <span class="pre">&quot;reward&quot;)</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(&quot;next&quot;,</span> <span class="pre">&quot;done&quot;)</span></code>, <code class="docutils literal notranslate"><span class="pre">(&quot;next&quot;,</span> <span class="pre">&quot;terminated&quot;)</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">&quot;next&quot;</span></code> tensordict state as returned by the environment)
+necessary to compute the value estimates and the TDEstimate.
+The data passed to this module should be structured as
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">[*B,</span> <span class="pre">T,</span> <span class="pre">*F]</span></code> where <code class="xref py py-obj docutils literal notranslate"><span class="pre">B</span></code> are
+the batch size, <code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code> the time dimension and <code class="xref py py-obj docutils literal notranslate"><span class="pre">F</span></code> the
+feature dimension(s). The tensordict must have shape <code class="docutils literal notranslate"><span class="pre">[*B,</span> <span class="pre">T]</span></code>.</p></li>
 <li><p><strong>params</strong> (<em>TensorDictBase</em><em>, </em><em>optional</em>) – A nested TensorDict containing the params
 to be passed to the functional value network module.</p></li>
 <li><p><strong>target_params</strong> (<em>TensorDictBase</em><em>, </em><em>optional</em>) – A nested TensorDict containing the
