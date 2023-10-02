@@ -515,16 +515,6 @@
     <span class="k">if</span> <span class="n">reward_scaling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">env</span><span class="o">.</span><span class="n">append_transform</span><span class="p">(</span><span class="n">RewardScaling</span><span class="p">(</span><span class="n">reward_loc</span><span class="p">,</span> <span class="n">reward_scaling</span><span class="p">))</span>
 
-    <span class="n">double_to_float_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">double_to_float_inv_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">env_library</span> <span class="ow">is</span> <span class="n">DMControlEnv</span><span class="p">:</span>
-        <span class="n">double_to_float_list</span> <span class="o">+=</span> <span class="p">[</span>
-            <span class="s2">&quot;reward&quot;</span><span class="p">,</span>
-        <span class="p">]</span>
-        <span class="n">double_to_float_list</span> <span class="o">+=</span> <span class="p">[</span>
-            <span class="s2">&quot;action&quot;</span><span class="p">,</span>
-        <span class="p">]</span>
-        <span class="n">double_to_float_inv_list</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]</span>  <span class="c1"># DMControl requires double-precision</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">from_pixels</span><span class="p">:</span>
         <span class="n">selected_keys</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">key</span>
@@ -557,22 +547,13 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="n">double_to_float_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_key</span><span class="p">)</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">append_transform</span><span class="p">(</span>
-            <span class="n">DoubleToFloat</span><span class="p">(</span>
-                <span class="n">in_keys</span><span class="o">=</span><span class="n">double_to_float_list</span><span class="p">,</span> <span class="n">in_keys_inv</span><span class="o">=</span><span class="n">double_to_float_inv_list</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">append_transform</span><span class="p">(</span><span class="n">DoubleToFloat</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">&quot;catframes&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">catframes</span><span class="p">:</span>
             <span class="n">env</span><span class="o">.</span><span class="n">append_transform</span><span class="p">(</span><span class="n">CatFrames</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">catframes</span><span class="p">,</span> <span class="n">in_keys</span><span class="o">=</span><span class="p">[</span><span class="n">out_key</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">append_transform</span><span class="p">(</span>
-            <span class="n">DoubleToFloat</span><span class="p">(</span>
-                <span class="n">in_keys</span><span class="o">=</span><span class="n">double_to_float_list</span><span class="p">,</span> <span class="n">in_keys_inv</span><span class="o">=</span><span class="n">double_to_float_inv_list</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">append_transform</span><span class="p">(</span><span class="n">DoubleToFloat</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">&quot;gSDE&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gSDE</span><span class="p">:</span>
         <span class="n">env</span><span class="o">.</span><span class="n">append_transform</span><span class="p">(</span>

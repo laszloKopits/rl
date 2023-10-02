@@ -378,7 +378,7 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
 <span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">indent</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
@@ -444,7 +444,9 @@
     <span class="k">def</span> <span class="nf">new_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_spec</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">observation_spec</span><span class="p">,</span> <span class="n">CompositeSpec</span><span class="p">):</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">observation_spec</span><span class="o">.</span><span class="n">_specs</span>
-            <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span><span class="p">):</span>
+            <span class="n">in_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span>
+            <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">in_key</span> <span class="ow">in</span> <span class="n">observation_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
                     <span class="n">d</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_spec</span><span class="p">[</span><span class="n">in_key</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
             <span class="k">return</span> <span class="n">CompositeSpec</span><span class="p">(</span>
@@ -472,7 +474,9 @@
             <span class="n">state_spec</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">input_spec</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">state_spec</span> <span class="o">=</span> <span class="n">state_spec</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys_inv</span><span class="p">):</span>
+        <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span>
+        <span class="n">out_keys_inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys_inv</span>
+        <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">in_keys_inv</span><span class="p">,</span> <span class="n">out_keys_inv</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">in_key</span> <span class="o">!=</span> <span class="n">out_key</span><span class="p">:</span>
                 <span class="c1"># we only change the input spec if the key is the same</span>
                 <span class="k">continue</span>
@@ -525,26 +529,73 @@
         <span class="n">out_keys_inv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_keys</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-            <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">in_keys</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_keys</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-            <span class="n">out_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">out_keys</span><span class="p">]</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span> <span class="o">=</span> <span class="n">in_keys</span>
-        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span> <span class="o">=</span> <span class="n">out_keys</span>
-        <span class="k">if</span> <span class="n">in_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span> <span class="o">=</span> <span class="n">in_keys_inv</span>
-        <span class="k">if</span> <span class="n">out_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out_keys_inv</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out_keys_inv</span> <span class="o">=</span> <span class="n">out_keys_inv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_missing_tolerance</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_container&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_parent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">in_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">in_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_in_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">in_keys</span>
+
+    <span class="nd">@in_keys</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">in_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_keys</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">out_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_out_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">out_keys</span>
+
+    <span class="nd">@out_keys</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">out_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_keys</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">in_keys_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_in_keys_inv&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">in_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">in_keys_inv</span>
+
+    <span class="nd">@in_keys_inv</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">in_keys_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_keys_inv</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">out_keys_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out_keys_inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_out_keys_inv&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">out_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">out_keys_inv</span>
+
+    <span class="nd">@out_keys_inv</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">out_keys_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_keys_inv</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="Transform.reset"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.Transform.html#torchrl.envs.transforms.Transform.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets a transform if it is stateful.&quot;&quot;&quot;</span>
@@ -579,8 +630,9 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">in_key</span> <span class="ow">in</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">include_nested</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-                <span class="n">observation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_transform</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">in_key</span><span class="p">))</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">in_key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">observation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_transform</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                 <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
                     <span class="n">out_key</span><span class="p">,</span>
                     <span class="n">observation</span><span class="p">,</span>
@@ -1230,7 +1282,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">transforms</span><span class="p">:</span> <span class="n">Transform</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="p">[])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">transforms</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">transforms</span><span class="p">:</span>
             <span class="n">t</span><span class="o">.</span><span class="n">set_container</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1450,6 +1502,8 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="n">IMAGE_KEYS</span>  <span class="c1"># default</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">from_int</span> <span class="o">=</span> <span class="n">from_int</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unsqueeze</span> <span class="o">=</span> <span class="n">unsqueeze</span>
@@ -1538,6 +1592,12 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">in_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">out_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys_inv</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys_inv</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="p">,</span> <span class="n">in_keys_inv</span><span class="p">,</span> <span class="n">out_keys_inv</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">high</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Either one or both of `high` and `low` must be provided.&quot;</span><span class="p">)</span>
@@ -1797,6 +1857,8 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
         <span class="n">clamp_min_tensor</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">clamp_min</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">clamp_min</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">clamp_min</span><span class="p">)</span>
@@ -1851,6 +1913,8 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_apply_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reward</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
@@ -1892,6 +1956,8 @@
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="n">IMAGE_KEYS</span>  <span class="c1"># default</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
@@ -1960,6 +2026,8 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="n">IMAGE_KEYS</span>  <span class="c1"># default</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">w</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="n">h</span> <span class="k">if</span> <span class="n">h</span> <span class="k">else</span> <span class="n">w</span>
@@ -2014,6 +2082,8 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="n">IMAGE_KEYS</span>  <span class="c1"># default</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">allow_positive_dim</span> <span class="ow">and</span> <span class="n">first_dim</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -2100,6 +2170,12 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># default</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">in_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># default</span>
+        <span class="k">if</span> <span class="n">out_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys_inv</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys_inv</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span>
             <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">,</span>
@@ -2274,6 +2350,15 @@
         <span class="n">in_keys_inv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">out_keys_inv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">in_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">out_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys_inv</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys_inv</span><span class="p">)</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span>
             <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">,</span>
@@ -2366,7 +2451,9 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="n">IMAGE_KEYS</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">GrayScale</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_apply_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="n">observation</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">rgb_to_grayscale</span><span class="p">(</span><span class="n">observation</span><span class="p">)</span>
@@ -2457,10 +2544,23 @@
         <span class="n">standard_normal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Not passing in_keys to ObservationNorm will soon be deprecated. &quot;</span>
+                <span class="s2">&quot;Ensure you specify the entries to be normalized&quot;</span><span class="p">,</span>
+                <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="s2">&quot;observation&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;pixels&quot;</span><span class="p">,</span>
             <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">in_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">out_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys_inv</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys_inv</span><span class="p">)</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span>
             <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">,</span>
@@ -2765,6 +2865,8 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="n">IMAGE_KEYS</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">N</span>
         <span class="k">if</span> <span class="n">dim</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
@@ -3020,7 +3122,7 @@
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">in_keys</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">standard_normal</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
@@ -3096,14 +3198,22 @@
 <span class="sd">        tensor. For large data structures, this can impact performance as this</span>
 <span class="sd">        scanning doesn&#39;t come for free. The keys to be</span>
 <span class="sd">        transformed will not be cached.</span>
+<span class="sd">        Note that, in this case, the out_keys (resp.</span>
+<span class="sd">        out_keys_inv) cannot be passed as the order on which the keys are processed</span>
+<span class="sd">        cannot be anticipated precisely.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dtype_in (torch.dtype): the input dtype (from the env).</span>
 <span class="sd">        dtype_out (torch.dtype): the output dtype (for model training).</span>
 <span class="sd">        in_keys (sequence of NestedKey, optional): list of ``dtype_in`` keys to be converted to</span>
 <span class="sd">            ``dtype_out`` before being exposed to external objects and functions.</span>
+<span class="sd">        out_keys (sequence of NestedKey, optional): list of destination keys.</span>
+<span class="sd">            Defaults to ``in_keys`` if not provided.</span>
 <span class="sd">        in_keys_inv (sequence of NestedKey, optional): list of ``dtype_out`` keys to be converted to</span>
 <span class="sd">            ``dtype_in`` before being passed to the contained base_env or storage.</span>
+<span class="sd">        out_keys_inv (sequence of NestedKey, optional): list of destination keys for inverse</span>
+<span class="sd">            transform.</span>
+<span class="sd">            Defaults to ``in_keys_inv`` if not provided.</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; td = TensorDict(</span>
@@ -3187,78 +3297,149 @@
         <span class="n">dtype_in</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
         <span class="n">dtype_out</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
         <span class="n">in_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">out_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">in_keys_inv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">out_keys_inv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span> <span class="o">=</span> <span class="n">dtype_in</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype_out</span> <span class="o">=</span> <span class="n">dtype_out</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span>
+            <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">,</span>
+            <span class="n">in_keys_inv</span><span class="o">=</span><span class="n">in_keys_inv</span><span class="p">,</span>
+            <span class="n">out_keys_inv</span><span class="o">=</span><span class="n">out_keys_inv</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">in_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">in_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_in_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_keys_unset</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span>
+            <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># in_keys=None means all entries of dtype_in will be mapped to dtype_out</span>
+                <span class="k">return</span> <span class="kc">None</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_keys_unset</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">observation_spec</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
+                    <span class="n">in_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">full_reward_spec</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
+                    <span class="n">in_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_in_keys</span> <span class="o">=</span> <span class="n">in_keys</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_out_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">in_keys</span>
+
+    <span class="nd">@in_keys</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">in_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_keys</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">out_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_out_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out_keys</span>
+
+    <span class="nd">@out_keys</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">out_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_keys</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">in_keys_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_in_keys_inv&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">in_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_keys_inv_unset</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span>
+            <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># in_keys_inv=None means all entries of dtype_out will be mapped to dtype_in</span>
+                <span class="k">return</span> <span class="kc">None</span>
             <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_keys_inv_unset</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">full_action_spec</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
+                    <span class="n">in_keys_inv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">full_state_spec</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
+                    <span class="n">in_keys_inv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_in_keys_inv</span> <span class="o">=</span> <span class="n">in_keys_inv</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_out_keys_inv&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">out_keys_inv</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys_inv</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">in_keys_inv</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">in_keys_inv</span><span class="o">=</span><span class="n">in_keys_inv</span><span class="p">)</span>
+    <span class="nd">@in_keys_inv</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">in_keys_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_in_keys_inv</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="k">def</span> <span class="nf">_set_in_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">env_base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span>
-        <span class="k">if</span> <span class="n">env_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># retrieve the specs that are self.dtype_in</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_unset</span><span class="p">:</span>
-                <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">observation_spec</span> <span class="o">=</span> <span class="n">env_base</span><span class="o">.</span><span class="n">observation_spec</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">observation_spec</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
-                        <span class="n">in_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
-                <span class="n">reward_spec</span> <span class="o">=</span> <span class="n">env_base</span><span class="o">.</span><span class="n">reward_spec</span>
-                <span class="k">if</span> <span class="n">reward_spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
-                    <span class="n">in_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">env_base</span><span class="o">.</span><span class="n">reward_key</span><span class="p">))</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">out_keys_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out_keys_inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_out_keys_inv&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">out_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys_inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_keys_inv</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out_keys_inv</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span> <span class="o">=</span> <span class="n">in_keys</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_keys_unset</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_inv_unset</span><span class="p">:</span>
-                <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">state_spec</span> <span class="o">=</span> <span class="n">env_base</span><span class="o">.</span><span class="n">state_spec</span>
-                <span class="k">if</span> <span class="n">state_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">state_spec</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-                        <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
-                            <span class="n">in_keys_inv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
-                <span class="n">action_spec</span> <span class="o">=</span> <span class="n">env_base</span><span class="o">.</span><span class="n">action_spec</span>
-                <span class="k">if</span> <span class="n">action_spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
-                    <span class="n">in_keys_inv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">env_base</span><span class="o">.</span><span class="n">action_key</span><span class="p">))</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys_inv</span> <span class="o">=</span> <span class="n">in_keys_inv</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_keys_inv_unset</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_container</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
+    <span class="nd">@out_keys_inv</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">out_keys_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">unravel_key</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_keys_inv</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="DTypeCastTransform.forward"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.DTypeCastTransform.html#torchrl.envs.transforms.DTypeCastTransform.forward">[docs]</a>    <span class="nd">@dispatch</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">&quot;in_keys&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;out_keys&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads the input tensordict, and for the selected keys, applies the transform.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_unset</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_in_keys</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
-                    <span class="n">out_key</span> <span class="o">=</span> <span class="n">in_key</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                    <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">out_key</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">tensordict</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span></div>
+        <span class="n">in_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span>
+        <span class="n">out_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span>
+        <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;in_keys wasn&#39;t provided and couldn&#39;t be retrieved. However, &quot;</span>
+                    <span class="s2">&quot;out_keys was passed to the constructor. Since the order of the &quot;</span>
+                    <span class="s2">&quot;entries mapped from dtype_in to dtype_out cannot be guaranteed, &quot;</span>
+                    <span class="s2">&quot;this functionality is not covered. Consider passing the in_keys &quot;</span>
+                    <span class="s2">&quot;or not passing any out_keys.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
+                    <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_transform</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                    <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">in_key</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># we made sure that if in_keys is not None, out_keys is not None either</span>
+            <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="p">):</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_transform</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">in_key</span><span class="p">))</span>
+                <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">out_key</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensordict</span></div>
 
     <span class="k">def</span> <span class="nf">_inv_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_inv_unset</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_in_keys</span><span class="p">()</span>
-            <span class="c1"># we can&#39;t differentiate between content of forward and inverse</span>
-            <span class="n">tensordict</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_out</span><span class="p">:</span>
-                    <span class="n">out_key</span> <span class="o">=</span> <span class="n">in_key</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inv_apply_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                    <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">out_key</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span>
+        <span class="n">out_keys_inv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys_inv</span>
+        <span class="k">if</span> <span class="n">in_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">out_keys_inv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;in_keys_inv wasn&#39;t provided and couldn&#39;t be retrieved. However, &quot;</span>
+                    <span class="s2">&quot;out_keys_inv was passed to the constructor. Since the order of the &quot;</span>
+                    <span class="s2">&quot;entries mapped from dtype_in to dtype_out cannot be guaranteed, &quot;</span>
+                    <span class="s2">&quot;this functionality is not covered. Consider passing the in_keys_inv &quot;</span>
+                    <span class="s2">&quot;or not passing any out_keys_inv.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">for</span> <span class="n">in_key_inv</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_out</span><span class="p">:</span>
+                    <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inv_apply_transform</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                    <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">in_key_inv</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">tensordict</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_inv_call</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_inv_call</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_apply_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">obs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype_out</span><span class="p">)</span>
@@ -3271,52 +3452,81 @@
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">spec</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_transform_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
             <span class="n">spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_out</span>
             <span class="n">space</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">space</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">ContinuousBox</span><span class="p">):</span>
                 <span class="n">space</span><span class="o">.</span><span class="n">low</span> <span class="o">=</span> <span class="n">space</span><span class="o">.</span><span class="n">low</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype_out</span><span class="p">)</span>
                 <span class="n">space</span><span class="o">.</span><span class="n">high</span> <span class="o">=</span> <span class="n">space</span><span class="o">.</span><span class="n">high</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype_out</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">spec</span>
 
 <div class="viewcode-block" id="DTypeCastTransform.transform_input_spec"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.DTypeCastTransform.html#torchrl.envs.transforms.DTypeCastTransform.transform_input_spec">[docs]</a>    <span class="k">def</span> <span class="nf">transform_input_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_spec</span><span class="p">:</span> <span class="n">TensorSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_inv_unset</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_in_keys</span><span class="p">()</span>
-        <span class="n">action_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span>
-        <span class="n">state_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">action_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
-                <span class="n">_spec</span> <span class="o">=</span> <span class="n">action_spec</span>
-            <span class="k">elif</span> <span class="n">state_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">state_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
-                <span class="n">_spec</span> <span class="o">=</span> <span class="n">state_spec</span>
+        <span class="n">full_action_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span>
+        <span class="n">full_state_spec</span> <span class="o">=</span> <span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_state_spec&quot;</span><span class="p">]</span>
+        <span class="c1"># if this method is called, then it must have a parent and in_keys_inv will be defined</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Calling transform_input_spec without a parent environment isn&#39;t supported yet for </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">in_key_inv</span><span class="p">,</span> <span class="n">out_key_inv</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys_inv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys_inv</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">in_key_inv</span> <span class="ow">in</span> <span class="n">full_action_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
+                <span class="n">_spec</span> <span class="o">=</span> <span class="n">full_action_spec</span><span class="p">[</span><span class="n">in_key_inv</span><span class="p">]</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
+            <span class="k">elif</span> <span class="n">in_key_inv</span> <span class="ow">in</span> <span class="n">full_state_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
+                <span class="n">_spec</span> <span class="o">=</span> <span class="n">full_state_spec</span><span class="p">[</span><span class="n">in_key_inv</span><span class="p">]</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Key </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not found in state_spec and action_spec.&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">_spec</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;input_spec[</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">].dtype is not </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">input_spec</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Key </span><span class="si">{</span><span class="n">in_key_inv</span><span class="si">}</span><span class="s2"> not found in state_spec and action_spec.&quot;</span>
                 <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_transform_spec</span><span class="p">(</span><span class="n">_spec</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">_spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;input_spec[</span><span class="si">{</span><span class="n">in_key_inv</span><span class="si">}</span><span class="s2">].dtype is not </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">in_key_inv</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="n">_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_spec</span><span class="p">(</span><span class="n">_spec</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span>
+                <span class="n">full_action_spec</span><span class="p">[</span><span class="n">out_key_inv</span><span class="p">]</span> <span class="o">=</span> <span class="n">_spec</span>
+            <span class="k">elif</span> <span class="n">target</span> <span class="o">==</span> <span class="s2">&quot;state&quot;</span><span class="p">:</span>
+                <span class="n">full_state_spec</span><span class="p">[</span><span class="n">out_key_inv</span><span class="p">]</span> <span class="o">=</span> <span class="n">_spec</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># unreachable</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span>
         <span class="k">return</span> <span class="n">input_spec</span></div>
 
-<div class="viewcode-block" id="DTypeCastTransform.transform_reward_spec"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.DTypeCastTransform.html#torchrl.envs.transforms.DTypeCastTransform.transform_reward_spec">[docs]</a>    <span class="nd">@_apply_to_composite</span>
-    <span class="k">def</span> <span class="nf">transform_reward_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reward_spec</span><span class="p">:</span> <span class="n">TensorSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_unset</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_in_keys</span><span class="p">()</span>
-        <span class="n">reward_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">reward_key</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;reward&quot;</span>
-        <span class="k">if</span> <span class="n">unravel_key</span><span class="p">(</span><span class="n">reward_key</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">reward_spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;reward_spec.dtype is not </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="DTypeCastTransform.transform_output_spec"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.DTypeCastTransform.html#torchrl.envs.transforms.DTypeCastTransform.transform_output_spec">[docs]</a>    <span class="k">def</span> <span class="nf">transform_output_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_spec</span><span class="p">:</span> <span class="n">CompositeSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompositeSpec</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Calling transform_reward_spec without a parent environment isn&#39;t supported yet for </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">full_reward_spec</span> <span class="o">=</span> <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">reward_key</span><span class="p">,</span> <span class="n">reward_spec</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">full_reward_spec</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)):</span>
+            <span class="c1"># find out_key that match the in_key</span>
+            <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">reward_key</span> <span class="o">==</span> <span class="n">in_key</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">reward_spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;reward_spec.dtype is not </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">full_reward_spec</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_spec</span><span class="p">(</span><span class="n">reward_spec</span><span class="p">)</span>
+        <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_observation_spec</span><span class="p">(</span>
+            <span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_observation_spec&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">output_spec</span></div>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_transform_spec</span><span class="p">(</span><span class="n">reward_spec</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">reward_spec</span></div>
-
-<div class="viewcode-block" id="DTypeCastTransform.transform_observation_spec"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.DTypeCastTransform.html#torchrl.envs.transforms.DTypeCastTransform.transform_observation_spec">[docs]</a>    <span class="k">def</span> <span class="nf">transform_observation_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_spec</span><span class="p">:</span> <span class="n">TensorSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_unset</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_set_in_keys</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_observation_spec</span><span class="p">(</span><span class="n">observation_spec</span><span class="p">)</span></div>
-
-    <span class="nd">@_apply_to_composite</span>
-    <span class="k">def</span> <span class="nf">_transform_observation_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_spec</span><span class="p">:</span> <span class="n">TensorSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorSpec</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_transform_spec</span><span class="p">(</span><span class="n">observation_spec</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">observation_spec</span>
+<div class="viewcode-block" id="DTypeCastTransform.transform_observation_spec"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.DTypeCastTransform.html#torchrl.envs.transforms.DTypeCastTransform.transform_observation_spec">[docs]</a>    <span class="k">def</span> <span class="nf">transform_observation_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_spec</span><span class="p">):</span>
+        <span class="n">full_observation_spec</span> <span class="o">=</span> <span class="n">observation_spec</span>
+        <span class="k">for</span> <span class="n">observation_key</span><span class="p">,</span> <span class="n">observation_spec</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="n">full_observation_spec</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="c1"># find out_key that match the in_key</span>
+            <span class="k">for</span> <span class="n">in_key</span><span class="p">,</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">observation_key</span> <span class="o">==</span> <span class="n">in_key</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">observation_spec</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;observation_spec.dtype is not </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype_in</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                    <span class="n">full_observation_spec</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_spec</span><span class="p">(</span>
+                        <span class="n">observation_spec</span>
+                    <span class="p">)</span>
+        <span class="k">return</span> <span class="n">full_observation_spec</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">s</span> <span class="o">=</span> <span class="p">(</span>
@@ -3343,12 +3553,20 @@
 <span class="sd">        tensor. For large data structures, this can impact performance as this</span>
 <span class="sd">        scanning doesn&#39;t come for free. The keys to be</span>
 <span class="sd">        transformed will not be cached.</span>
+<span class="sd">        Note that, in this case, the out_keys (resp.</span>
+<span class="sd">        out_keys_inv) cannot be passed as the order on which the keys are processed</span>
+<span class="sd">        cannot be anticipated precisely.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        in_keys (sequence of NestedKey, optional): list of double keys to be converted to</span>
 <span class="sd">            float before being exposed to external objects and functions.</span>
+<span class="sd">        out_keys (sequence of NestedKey, optional): list of destination keys.</span>
+<span class="sd">            Defaults to ``in_keys`` if not provided.</span>
 <span class="sd">        in_keys_inv (sequence of NestedKey, optional): list of float keys to be converted to</span>
 <span class="sd">            double before being passed to the contained base_env or storage.</span>
+<span class="sd">        out_keys_inv (sequence of NestedKey, optional): list of destination keys for inverse</span>
+<span class="sd">            transform.</span>
+<span class="sd">            Defaults to ``in_keys_inv`` if not provided.</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        &gt;&gt;&gt; td = TensorDict(</span>
@@ -3430,9 +3648,18 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">in_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">out_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">in_keys_inv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">out_keys_inv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">double</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">in_keys</span><span class="p">,</span> <span class="n">in_keys_inv</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">dtype_in</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">double</span><span class="p">,</span>
+            <span class="n">dtype_out</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">,</span>
+            <span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span>
+            <span class="n">in_keys_inv</span><span class="o">=</span><span class="n">in_keys_inv</span><span class="p">,</span>
+            <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">,</span>
+            <span class="n">out_keys_inv</span><span class="o">=</span><span class="n">out_keys_inv</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DeviceCastTransform"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.DeviceCastTransform.html#torchrl.envs.transforms.DeviceCastTransform">[docs]</a><span class="k">class</span> <span class="nc">DeviceCastTransform</span><span class="p">(</span><span class="n">Transform</span><span class="p">):</span>
@@ -3466,7 +3693,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">orig_device</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">orig_device</span><span class="p">)</span> <span class="k">if</span> <span class="n">orig_device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">orig_device</span>
         <span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="p">[])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">set_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Transform</span><span class="p">,</span> <span class="n">EnvBase</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -3576,7 +3803,6 @@
             <span class="n">in_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_sort_keys</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_key</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CatTensors requires out_key to be of type NestedKey&quot;</span><span class="p">)</span>
-        <span class="c1"># super().__init__(in_keys=in_keys)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">CatTensors</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="p">[</span><span class="n">out_key</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">dim</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_del_keys</span> <span class="o">=</span> <span class="n">del_keys</span>
@@ -3738,11 +3964,13 @@
             <span class="n">in_keys</span> <span class="o">=</span> <span class="n">in_keys_inv</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">in_keys_inv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">in_keys_inv</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span>
-            <span class="n">out_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span>
+            <span class="n">out_keys</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">),</span>
             <span class="n">in_keys_inv</span><span class="o">=</span><span class="n">in_keys_inv</span><span class="p">,</span>
-            <span class="n">out_keys_inv</span><span class="o">=</span><span class="n">in_keys_inv</span><span class="p">,</span>
+            <span class="n">out_keys_inv</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="n">in_keys_inv</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_actions_effective</span> <span class="o">=</span> <span class="n">num_actions_effective</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_actions</span> <span class="o">=</span> <span class="n">max_actions</span>
@@ -3810,7 +4038,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">frame_skip</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;frame_skip should have a value greater or equal to one.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frame_skip</span> <span class="o">=</span> <span class="n">frame_skip</span>
@@ -3855,7 +4083,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">noops</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample initial states by taking random number of no-ops on reset.&quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">noops</span> <span class="o">=</span> <span class="n">noops</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random</span> <span class="o">=</span> <span class="n">random</span>
 
@@ -4018,7 +4246,7 @@
                     <span class="s2">&quot;The values of the primers must be a subtype of the TensorSpec class. &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span><span class="si">}</span><span class="s2"> instead.&quot;</span>
                 <span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -4123,7 +4351,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calls pin_memory on the tensordict to facilitate writing on CUDA devices.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">()</span>
@@ -4180,6 +4408,8 @@
 <span class="sd">    Args:</span>
 <span class="sd">        in_keys (sequence of NestedKey, optional): keys to be updated.</span>
 <span class="sd">            default: [&quot;observation&quot;, &quot;reward&quot;]</span>
+<span class="sd">        out_keys (sequence of NestedKey, optional): destination keys.</span>
+<span class="sd">            Defaults to ``in_keys``.</span>
 <span class="sd">        shared_td (TensorDictBase, optional): A shared tensordict containing the</span>
 <span class="sd">            keys of the transform.</span>
 <span class="sd">        decay (number, optional): decay rate of the moving average.</span>
@@ -4216,6 +4446,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">in_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">out_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">shared_td</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TensorDictBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">lock</span><span class="p">:</span> <span class="n">mp</span><span class="o">.</span><span class="n">Lock</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9999</span><span class="p">,</span>
@@ -4226,7 +4457,9 @@
             <span class="n">lock</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">]</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_td</span> <span class="o">=</span> <span class="n">shared_td</span>
         <span class="k">if</span> <span class="n">shared_td</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
             <span class="n">shared_td</span><span class="o">.</span><span class="n">is_shared</span><span class="p">()</span> <span class="ow">or</span> <span class="n">shared_td</span><span class="o">.</span><span class="n">is_memmap</span><span class="p">()</span>
@@ -4747,7 +4980,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">truncated_key</span> <span class="o">=</span> <span class="n">truncated_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">step_count_key</span> <span class="o">=</span> <span class="n">step_count_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_done</span> <span class="o">=</span> <span class="n">update_done</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">truncated_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -5077,7 +5310,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">excluded_keys</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="p">[],</span> <span class="n">in_keys_inv</span><span class="o">=</span><span class="p">[],</span> <span class="n">out_keys</span><span class="o">=</span><span class="p">[],</span> <span class="n">out_keys_inv</span><span class="o">=</span><span class="p">[])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">excluded_keys</span> <span class="o">=</span> <span class="n">unravel_key_list</span><span class="p">(</span><span class="n">excluded_keys</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
@@ -5159,7 +5392,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">selected_keys</span><span class="p">,</span> <span class="n">keep_rewards</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">keep_dones</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="p">[],</span> <span class="n">in_keys_inv</span><span class="o">=</span><span class="p">[],</span> <span class="n">out_keys</span><span class="o">=</span><span class="p">[],</span> <span class="n">out_keys_inv</span><span class="o">=</span><span class="p">[])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">selected_keys</span> <span class="o">=</span> <span class="n">unravel_key_list</span><span class="p">(</span><span class="n">selected_keys</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
@@ -5272,6 +5505,8 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;observation&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">T</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -5412,7 +5647,7 @@
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_dim</span> <span class="o">=</span> <span class="n">sample_dim</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mask_key</span> <span class="o">=</span> <span class="n">mask_key</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="RandomCropTensorDict.forward"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.RandomCropTensorDict.html#torchrl.envs.transforms.RandomCropTensorDict.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">shape</span>
@@ -5492,7 +5727,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;init_key can only be of type str.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_key</span> <span class="o">=</span> <span class="n">init_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_key</span> <span class="o">=</span> <span class="s2">&quot;_reset&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="p">[],</span> <span class="n">out_keys</span><span class="o">=</span><span class="p">[])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">set_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Transform</span><span class="p">,</span> <span class="n">EnvBase</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_keys</span> <span class="o">=</span> <span class="kc">None</span>
@@ -5910,7 +6145,7 @@
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">)]</span>
         <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="c1"># out_keys = [&quot;reward_to_go&quot;]</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span>
@@ -6104,7 +6339,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">final_name</span><span class="o">=</span><span class="s2">&quot;final&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final_name</span> <span class="o">=</span> <span class="n">final_name</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="p">[])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_memo</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">def</span> <span class="nf">set_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Transform</span><span class="p">,</span> <span class="n">EnvBase</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

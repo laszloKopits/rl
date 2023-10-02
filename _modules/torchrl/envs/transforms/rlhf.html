@@ -372,7 +372,7 @@
 <span class="c1">#</span>
 <span class="c1"># This source code is licensed under the MIT license found in the</span>
 <span class="c1"># LICENSE file in the root directory of this source tree.</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">tensordict</span> <span class="kn">import</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">unravel_key</span>
@@ -463,24 +463,22 @@
         <span class="k">if</span> <span class="n">in_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">in_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_IN_KEYS</span>
         <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">in_keys</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">in_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">in_keys</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">out_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">out_keys</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_seq_of_nested_key</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_seq_of_nested_key</span><span class="p">(</span><span class="n">out_keys</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;invalid in_keys / out_keys:</span><span class="se">\n</span><span class="s2">in_keys=</span><span class="si">{</span><span class="n">in_keys</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">out_keys=</span><span class="si">{</span><span class="n">out_keys</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_keys</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Only one in_key/out_key is allowed, got in_keys=</span><span class="si">{</span><span class="n">in_keys</span><span class="si">}</span><span class="s2">, out_keys=</span><span class="si">{</span><span class="n">out_keys</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
+            <span class="n">out_keys</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">in_keys</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_keys</span><span class="o">=</span><span class="n">in_keys</span><span class="p">,</span> <span class="n">out_keys</span><span class="o">=</span><span class="n">out_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_seq_of_nested_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">is_seq_of_nested_key</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;invalid in_keys / out_keys:</span><span class="se">\n</span><span class="s2">in_keys=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">out_keys=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Only one in_key/out_key is allowed, got in_keys=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="si">}</span><span class="s2">, out_keys=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
         <span class="c1"># for convenience, convert out_keys to tuples</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_out_keys</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">out_key</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">out_key</span><span class="p">,)</span>
-            <span class="k">for</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_keys</span>
+            <span class="k">for</span> <span class="n">out_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_keys</span>
         <span class="p">]</span>
 
         <span class="c1"># update the in_keys for dispatch etc</span>

@@ -855,7 +855,7 @@ to be able to create this other composition:</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.DiscreteActionProjection.html#torchrl.envs.transforms.DiscreteActionProjection" title="torchrl.envs.transforms.DiscreteActionProjection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DiscreteActionProjection</span></code></a>(...[, action_key, ...])</p></td>
 <td><p>Projects discrete actions from a high dimensional space to a low dimensional space.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.DoubleToFloat.html#torchrl.envs.transforms.DoubleToFloat" title="torchrl.envs.transforms.DoubleToFloat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DoubleToFloat</span></code></a>([in_keys, in_keys_inv])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.DoubleToFloat.html#torchrl.envs.transforms.DoubleToFloat" title="torchrl.envs.transforms.DoubleToFloat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DoubleToFloat</span></code></a>([in_keys, out_keys, ...])</p></td>
 <td><p>Casts one dtype to another for selected keys.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.DTypeCastTransform.html#torchrl.envs.transforms.DTypeCastTransform" title="torchrl.envs.transforms.DTypeCastTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DTypeCastTransform</span></code></a>(dtype_in, dtype_out[, ...])</p></td>
@@ -948,7 +948,7 @@ to be able to create this other composition:</p>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.UnsqueezeTransform.html#torchrl.envs.transforms.UnsqueezeTransform" title="torchrl.envs.transforms.UnsqueezeTransform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UnsqueezeTransform</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Inserts a dimension of size one at the specified position.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.VecNorm.html#torchrl.envs.transforms.VecNorm" title="torchrl.envs.transforms.VecNorm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VecNorm</span></code></a>([in_keys, shared_td, lock, decay, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.VecNorm.html#torchrl.envs.transforms.VecNorm" title="torchrl.envs.transforms.VecNorm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VecNorm</span></code></a>([in_keys, out_keys, shared_td, ...])</p></td>
 <td><p>Moving average normalization layer for torchrl environments.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.VC1Transform.html#torchrl.envs.transforms.VC1Transform" title="torchrl.envs.transforms.VC1Transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VC1Transform</span></code></a>(in_keys, out_keys, model_name)</p></td>
