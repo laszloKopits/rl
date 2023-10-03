@@ -6,28 +6,28 @@
 
 Computation times
 =================
-**22:33.874** total execution time for **tutorials** files:
+**22:47.021** total execution time for **tutorials** files:
 
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_torchrl_demo.py` (``torchrl_demo.py``)           | 03:57.426 | 14.7 MB   |
+| :ref:`sphx_glr_tutorials_torchrl_demo.py` (``torchrl_demo.py``)           | 04:00.988 | 31.6 MB   |
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_torchrl_envs.py` (``torchrl_envs.py``)           | 03:33.197 | 137.2 MB  |
+| :ref:`sphx_glr_tutorials_torchrl_envs.py` (``torchrl_envs.py``)           | 03:35.911 | 159.0 MB  |
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_dqn_with_rnn.py` (``dqn_with_rnn.py``)           | 03:29.720 | 1896.2 MB |
+| :ref:`sphx_glr_tutorials_dqn_with_rnn.py` (``dqn_with_rnn.py``)           | 03:30.199 | 1813.5 MB |
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_pendulum.py` (``pendulum.py``)                   | 02:52.591 | 9.1 MB    |
+| :ref:`sphx_glr_tutorials_pendulum.py` (``pendulum.py``)                   | 02:51.218 | 9.2 MB    |
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_rb_tutorial.py` (``rb_tutorial.py``)             | 02:34.393 | 384.0 MB  |
+| :ref:`sphx_glr_tutorials_rb_tutorial.py` (``rb_tutorial.py``)             | 02:38.353 | 383.7 MB  |
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_coding_ddpg.py` (``coding_ddpg.py``)             | 01:59.414 | 13.0 MB   |
+| :ref:`sphx_glr_tutorials_coding_ddpg.py` (``coding_ddpg.py``)             | 02:00.750 | 12.9 MB   |
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_coding_ppo.py` (``coding_ppo.py``)               | 01:32.202 | 14.8 MB   |
+| :ref:`sphx_glr_tutorials_coding_ppo.py` (``coding_ppo.py``)               | 01:32.721 | 14.8 MB   |
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_coding_dqn.py` (``coding_dqn.py``)               | 01:21.299 | 1121.7 MB |
+| :ref:`sphx_glr_tutorials_coding_dqn.py` (``coding_dqn.py``)               | 01:22.268 | 1118.9 MB |
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_multi_task.py` (``multi_task.py``)               | 00:49.460 | 121.2 MB  |
+| :ref:`sphx_glr_tutorials_multi_task.py` (``multi_task.py``)               | 00:50.081 | 124.3 MB  |
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_multiagent_ppo.py` (``multiagent_ppo.py``)       | 00:20.440 | 1073.9 MB |
+| :ref:`sphx_glr_tutorials_multiagent_ppo.py` (``multiagent_ppo.py``)       | 00:20.763 | 1082.1 MB |
 +---------------------------------------------------------------------------+-----------+-----------+
-| :ref:`sphx_glr_tutorials_pretrained_models.py` (``pretrained_models.py``) | 00:03.731 | 558.5 MB  |
+| :ref:`sphx_glr_tutorials_pretrained_models.py` (``pretrained_models.py``) | 00:03.770 | 557.9 MB  |
 +---------------------------------------------------------------------------+-----------+-----------+
