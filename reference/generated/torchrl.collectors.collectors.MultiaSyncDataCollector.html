@@ -485,12 +485,12 @@ Once a trajectory reaches <code class="docutils literal notranslate"><span class
 If the environment wraps multiple environments together, the number
 of steps is tracked for each environment independently. Negative
 values are allowed, in which case this argument is ignored.
-Defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code> (i.e. no maximum number of steps).</p></li>
+Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code> (i.e. no maximum number of steps).</p></li>
 <li><p><strong>init_random_frames</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of frames for which the
 policy is ignored before it is called. This feature is mainly
 intended to be used in offline/model-based settings, where a
 batch of random trajectories can be used to initialize training.
-Defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code> (i.e. no random frames).</p></li>
+Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code> (i.e. no random frames).</p></li>
 <li><p><strong>reset_at_each_iter</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether environments should be reset
 at the beginning of a batch collection.
 Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>

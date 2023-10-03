@@ -727,129 +727,128 @@
             <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_network_params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_actor_network_params</span><span class="p">],</span> <span class="mi">0</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="TD3Loss.forward"><a class="viewcode-back" href="../../../reference/generated/torchrl.objectives.TD3Loss.html#torchrl.objectives.TD3Loss.forward">[docs]</a>    <span class="nd">@dispatch</span>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
-        <span class="n">obs_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="o">.</span><span class="n">in_keys</span>
-        <span class="n">tensordict_save</span> <span class="o">=</span> <span class="n">tensordict</span>
-        <span class="n">tensordict</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">act</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
-        <span class="n">action_shape</span> <span class="o">=</span> <span class="n">act</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">action_device</span> <span class="o">=</span> <span class="n">act</span><span class="o">.</span><span class="n">device</span>
-        <span class="c1"># computing early for reprod</span>
-        <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span>
-            <span class="n">mean</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">action_shape</span><span class="p">),</span>
-            <span class="n">std</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">action_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy_noise</span><span class="p">),</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">action_device</span><span class="p">)</span>
-        <span class="n">noise</span> <span class="o">=</span> <span class="n">noise</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_clip</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_clip</span><span class="p">)</span>
-
-        <span class="n">tensordict_actor_grad</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="o">*</span><span class="n">obs_keys</span>
-        <span class="p">)</span>  <span class="c1"># to avoid overwriting keys</span>
-        <span class="n">next_td_actor</span> <span class="o">=</span> <span class="n">step_mdp</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="o">.</span><span class="n">in_keys</span>
-        <span class="p">)</span>  <span class="c1"># next_observation -&gt;</span>
-        <span class="n">tensordict_actor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">tensordict_actor_grad</span><span class="p">,</span> <span class="n">next_td_actor</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="c1"># DO NOT call contiguous bc we&#39;ll update the tds later</span>
-        <span class="n">actor_output_td</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vmap_actor_network00</span><span class="p">(</span>
-            <span class="n">tensordict_actor</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_cached_stack_actor_params</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">actor_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">):</span>
+        <span class="n">tensordict_actor_grad</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span>
+        <span class="n">tensordict_actor_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="p">(</span>
+            <span class="n">tensordict_actor_grad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_network_params</span>
         <span class="p">)</span>
-        <span class="c1"># add noise to target policy</span>
-        <span class="n">actor_output_td1</span> <span class="o">=</span> <span class="n">actor_output_td</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">next_action</span> <span class="o">=</span> <span class="p">(</span><span class="n">actor_output_td1</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span><span class="p">)</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">min_action</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_action</span>
-        <span class="p">)</span>
-        <span class="n">actor_output_td1</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">,</span> <span class="n">next_action</span><span class="p">)</span>
-        <span class="n">tensordict_actor</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">,</span>
-            <span class="n">actor_output_td</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">),</span>
-        <span class="p">)</span>
-
-        <span class="c1"># repeat tensordict_actor to match the qvalue size</span>
-        <span class="n">_actor_loss_td</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">tensordict_actor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">qvalue_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_qvalue_nets</span><span class="p">,</span> <span class="o">*</span><span class="n">tensordict_actor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="n">actor_loss_td</span> <span class="o">=</span> <span class="n">tensordict_actor_grad</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">qvalue_network</span><span class="o">.</span><span class="n">in_keys</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_qvalue_nets</span><span class="p">,</span> <span class="o">*</span><span class="n">tensordict_actor_grad</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="p">)</span>  <span class="c1"># for actor loss</span>
-        <span class="n">_qval_td</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">qvalue_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">num_qvalue_nets</span><span class="p">,</span>
-            <span class="o">*</span><span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">qvalue_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
-        <span class="p">)</span>  <span class="c1"># for qvalue loss</span>
-        <span class="n">_next_val_td</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">tensordict_actor</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">qvalue_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_qvalue_nets</span><span class="p">,</span> <span class="o">*</span><span class="n">tensordict_actor</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
-        <span class="p">)</span>  <span class="c1"># for next value estimation</span>
-        <span class="n">tensordict_qval</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">_actor_loss_td</span><span class="p">,</span>
-                <span class="n">_next_val_td</span><span class="p">,</span>
-                <span class="n">_qval_td</span><span class="p">,</span>
-            <span class="p">],</span>
-            <span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># cat params</span>
-        <span class="n">qvalue_params</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
-            <span class="p">[</span>
+        <span class="n">state_action_value_actor</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vmap_qvalue_network00</span><span class="p">(</span>
+                <span class="n">actor_loss_td</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_cached_detach_qvalue_network_params</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">target_qvalue_network_params</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">qvalue_network_params</span><span class="p">,</span>
-            <span class="p">],</span>
-            <span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">state_action_value</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">tensordict_qval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vmap_qvalue_network00</span><span class="p">(</span>
-            <span class="n">tensordict_qval</span><span class="p">,</span>
-            <span class="n">qvalue_params</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">loss_actor</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">state_action_value_actor</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;state_action_value_actor&quot;</span><span class="p">:</span> <span class="n">state_action_value_actor</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">loss_actor</span><span class="p">,</span> <span class="n">metadata</span>
 
-        <span class="n">state_action_value</span> <span class="o">=</span> <span class="n">tensordict_qval</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">state_action_value</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="p">(</span>
-            <span class="n">state_action_value_actor</span><span class="p">,</span>
-            <span class="n">next_state_action_value_qvalue</span><span class="p">,</span>
-            <span class="n">state_action_value_qvalue</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="n">state_action_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
-            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_qvalue_nets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_qvalue_nets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_qvalue_nets</span><span class="p">],</span>
-            <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">value_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">):</span>
+        <span class="n">tensordict</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">act</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="c1"># computing early for reprod</span>
+        <span class="n">noise</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">act</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy_noise</span><span class="p">)</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_clip</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_clip</span>
         <span class="p">)</span>
 
-        <span class="n">loss_actor</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">state_action_value_actor</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">next_td_actor</span> <span class="o">=</span> <span class="n">step_mdp</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="o">.</span><span class="n">in_keys</span>
+            <span class="p">)</span>  <span class="c1"># next_observation -&gt;</span>
+            <span class="n">next_td_actor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="p">(</span>
+                <span class="n">next_td_actor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_actor_network_params</span>
+            <span class="p">)</span>
+            <span class="n">next_action</span> <span class="o">=</span> <span class="p">(</span><span class="n">next_td_actor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span><span class="p">)</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">min_action</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_action</span>
+            <span class="p">)</span>
+            <span class="n">next_td_actor</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">,</span>
+                <span class="n">next_action</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">next_val_td</span> <span class="o">=</span> <span class="n">next_td_actor</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">qvalue_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_qvalue_nets</span><span class="p">,</span> <span class="o">*</span><span class="n">next_td_actor</span><span class="o">.</span><span class="n">batch_size</span>
+            <span class="p">)</span>  <span class="c1"># for next value estimation</span>
+            <span class="n">next_target_q1q2</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vmap_qvalue_network00</span><span class="p">(</span>
+                    <span class="n">next_val_td</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">target_qvalue_network_params</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">state_action_value</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="c1"># min over the next target qvalues</span>
+        <span class="n">next_target_qvalue</span> <span class="o">=</span> <span class="n">next_target_q1q2</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="n">next_state_value</span> <span class="o">=</span> <span class="n">next_state_action_value_qvalue</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># set next target qvalues</span>
         <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
             <span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">state_action_value</span><span class="p">),</span>
-            <span class="n">next_state_value</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">next_target_qvalue</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
         <span class="p">)</span>
+
+        <span class="n">qval_td</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">qvalue_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_qvalue_nets</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">tensordict</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># preditcted current qvalues</span>
+        <span class="n">current_qvalue</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vmap_qvalue_network00</span><span class="p">(</span>
+                <span class="n">qval_td</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">qvalue_network_params</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">state_action_value</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># compute target values for the qvalue loss (reward + gamma * next_target_qvalue * (1 - done))</span>
         <span class="n">target_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_estimator</span><span class="o">.</span><span class="n">value_estimate</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">pred_val</span> <span class="o">=</span> <span class="n">state_action_value_qvalue</span>
-        <span class="n">td_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">pred_val</span> <span class="o">-</span> <span class="n">target_value</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">td_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">current_qvalue</span> <span class="o">-</span> <span class="n">target_value</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">loss_qval</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">distance_loss</span><span class="p">(</span>
-                <span class="n">pred_val</span><span class="p">,</span>
-                <span class="n">target_value</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">pred_val</span><span class="p">),</span>
+                <span class="n">current_qvalue</span><span class="p">,</span>
+                <span class="n">target_value</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">current_qvalue</span><span class="p">),</span>
                 <span class="n">loss_function</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
             <span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-            <span class="o">*</span> <span class="mf">0.5</span>
         <span class="p">)</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;td_error&quot;</span><span class="p">:</span> <span class="n">td_error</span><span class="p">,</span>
+            <span class="s2">&quot;next_state_value&quot;</span><span class="p">:</span> <span class="n">next_target_qvalue</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="s2">&quot;pred_value&quot;</span><span class="p">:</span> <span class="n">current_qvalue</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="s2">&quot;target_value&quot;</span><span class="p">:</span> <span class="n">target_value</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+        <span class="p">}</span>
 
-        <span class="n">tensordict_save</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">td_error</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">loss_qval</span><span class="p">,</span> <span class="n">metadata</span>
 
+<div class="viewcode-block" id="TD3Loss.forward"><a class="viewcode-back" href="../../../reference/generated/torchrl.objectives.TD3Loss.html#torchrl.objectives.TD3Loss.forward">[docs]</a>    <span class="nd">@dispatch</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
+        <span class="n">tensordict_save</span> <span class="o">=</span> <span class="n">tensordict</span>
+        <span class="n">loss_actor</span><span class="p">,</span> <span class="n">metadata_actor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_loss</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
+        <span class="n">loss_qval</span><span class="p">,</span> <span class="n">metadata_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_loss</span><span class="p">(</span><span class="n">tensordict_save</span><span class="p">)</span>
+        <span class="n">tensordict_save</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">metadata_value</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;td_error&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">loss_qval</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">loss_actor</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;QVal and actor loss have different shape: </span><span class="si">{</span><span class="n">loss_qval</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">loss_actor</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="n">td_out</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">(</span>
             <span class="n">source</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;loss_actor&quot;</span><span class="p">:</span> <span class="n">loss_actor</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
-                <span class="s2">&quot;loss_qvalue&quot;</span><span class="p">:</span> <span class="n">loss_qval</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
-                <span class="s2">&quot;pred_value&quot;</span><span class="p">:</span> <span class="n">pred_val</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
-                <span class="s2">&quot;state_action_value_actor&quot;</span><span class="p">:</span> <span class="n">state_action_value_actor</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
-                <span class="s2">&quot;next_state_value&quot;</span><span class="p">:</span> <span class="n">next_state_value</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
-                <span class="s2">&quot;target_value&quot;</span><span class="p">:</span> <span class="n">target_value</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+                <span class="s2">&quot;loss_actor&quot;</span><span class="p">:</span> <span class="n">loss_actor</span><span class="p">,</span>
+                <span class="s2">&quot;loss_qvalue&quot;</span><span class="p">:</span> <span class="n">loss_qval</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">metadata_actor</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">metadata_value</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">batch_size</span><span class="o">=</span><span class="p">[],</span>
         <span class="p">)</span>
