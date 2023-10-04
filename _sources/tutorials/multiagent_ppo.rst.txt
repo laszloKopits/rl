@@ -309,16 +309,15 @@ There are four specs to look at:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 255-262
+.. GENERATED FROM PYTHON SOURCE LINES 255-261
 
 .. code-block:: default
 
 
-    print("action_spec:", env.action_spec)
-    print("reward_spec:", env.reward_spec)
-    print("done_spec:", env.done_spec)
+    print("action_spec:", env.full_action_spec)
+    print("reward_spec:", env.full_reward_spec)
+    print("done_spec:", env.full_done_spec)
     print("observation_spec:", env.observation_spec)
-
 
 
 
@@ -328,20 +327,24 @@ There are four specs to look at:
 
  .. code-block:: none
 
-    action_spec: BoundedTensorSpec(
-        shape=torch.Size([60, 3, 2]),
-        space=ContinuousBox(
-            low=Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, contiguous=True),
-            high=Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, contiguous=True)),
-        device=cpu,
-        dtype=torch.float32,
-        domain=continuous)
-    reward_spec: UnboundedContinuousTensorSpec(
-        shape=torch.Size([60, 3, 1]),
-        space=None,
-        device=cpu,
-        dtype=torch.float32,
-        domain=continuous)
+    action_spec: CompositeSpec(
+        agents: CompositeSpec(
+            action: BoundedTensorSpec(
+                shape=torch.Size([60, 3, 2]),
+                space=ContinuousBox(
+                    low=Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, contiguous=True),
+                    high=Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, contiguous=True)),
+                device=cpu,
+                dtype=torch.float32,
+                domain=continuous), device=cpu, shape=torch.Size([60, 3])), device=cpu, shape=torch.Size([60]))
+    reward_spec: CompositeSpec(
+        agents: CompositeSpec(
+            reward: UnboundedContinuousTensorSpec(
+                shape=torch.Size([60, 3, 1]),
+                space=None,
+                device=cpu,
+                dtype=torch.float32,
+                domain=continuous), device=cpu, shape=torch.Size([60, 3])), device=cpu, shape=torch.Size([60]))
     done_spec: CompositeSpec(
         done: DiscreteTensorSpec(
             shape=torch.Size([60, 1]),
@@ -386,7 +389,7 @@ There are four specs to look at:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 263-275
+.. GENERATED FROM PYTHON SOURCE LINES 262-281
 
 Using the commands just shown we can access the domain of each value.
 Doing this we can see that all specs apart from done have a leading shape ``(num_vmas_envs, n_agents)``.
@@ -398,17 +401,25 @@ TorchRL has a way to keep track of which MARL specs are shared and which are not
 In fact, specs that have the additional agent dimension
 (i.e., they vary for each agent) will be contained in a inner "agents" key.
 
-To access the full structure of the specs we can use
+As you can see the reward and action spec present the "agent" key,
+meaning that entries in tensordicts belonging to those specs will be nested in an "agents" tensordict,
+grouping all per-agent values.
+
+To quickly access the keys for each of these values in tensordicts, we can simply ask the environment for the
+respective keys, and
+we will immediately understand which are per-agent and which shared.
+This info will be useful in order to tell all other TorchRL components where to find each value
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 275-280
+.. GENERATED FROM PYTHON SOURCE LINES 281-287
 
 .. code-block:: default
 
 
-    print("full_action_spec:", env.input_spec["full_action_spec"])
-    print("full_reward_spec:", env.output_spec["full_reward_spec"])
-    print("full_done_spec:", env.output_spec["full_done_spec"])
+    print("action_keys:", env.action_keys)
+    print("reward_keys:", env.reward_keys)
+    print("done_keys:", env.done_keys)
+
 
 
 
@@ -418,94 +429,14 @@ To access the full structure of the specs we can use
 
  .. code-block:: none
 
-    full_action_spec: CompositeSpec(
-        agents: CompositeSpec(
-            action: BoundedTensorSpec(
-                shape=torch.Size([60, 3, 2]),
-                space=ContinuousBox(
-                    low=Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, contiguous=True),
-                    high=Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, contiguous=True)),
-                device=cpu,
-                dtype=torch.float32,
-                domain=continuous), device=cpu, shape=torch.Size([60, 3])), device=cpu, shape=torch.Size([60]))
-    full_reward_spec: CompositeSpec(
-        agents: CompositeSpec(
-            reward: UnboundedContinuousTensorSpec(
-                shape=torch.Size([60, 3, 1]),
-                space=None,
-                device=cpu,
-                dtype=torch.float32,
-                domain=continuous), device=cpu, shape=torch.Size([60, 3])), device=cpu, shape=torch.Size([60]))
-    full_done_spec: CompositeSpec(
-        done: DiscreteTensorSpec(
-            shape=torch.Size([60, 1]),
-            space=DiscreteBox(n=2),
-            device=cpu,
-            dtype=torch.bool,
-            domain=discrete),
-        terminated: DiscreteTensorSpec(
-            shape=torch.Size([60, 1]),
-            space=DiscreteBox(n=2),
-            device=cpu,
-            dtype=torch.bool,
-            domain=discrete), device=cpu, shape=torch.Size([60]))
+    action_keys: [('agents', 'action')]
+    reward_keys: [('agents', 'reward')]
+    done_keys: ['done', 'terminated']
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 281-290
-
-As you can see the reward and action spec present the "agent" key,
-meaning that entries in tensordicts belonging to those specs will be nested in an "agents" tensordict,
-grouping all per-agent values.
-
-To quickly access the key for each of these values in tensordicts, we can simply ask the environment for the
-respective key, and
-we will immediately understand which are per-agent and which shared.
-This info will be useful in order to tell all other TorchRL components where to find each value
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 290-295
-
-.. code-block:: default
-
-
-    print("action_key:", env.action_key)
-    print("reward_key:", env.reward_key)
-    print("done_key:", env.done_key)
-
-
-
-.. rst-class:: sphx-glr-script-out
-
-.. code-block:: pytb
-
-    Traceback (most recent call last):
-      File "/__w/rl/rl/docs/source/reference/generated/tutorials/multiagent_ppo.py", line 293, in <module>
-        print("done_key:", env.done_key)
-      File "/__w/rl/rl/torchrl/envs/common.py", line 919, in done_key
-        raise KeyError(
-    KeyError: 'done_key requested but more than one key present in the environment'
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 296-298
-
-To tie it all together, we can see that passing these keys to the full specs gives us the leaf domains
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 298-303
-
-.. code-block:: default
-
-
-    assert env.action_spec == env.input_spec["full_action_spec"][env.action_key]
-    assert env.reward_spec == env.output_spec["full_reward_spec"][env.reward_key]
-    assert env.done_spec == env.output_spec["full_done_spec"][env.done_key]
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 304-317
+.. GENERATED FROM PYTHON SOURCE LINES 288-301
 
 Transforms
 ~~~~~~~~~~
@@ -521,7 +452,7 @@ the device and meta-data of the wrapped environment, and transform these dependi
 of transforms it contains.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 317-325
+.. GENERATED FROM PYTHON SOURCE LINES 301-309
 
 .. code-block:: default
 
@@ -534,20 +465,38 @@ of transforms it contains.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 326-329
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 310-313
 
 the :func:`check_env_specs` function runs a small rollout and compares its output against the environment
 specs. If no error is raised, we can be confident that the specs are properly defined:
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 329-331
+.. GENERATED FROM PYTHON SOURCE LINES 313-315
 
 .. code-block:: default
 
     check_env_specs(env)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 332-340
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    check_env_specs succeeded!
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 316-324
 
 Rollout
 ~~~~~~~
@@ -558,7 +507,7 @@ and outputs look like. Actions will automatically be drawn at random from the ac
 domain.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 340-344
+.. GENERATED FROM PYTHON SOURCE LINES 324-328
 
 .. code-block:: default
 
@@ -567,7 +516,65 @@ domain.
     print("rollout of three steps:", rollout)
     print("Shape of the rollout TensorDict:", rollout.batch_size)
 
-.. GENERATED FROM PYTHON SOURCE LINES 345-407
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    rollout of three steps: TensorDict(
+        fields={
+            agents: TensorDict(
+                fields={
+                    action: Tensor(shape=torch.Size([60, 5, 3, 2]), device=cpu, dtype=torch.float32, is_shared=False),
+                    episode_reward: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                    info: TensorDict(
+                        fields={
+                            agent_collisions: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                            final_rew: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                            pos_rew: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
+                        batch_size=torch.Size([60, 5, 3]),
+                        device=cpu,
+                        is_shared=False),
+                    observation: Tensor(shape=torch.Size([60, 5, 3, 18]), device=cpu, dtype=torch.float32, is_shared=False)},
+                batch_size=torch.Size([60, 5, 3]),
+                device=cpu,
+                is_shared=False),
+            done: Tensor(shape=torch.Size([60, 5, 1]), device=cpu, dtype=torch.bool, is_shared=False),
+            next: TensorDict(
+                fields={
+                    agents: TensorDict(
+                        fields={
+                            episode_reward: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                            info: TensorDict(
+                                fields={
+                                    agent_collisions: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                                    final_rew: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                                    pos_rew: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
+                                batch_size=torch.Size([60, 5, 3]),
+                                device=cpu,
+                                is_shared=False),
+                            observation: Tensor(shape=torch.Size([60, 5, 3, 18]), device=cpu, dtype=torch.float32, is_shared=False),
+                            reward: Tensor(shape=torch.Size([60, 5, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
+                        batch_size=torch.Size([60, 5, 3]),
+                        device=cpu,
+                        is_shared=False),
+                    done: Tensor(shape=torch.Size([60, 5, 1]), device=cpu, dtype=torch.bool, is_shared=False),
+                    terminated: Tensor(shape=torch.Size([60, 5, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
+                batch_size=torch.Size([60, 5]),
+                device=cpu,
+                is_shared=False),
+            terminated: Tensor(shape=torch.Size([60, 5, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
+        batch_size=torch.Size([60, 5]),
+        device=cpu,
+        is_shared=False)
+    Shape of the rollout TensorDict: torch.Size([60, 5])
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 329-391
 
 We can see that our rollout has ``batch_size`` of ``(num_vmas_envs, n_rollout_steps)``.
 This means that all the tensors in it will have those leading dimensions.
@@ -632,7 +639,7 @@ For this we use the ``MultiAgentMLP``, a TorchRL module made exactly for
 multiple agents, with much customisation available.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 407-427
+.. GENERATED FROM PYTHON SOURCE LINES 391-411
 
 .. code-block:: default
 
@@ -657,7 +664,13 @@ multiple agents, with much customisation available.
     )
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 428-437
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 412-421
 
 **Second**: wrap the neural network in a :class:`TensorDictModule`
 
@@ -669,7 +682,7 @@ Note that we use ``("agents", ...)`` keys as these keys are denoting data with t
 additional ``n_agents`` dimension.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 437-443
+.. GENERATED FROM PYTHON SOURCE LINES 421-427
 
 .. code-block:: default
 
@@ -680,7 +693,13 @@ additional ``n_agents`` dimension.
     )
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 444-456
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 428-440
 
 **Third**: wrap the :class:`TensorDictModule` in a :class:`ProbabilisticActor`
 
@@ -695,7 +714,7 @@ the :class:`TensorDictModule` above) has to end with the
 :class:`TanhNormal` distribution constructor keyword arguments (loc and scale).
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 456-471
+.. GENERATED FROM PYTHON SOURCE LINES 440-455
 
 .. code-block:: default
 
@@ -715,7 +734,13 @@ the :class:`TensorDictModule` above) has to end with the
     )  # we'll need the log-prob for the PPO loss
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 472-505
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 456-489
 
 Critic network
 --------------
@@ -751,7 +776,7 @@ If the critic is centralised and shared,
 all the values along the ``n_agents`` dimension will be identical.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 505-527
+.. GENERATED FROM PYTHON SOURCE LINES 489-511
 
 .. code-block:: default
 
@@ -778,7 +803,13 @@ all the values along the ``n_agents`` dimension will be identical.
     )
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 528-536
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 512-520
 
 Let us try our policy and critic modules. As pointed earlier, the usage of
 :class:`TensorDictModule` makes it possible to directly read the output
@@ -789,7 +820,7 @@ and where to write it:
 components as in single-agent learning. Isn't this fantastic?**
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 536-539
+.. GENERATED FROM PYTHON SOURCE LINES 520-523
 
 .. code-block:: default
 
@@ -797,7 +828,67 @@ components as in single-agent learning. Isn't this fantastic?**
     print("Running value:", critic(env.reset()))
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 540-552
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    Running policy: TensorDict(
+        fields={
+            agents: TensorDict(
+                fields={
+                    action: Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, is_shared=False),
+                    episode_reward: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                    info: TensorDict(
+                        fields={
+                            agent_collisions: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                            final_rew: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                            pos_rew: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
+                        batch_size=torch.Size([60, 3]),
+                        device=cpu,
+                        is_shared=False),
+                    loc: Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, is_shared=False),
+                    observation: Tensor(shape=torch.Size([60, 3, 18]), device=cpu, dtype=torch.float32, is_shared=False),
+                    sample_log_prob: Tensor(shape=torch.Size([60, 3]), device=cpu, dtype=torch.float32, is_shared=False),
+                    scale: Tensor(shape=torch.Size([60, 3, 2]), device=cpu, dtype=torch.float32, is_shared=False)},
+                batch_size=torch.Size([60, 3]),
+                device=cpu,
+                is_shared=False),
+            done: Tensor(shape=torch.Size([60, 1]), device=cpu, dtype=torch.bool, is_shared=False),
+            terminated: Tensor(shape=torch.Size([60, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
+        batch_size=torch.Size([60]),
+        device=cpu,
+        is_shared=False)
+    Running value: TensorDict(
+        fields={
+            agents: TensorDict(
+                fields={
+                    episode_reward: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                    info: TensorDict(
+                        fields={
+                            agent_collisions: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                            final_rew: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                            pos_rew: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
+                        batch_size=torch.Size([60, 3]),
+                        device=cpu,
+                        is_shared=False),
+                    observation: Tensor(shape=torch.Size([60, 3, 18]), device=cpu, dtype=torch.float32, is_shared=False),
+                    state_value: Tensor(shape=torch.Size([60, 3, 1]), device=cpu, dtype=torch.float32, is_shared=False)},
+                batch_size=torch.Size([60, 3]),
+                device=cpu,
+                is_shared=False),
+            done: Tensor(shape=torch.Size([60, 1]), device=cpu, dtype=torch.bool, is_shared=False),
+            terminated: Tensor(shape=torch.Size([60, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
+        batch_size=torch.Size([60]),
+        device=cpu,
+        is_shared=False)
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 524-536
 
 Data collector
 --------------
@@ -812,7 +903,7 @@ We will use the simplest possible data collector, which has the same output as a
 with the only difference that it will auto reset done states until the desired frames are collected.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 552-561
+.. GENERATED FROM PYTHON SOURCE LINES 536-545
 
 .. code-block:: default
 
@@ -826,7 +917,13 @@ with the only difference that it will auto reset done states until the desired f
     )
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 562-574
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 546-558
 
 Replay buffer
 -------------
@@ -841,7 +938,7 @@ use the collected data online, but using these classes
 makes it easy for us to build the inner training loop in a reproducible way.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 574-583
+.. GENERATED FROM PYTHON SOURCE LINES 558-567
 
 .. code-block:: default
 
@@ -855,7 +952,13 @@ makes it easy for us to build the inner training loop in a reproducible way.
     )
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 584-605
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 568-589
 
 Loss function
 -------------
@@ -879,7 +982,7 @@ Both of these will be used by :class:`ClipPPOLoss` to
 return the policy and value losses.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 605-628
+.. GENERATED FROM PYTHON SOURCE LINES 589-615
 
 .. code-block:: default
 
@@ -896,6 +999,9 @@ return the policy and value losses.
         action=env.action_key,
         sample_log_prob=("agents", "sample_log_prob"),
         value=("agents", "state_value"),
+        # These last 2 keys will be expanded to match the reward shape
+        done=("agents", "done"),
+        terminated=("agents", "terminated"),
     )
 
 
@@ -907,7 +1013,13 @@ return the policy and value losses.
     optim = torch.optim.Adam(loss_module.parameters(), lr)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 629-646
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 616-633
 
 Training loop
 -------------
@@ -927,7 +1039,7 @@ The steps include:
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 646-699
+.. GENERATED FROM PYTHON SOURCE LINES 633-693
 
 .. code-block:: default
 
@@ -937,11 +1049,18 @@ The steps include:
     episode_reward_mean_list = []
     for tensordict_data in collector:
         tensordict_data.set(
-            ("next", "done"),
+            ("next", "agents", "done"),
             tensordict_data.get(("next", "done"))
             .unsqueeze(-1)
-            .expand(tensordict_data.get(("next", env.reward_key)).shape),
-        )  # We need to expand the done to match the reward shape (this is expected by the value estimator)
+            .expand(tensordict_data.get_item_shape(("next", env.reward_key))),
+        )
+        tensordict_data.set(
+            ("next", "agents", "terminated"),
+            tensordict_data.get(("next", "terminated"))
+            .unsqueeze(-1)
+            .expand(tensordict_data.get_item_shape(("next", env.reward_key))),
+        )
+        # We need to expand the done and terminated to match the reward shape (this is expected by the value estimator)
 
         with torch.no_grad():
             GAE(
@@ -976,7 +1095,7 @@ The steps include:
         collector.update_policy_weights_()
 
         # Logging
-        done = tensordict_data.get(("next", "done"))
+        done = tensordict_data.get(("next", "agents", "done"))
         episode_reward_mean = (
             tensordict_data.get(("next", "agents", "episode_reward"))[done].mean().item()
         )
@@ -985,7 +1104,18 @@ The steps include:
         pbar.update()
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 700-707
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    episode_reward_mean = 0:   0%|          | 0/10 [00:00<?, ?it/s]    episode_reward_mean = -0.3641679584980011:  10%|█         | 1/10 [00:08<01:12,  8.00s/it]    episode_reward_mean = 0.4940122067928314:  20%|██        | 2/10 [00:15<01:03,  7.96s/it]     episode_reward_mean = 1.0600677728652954:  30%|███       | 3/10 [00:23<00:55,  7.96s/it]    episode_reward_mean = 1.4344534873962402:  40%|████      | 4/10 [00:31<00:47,  7.94s/it]    episode_reward_mean = 2.1100871562957764:  50%|█████     | 5/10 [00:39<00:39,  7.94s/it]    episode_reward_mean = 2.304917335510254:  60%|██████    | 6/10 [00:47<00:31,  7.93s/it]     episode_reward_mean = 2.6943857669830322:  70%|███████   | 7/10 [00:55<00:23,  7.94s/it]    episode_reward_mean = 2.871443748474121:  80%|████████  | 8/10 [01:03<00:16,  8.03s/it]     episode_reward_mean = 2.8500826358795166:  90%|█████████ | 9/10 [01:12<00:08,  8.16s/it]    episode_reward_mean = 2.759843587875366: 100%|██████████| 10/10 [01:21<00:00,  8.40s/it]
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 694-701
 
 Results
 -------
@@ -995,7 +1125,7 @@ Let's plot the mean reward obtained per episode
 To make training last longer, increase the ``n_iters`` hyperparameter.
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 707-713
+.. GENERATED FROM PYTHON SOURCE LINES 701-707
 
 .. code-block:: default
 
@@ -1006,7 +1136,18 @@ To make training last longer, increase the ``n_iters`` hyperparameter.
     plt.show()
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 714-768
+
+
+.. image-sg:: /tutorials/images/sphx_glr_multiagent_ppo_001.png
+   :alt: Episode reward mean
+   :srcset: /tutorials/images/sphx_glr_multiagent_ppo_001.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 708-762
 
 Render
 ------
@@ -1063,7 +1204,7 @@ If you are running this in Google Colab, you can render the trained policy by ru
    Image(open(f"{scenario_name}.gif", "rb").read())
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 771-800
+.. GENERATED FROM PYTHON SOURCE LINES 765-794
 
 Conclusion and next steps
 -------------------------
@@ -1098,9 +1239,9 @@ Here are a few videos of some possible scenarios you can try in VMAS.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 20.872 seconds)
+   **Total running time of the script:** (2 minutes 20.611 seconds)
 
-**Estimated memory usage:**  1085 MB
+**Estimated memory usage:**  23 MB
 
 
 .. _sphx_glr_download_tutorials_multiagent_ppo.py:
