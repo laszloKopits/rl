@@ -861,7 +861,7 @@ following keyword-only arguments:
             [[0.0737]],
 
             [[0.0737]]]))])
-    self.log_dir: /tmp/tmp7h0dquor/dqn_exp_886b6888-6287-11ee-8b92-0242ac120002
+    self.log_dir: /tmp/tmptzopa3x4/dqn_exp_e7871540-62bb-11ee-880f-0242ac120002
 
 
 
@@ -1089,9 +1089,9 @@ Possible improvements to this tutorial could include:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 22.179 seconds)
+   **Total running time of the script:** (1 minutes 22.199 seconds)
 
-**Estimated memory usage:**  1128 MB
+**Estimated memory usage:**  1121 MB
 
 
 .. _sphx_glr_download_tutorials_coding_dqn.py:
