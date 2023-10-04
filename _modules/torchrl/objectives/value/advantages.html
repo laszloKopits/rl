@@ -912,7 +912,7 @@
 <span class="sd">            &gt;&gt;&gt; reward = torch.randn(1, 10, 1)</span>
 <span class="sd">            &gt;&gt;&gt; done = torch.zeros(1, 10, 1, dtype=torch.bool)</span>
 <span class="sd">            &gt;&gt;&gt; terminated = torch.zeros(1, 10, 1, dtype=torch.bool)</span>
-<span class="sd">            &gt;&gt;&gt; advantage, value_target = module(obs=obs, reward=reward, done=done, next_obs=next_obs, terminated=terminated)</span>
+<span class="sd">            &gt;&gt;&gt; advantage, value_target = module(obs=obs, next_reward=reward, next_done=done, next_obs=next_obs, next_terminated=terminated)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">batch_dims</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -1113,7 +1113,7 @@
 <span class="sd">            &gt;&gt;&gt; reward = torch.randn(1, 10, 1)</span>
 <span class="sd">            &gt;&gt;&gt; done = torch.zeros(1, 10, 1, dtype=torch.bool)</span>
 <span class="sd">            &gt;&gt;&gt; terminated = torch.zeros(1, 10, 1, dtype=torch.bool)</span>
-<span class="sd">            &gt;&gt;&gt; advantage, value_target = module(obs=obs, reward=reward, done=done, next_obs=next_obs, terminated=terminated)</span>
+<span class="sd">            &gt;&gt;&gt; advantage, value_target = module(obs=obs, next_reward=reward, next_done=done, next_obs=next_obs, next_terminated=terminated)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">batch_dims</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -1325,7 +1325,7 @@
 <span class="sd">            &gt;&gt;&gt; reward = torch.randn(1, 10, 1)</span>
 <span class="sd">            &gt;&gt;&gt; done = torch.zeros(1, 10, 1, dtype=torch.bool)</span>
 <span class="sd">            &gt;&gt;&gt; terminated = torch.zeros(1, 10, 1, dtype=torch.bool)</span>
-<span class="sd">            &gt;&gt;&gt; advantage, value_target = module(obs=obs, reward=reward, done=done, next_obs=next_obs, terminated=terminated)</span>
+<span class="sd">            &gt;&gt;&gt; advantage, value_target = module(obs=obs, next_reward=reward, next_done=done, next_obs=next_obs, next_terminated=terminated)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">batch_dims</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -1568,7 +1568,7 @@
 <span class="sd">            &gt;&gt;&gt; reward = torch.randn(1, 10, 1)</span>
 <span class="sd">            &gt;&gt;&gt; done = torch.zeros(1, 10, 1, dtype=torch.bool)</span>
 <span class="sd">            &gt;&gt;&gt; terminated = torch.zeros(1, 10, 1, dtype=torch.bool)</span>
-<span class="sd">            &gt;&gt;&gt; advantage, value_target = module(obs=obs, reward=reward, done=done, next_obs=next_obs, terminated=terminated)</span>
+<span class="sd">            &gt;&gt;&gt; advantage, value_target = module(obs=obs, next_reward=reward, next_done=done, next_obs=next_obs, next_terminated=terminated)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">batch_dims</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
