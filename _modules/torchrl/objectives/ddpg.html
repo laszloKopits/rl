@@ -650,32 +650,18 @@
 <span class="sd">            a tuple of 2 tensors containing the DDPG loss.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">loss_value</span><span class="p">,</span> <span class="n">td_error</span><span class="p">,</span> <span class="n">pred_val</span><span class="p">,</span> <span class="n">target_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loss_value</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
-        <span class="n">td_error</span> <span class="o">=</span> <span class="n">td_error</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">td_error</span> <span class="o">=</span> <span class="n">td_error</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
-            <span class="n">td_error</span><span class="p">,</span>
-            <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">loss_actor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loss_actor</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
+        <span class="n">loss_value</span><span class="p">,</span> <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_value</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
+        <span class="n">loss_actor</span><span class="p">,</span> <span class="n">metadata_actor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_actor</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metadata_actor</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">TensorDict</span><span class="p">(</span>
-            <span class="n">source</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;loss_actor&quot;</span><span class="p">:</span> <span class="n">loss_actor</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
-                <span class="s2">&quot;loss_value&quot;</span><span class="p">:</span> <span class="n">loss_value</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
-                <span class="s2">&quot;pred_value&quot;</span><span class="p">:</span> <span class="n">pred_val</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
-                <span class="s2">&quot;target_value&quot;</span><span class="p">:</span> <span class="n">target_value</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
-                <span class="s2">&quot;pred_value_max&quot;</span><span class="p">:</span> <span class="n">pred_val</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
-                <span class="s2">&quot;target_value_max&quot;</span><span class="p">:</span> <span class="n">target_value</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
-            <span class="p">},</span>
+            <span class="n">source</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;loss_actor&quot;</span><span class="p">:</span> <span class="n">loss_actor</span><span class="p">,</span> <span class="s2">&quot;loss_value&quot;</span><span class="p">:</span> <span class="n">loss_value</span><span class="p">,</span> <span class="o">**</span><span class="n">metadata</span><span class="p">},</span>
             <span class="n">batch_size</span><span class="o">=</span><span class="p">[],</span>
         <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_loss_actor</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">loss_actor</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
         <span class="n">td_copy</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
             <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_in_keys</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">value_exclusive_keys</span>
         <span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
@@ -687,12 +673,14 @@
             <span class="n">td_copy</span><span class="p">,</span>
             <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cached_detached_value_params</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="o">-</span><span class="n">td_copy</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">state_action_value</span><span class="p">)</span>
+        <span class="n">loss_actor</span> <span class="o">=</span> <span class="o">-</span><span class="n">td_copy</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">state_action_value</span><span class="p">)</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="n">loss_actor</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">metadata</span>
 
-    <span class="k">def</span> <span class="nf">_loss_value</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">loss_value</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
         <span class="c1"># value loss</span>
         <span class="n">td_copy</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">value_network</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value_network</span><span class="p">(</span>
@@ -710,7 +698,24 @@
             <span class="n">pred_val</span><span class="p">,</span> <span class="n">target_value</span><span class="p">,</span> <span class="n">loss_function</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">loss_value</span><span class="p">,</span> <span class="p">(</span><span class="n">pred_val</span> <span class="o">-</span> <span class="n">target_value</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">pred_val</span><span class="p">,</span> <span class="n">target_value</span>
+        <span class="n">td_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">pred_val</span> <span class="o">-</span> <span class="n">target_value</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">td_error</span> <span class="o">=</span> <span class="n">td_error</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">td_error</span> <span class="o">=</span> <span class="n">td_error</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">tensordict</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
+            <span class="n">td_error</span><span class="p">,</span>
+            <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;td_error&quot;</span><span class="p">:</span> <span class="n">td_error</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="s2">&quot;pred_value&quot;</span><span class="p">:</span> <span class="n">pred_val</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="s2">&quot;target_value&quot;</span><span class="p">:</span> <span class="n">target_value</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="s2">&quot;target_value_max&quot;</span><span class="p">:</span> <span class="n">target_value</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+                <span class="s2">&quot;pred_value_max&quot;</span><span class="p">:</span> <span class="n">pred_val</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="n">loss_value</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">metadata</span>
 
 <div class="viewcode-block" id="DDPGLoss.make_value_estimator"><a class="viewcode-back" href="../../../reference/generated/torchrl.objectives.DDPGLoss.html#torchrl.objectives.DDPGLoss.make_value_estimator">[docs]</a>    <span class="k">def</span> <span class="nf">make_value_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value_type</span><span class="p">:</span> <span class="n">ValueEstimators</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">hyperparams</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">value_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

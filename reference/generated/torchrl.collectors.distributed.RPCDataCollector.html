@@ -469,7 +469,7 @@ tensordict results from a separate node in a “first-ready,
 first-served” fashion.</p></li>
 <li><p><strong>slurm_kwargs</strong> (<em>dict</em>) – a dictionary of parameters to be passed to the
 submitit executor.</p></li>
-<li><p><strong>storing_device</strong> (<em>int</em><em>, </em><em>str</em><em> or </em><a class="reference external" href="https://pytorch.org/docs/stable/tensor_attributes.html#torch.device" title="(in PyTorch v2.0)"><em>torch.device</em></a><em>, </em><em>optional</em>) – the device where
+<li><p><strong>storing_device</strong> (<em>int</em><em>, </em><em>str</em><em> or </em><a class="reference external" href="https://pytorch.org/docs/stable/tensor_attributes.html#torch.device" title="(in PyTorch v2.1)"><em>torch.device</em></a><em>, </em><em>optional</em>) – the device where
 data will be stored and delivered by the iterator. Defaults to
 <code class="docutils literal notranslate"><span class="pre">&quot;cpu&quot;</span></code>.</p></li>
 <li><p><strong>update_after_each_batch</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, the weights will
@@ -497,7 +497,7 @@ To find more about submitit, visit
 <a class="reference external" href="https://github.com/facebookincubator/submitit">https://github.com/facebookincubator/submitit</a>
 Defaults to “submitit”.</p></li>
 <li><p><strong>tcp_port</strong> (<em>int</em><em>, </em><em>optional</em>) – the TCP port to be used. Defaults to 10003.</p></li>
-<li><p><strong>visible_devices</strong> (<em>list of Union</em><em>[</em><em>int</em><em>, </em><a class="reference external" href="https://pytorch.org/docs/stable/tensor_attributes.html#torch.device" title="(in PyTorch v2.0)"><em>torch.device</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – a
+<li><p><strong>visible_devices</strong> (<em>list of Union</em><em>[</em><em>int</em><em>, </em><a class="reference external" href="https://pytorch.org/docs/stable/tensor_attributes.html#torch.device" title="(in PyTorch v2.1)"><em>torch.device</em></a><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – a
 list of the same length as the number of nodes containing the
 device used to pass data to main.</p></li>
 <li><p><strong>tensorpipe_options</strong> (<em>dict</em><em>, </em><em>optional</em>) – a dictionary of keyword argument

@@ -479,7 +479,7 @@ A single dict can be provided as well, and will be used in all collectors.</p></
 tensordicts collected on each node. If <code class="docutils literal notranslate"><span class="pre">False</span></code> (default), each
 tensordict results from a separate node in a “first-ready,
 first-served” fashion.</p></li>
-<li><p><strong>storing_device</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/tensor_attributes.html#torch.device" title="(in PyTorch v2.0)"><em>torch.device</em></a><em>, </em><em>optional</em>) – if specified, collected tensordicts will be moved
+<li><p><strong>storing_device</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/tensor_attributes.html#torch.device" title="(in PyTorch v2.1)"><em>torch.device</em></a><em>, </em><em>optional</em>) – if specified, collected tensordicts will be moved
 to these devices before returning them to the user.</p></li>
 <li><p><strong>update_after_each_batch</strong> (<em>bool</em><em>, </em><em>optional</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, the weights will
 be updated after each collection. For <code class="docutils literal notranslate"><span class="pre">sync=True</span></code>, this means that
