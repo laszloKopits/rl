@@ -380,7 +380,7 @@
 <h1>RolloutFromModel<a class="headerlink" href="#rolloutfrommodel" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="torchrl.data.RolloutFromModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchrl.data.</span></span><span class="sig-name descname"><span class="pre">RolloutFromModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reward_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_new_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_clip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/data/rlhf/utils.html#RolloutFromModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.data.RolloutFromModel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchrl.data.</span></span><span class="sig-name descname"><span class="pre">RolloutFromModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reward_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kl_coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_new_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_clip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kl_scheduler</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">KLControllerBase</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/data/rlhf/utils.html#RolloutFromModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.data.RolloutFromModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class for performing rollouts with causal language models.</p>
 <p>It is assumed that the model this class wraps takes as input tokenized text and
 whose task is to predict the next word in a sentence having read the n previous
@@ -397,10 +397,13 @@ reference model during training.</p></li>
 <li><p><strong>reward_model</strong> – (nn.Module, tensordict.nn.TensorDictModule): a model which, given
 <code class="docutils literal notranslate"><span class="pre">input_ids</span></code> and <code class="docutils literal notranslate"><span class="pre">attention_mask</span></code>, calculates rewards for each token and
 end_scores (the reward for the final token in each sequence).</p></li>
+<li><p><strong>kl_coef</strong> – (float, optional): initial kl coefficient.</p></li>
 <li><p><strong>max_new_tokens</strong> (<em>int</em><em>, </em><em>optional</em>) – the maximum length of the sequence.
 Defaults to 50.</p></li>
 <li><p><strong>score_clip</strong> (<em>float</em><em>, </em><em>optional</em>) – Scores from the reward model are clipped to the
 range <code class="docutils literal notranslate"><span class="pre">(-score_clip,</span> <span class="pre">score_clip)</span></code>. Defaults to 10.</p></li>
+<li><p><strong>kl_scheduler</strong> (<em>KLControllerBase</em><em>, </em><em>optional</em>) – the KL coefficient scheduler.</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – number of steps between two optimization.</p></li>
 </ul>
 </dd>
 </dl>
@@ -452,7 +455,7 @@ range <code class="docutils literal notranslate"><span class="pre">(-score_clip,
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="torchrl.data.RolloutFromModel.create_rollout_td">
-<span class="sig-name descname"><span class="pre">create_rollout_td</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_probs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kl_coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/data/rlhf/utils.html#RolloutFromModel.create_rollout_td"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.data.RolloutFromModel.create_rollout_td" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">create_rollout_td</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_probs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_ratio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/data/rlhf/utils.html#RolloutFromModel.create_rollout_td"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.data.RolloutFromModel.create_rollout_td" title="Permalink to this definition">¶</a></dt>
 <dd><p>A TensorDict wrapper for generated data.</p>
 <p>This function takes a batch plus the generated tokens and replicates the
 tensordict structure that would have been obtained from a rollout with a TorchRL
@@ -535,12 +538,6 @@ log_ratio: the log ratio between probabilities under the generative</p>
 <dd class="field-odd"><p>generated (<a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.1)">torch.Tensor</a>)</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="torchrl.data.RolloutFromModel.kl_step">
-<span class="sig-name descname"><span class="pre">kl_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/data/rlhf/utils.html#RolloutFromModel.kl_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.data.RolloutFromModel.kl_step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Makes a step in the KL coefficient schedule.</p>
 </dd></dl>
 
 <dl class="py method">

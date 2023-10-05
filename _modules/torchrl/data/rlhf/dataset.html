@@ -678,16 +678,17 @@
 
 
 <div class="viewcode-block" id="get_dataloader"><a class="viewcode-back" href="../../../../reference/generated/torchrl.data.get_dataloader.html#torchrl.data.get_dataloader">[docs]</a><span class="k">def</span> <span class="nf">get_dataloader</span><span class="p">(</span>
-    <span class="n">batch_size</span><span class="p">,</span>
-    <span class="n">block_size</span><span class="p">,</span>
-    <span class="n">tensorclass_type</span><span class="p">,</span>
-    <span class="n">device</span><span class="p">,</span>
-    <span class="n">dataset_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">infinite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">prefetch</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
-    <span class="n">root_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">from_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">block_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">tensorclass_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+    <span class="n">dataset_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">infinite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">prefetch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">root_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">from_disk</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a dataset and returns a dataloader from it.</span>
 
@@ -716,9 +717,12 @@
 <span class="sd">        from_disk (bool, optional): if ``True``, :func:`datasets.load_from_disk`</span>
 <span class="sd">            will be used. Otherwise, :func:`datasets.load_dataset` will be used.</span>
 <span class="sd">            Defaults to ``False``.</span>
+<span class="sd">        num_workers (int, optional): number of workers for :meth:`datasets.dataset.map`</span>
+<span class="sd">            which is called during tokenization.</span>
+<span class="sd">            Defaults to ``max(os.cpu_count() // 2, 1)``.</span>
 
 <span class="sd">    Examples:</span>
-<span class="sd">        &gt;&gt;&gt; from torchrl.data.rlhf.comparison import PairwiseDataset</span>
+<span class="sd">        &gt;&gt;&gt; from torchrl.data.rlhf.reward import PairwiseDataset</span>
 <span class="sd">        &gt;&gt;&gt; dataloader = get_dataloader(</span>
 <span class="sd">        ...     batch_size=256, block_size=550, tensorclass_type=PairwiseDataset, device=&quot;cpu&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; for d in dataloader:</span>
@@ -751,6 +755,7 @@
         <span class="n">max_length</span><span class="o">=</span><span class="n">block_size</span><span class="p">,</span>
         <span class="n">root_dir</span><span class="o">=</span><span class="n">root_dir</span><span class="p">,</span>
         <span class="n">from_disk</span><span class="o">=</span><span class="n">from_disk</span><span class="p">,</span>
+        <span class="n">num_workers</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">TensorDictReplayBuffer</span><span class="p">(</span>
         <span class="n">storage</span><span class="o">=</span><span class="n">TensorStorage</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
