@@ -768,6 +768,7 @@
 <span class="sd">            policy is ignored before it is called. This feature is mainly</span>
 <span class="sd">            intended to be used in offline/model-based settings, where a</span>
 <span class="sd">            batch of random trajectories can be used to initialize training.</span>
+<span class="sd">            If provided, it will be rounded up to the closest multiple of frames_per_batch.</span>
 <span class="sd">            Defaults to ``None`` (i.e. no random frames).</span>
 <span class="sd">        reset_at_each_iter (bool, optional): Whether environments should be reset</span>
 <span class="sd">            at the beginning of a batch collection.</span>
@@ -969,13 +970,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">total_frames</span> <span class="o">=</span> <span class="n">total_frames</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_at_each_iter</span> <span class="o">=</span> <span class="n">reset_at_each_iter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">init_random_frames</span> <span class="o">=</span> <span class="n">init_random_frames</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">init_random_frames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">init_random_frames</span> <span class="o">%</span> <span class="n">frames_per_batch</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="n">RL_WARNINGS</span>
+        <span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;init_random_frames (</span><span class="si">{</span><span class="n">init_random_frames</span><span class="si">}</span><span class="s2">) is not exactly a multiple of frames_per_batch (</span><span class="si">{</span><span class="n">frames_per_batch</span><span class="si">}</span><span class="s2">), &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; this results in more init_random_frames than requested&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="n">init_random_frames</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">frames_per_batch</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">frames_per_batch</span><span class="si">}</span><span class="s2">).&quot;</span>
+                <span class="s2">&quot;To silence this message, set the environment variable RL_WARNINGS to False.&quot;</span>
+            <span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">postproc</span> <span class="o">=</span> <span class="n">postproc</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">postproc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">postproc</span><span class="p">,</span> <span class="s2">&quot;to&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">postproc</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storing_device</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">frames_per_batch</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_env</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">RL_WARNINGS</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;frames_per_batch </span><span class="si">{</span><span class="n">frames_per_batch</span><span class="si">}</span><span class="s2"> is not exactly divisible by the number of batched environments </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_env</span><span class="si">}</span><span class="s2">, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; this results in more frames_per_batch per iteration that requested.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;frames_per_batch (</span><span class="si">{</span><span class="n">frames_per_batch</span><span class="si">}</span><span class="s2">) is not exactly divisible by the number of batched environments (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_env</span><span class="si">}</span><span class="s2">), &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; this results in more frames_per_batch per iteration that requested&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="n">frames_per_batch</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">n_env</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">n_env</span><span class="si">}</span><span class="s2">).&quot;</span>
                 <span class="s2">&quot;To silence this message, set the environment variable RL_WARNINGS to False.&quot;</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">requested_frames_per_batch</span> <span class="o">=</span> <span class="n">frames_per_batch</span>
@@ -1396,6 +1410,7 @@
 <span class="sd">            policy is ignored before it is called. This feature is mainly</span>
 <span class="sd">            intended to be used in offline/model-based settings, where a</span>
 <span class="sd">            batch of random trajectories can be used to initialize training.</span>
+<span class="sd">            If provided, it will be rounded up to the closest multiple of frames_per_batch.</span>
 <span class="sd">            Defaults to ``None`` (i.e. no random frames).</span>
 <span class="sd">        reset_at_each_iter (bool, optional): Whether environments should be reset</span>
 <span class="sd">            at the beginning of a batch collection.</span>

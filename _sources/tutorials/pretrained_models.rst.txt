@@ -240,7 +240,7 @@ In this way, we can train an algorithm offline on a dataset made of images:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.790 seconds)
+   **Total running time of the script:** (0 minutes 3.845 seconds)
 
 **Estimated memory usage:**  561 MB
 
