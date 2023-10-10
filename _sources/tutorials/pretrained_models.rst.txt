@@ -190,7 +190,7 @@ images stored in a replay buffer (e.g. in an offline RL context). First, let's b
 
     from torchrl.data import LazyMemmapStorage, ReplayBuffer
 
-    storage = LazyMemmapStorage(1000, device=device)
+    storage = LazyMemmapStorage(1000)
     rb = ReplayBuffer(storage=storage, transform=r3m)
 
 
@@ -240,9 +240,9 @@ In this way, we can train an algorithm offline on a dataset made of images:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.850 seconds)
+   **Total running time of the script:** (0 minutes 3.816 seconds)
 
-**Estimated memory usage:**  562 MB
+**Estimated memory usage:**  561 MB
 
 
 .. _sphx_glr_download_tutorials_pretrained_models.py:
