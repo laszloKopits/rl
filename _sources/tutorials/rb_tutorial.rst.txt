@@ -201,7 +201,7 @@ change the ``collate_fn`` since the default expects numerical data):
 
  .. code-block:: none
 
-    [0, 0, 0]
+    ['a', 0, 0]
 
 
 
@@ -321,14 +321,14 @@ Let us sample from the buffer, and print the data:
  .. code-block:: none
 
     samples tensor([[ 0,  1,  2,  3],
-            [ 8,  9, 10, 11],
             [ 4,  5,  6,  7],
             [ 4,  5,  6,  7],
-            [ 0,  1,  2,  3]]) tensor([[ 0,  1,  2,  3,  4],
-            [10, 11, 12, 13, 14],
+            [ 4,  5,  6,  7],
+            [ 8,  9, 10, 11]]) tensor([[ 0,  1,  2,  3,  4],
             [ 5,  6,  7,  8,  9],
             [ 5,  6,  7,  8,  9],
-            [ 0,  1,  2,  3,  4]])
+            [ 5,  6,  7,  8,  9],
+            [10, 11, 12, 13, 14]])
 
 
 
@@ -358,16 +358,16 @@ A :class:`torchrl.data.LazyMemmapStorage` is created in the same manner:
  .. code-block:: none
 
     The buffer has 3 elements
-    samples: a= tensor([[0, 1, 2, 3],
-            [0, 1, 2, 3],
-            [4, 5, 6, 7],
-            [4, 5, 6, 7],
-            [0, 1, 2, 3]]) 
-    ('b', 'c'): tensor([[0, 1, 2, 3, 4],
-            [0, 1, 2, 3, 4],
-            [5, 6, 7, 8, 9],
-            [5, 6, 7, 8, 9],
-            [0, 1, 2, 3, 4]])
+    samples: a= tensor([[ 4,  5,  6,  7],
+            [ 4,  5,  6,  7],
+            [ 4,  5,  6,  7],
+            [ 4,  5,  6,  7],
+            [ 8,  9, 10, 11]]) 
+    ('b', 'c'): tensor([[ 5,  6,  7,  8,  9],
+            [ 5,  6,  7,  8,  9],
+            [ 5,  6,  7,  8,  9],
+            [ 5,  6,  7,  8,  9],
+            [10, 11, 12, 13, 14]])
 
 
 
@@ -460,11 +460,11 @@ generally be used interchangeably.
                 fields={
                     c: MemmapTensor(shape=torch.Size([12, 5]), device=cpu, dtype=torch.int64, is_shared=False)},
                 batch_size=torch.Size([12]),
-                device=None,
+                device=cpu,
                 is_shared=False),
             index: Tensor(shape=torch.Size([12]), device=cpu, dtype=torch.int64, is_shared=False)},
         batch_size=torch.Size([12]),
-        device=None,
+        device=cpu,
         is_shared=False)
 
 
@@ -491,7 +491,7 @@ Let us have a look at these indices:
 
  .. code-block:: none
 
-    tensor([2, 1, 0, 2, 2, 0, 1, 2, 1, 1, 1, 2])
+    tensor([2, 1, 2, 2, 0, 2, 2, 2, 0, 2, 1, 1])
 
 
 
@@ -552,7 +552,7 @@ encode datasets in a more explicit manner:
         images=MemmapTensor(shape=torch.Size([12, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
         labels=MemmapTensor(shape=torch.Size([12]), device=cpu, dtype=torch.int64, is_shared=False),
         batch_size=torch.Size([12]),
-        device=None,
+        device=cpu,
         is_shared=False)
 
 
@@ -609,7 +609,7 @@ sampling:
         images=MemmapTensor(shape=torch.Size([128, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
         labels=MemmapTensor(shape=torch.Size([128]), device=cpu, dtype=torch.int64, is_shared=False),
         batch_size=torch.Size([128]),
-        device=None,
+        device=cpu,
         is_shared=False)
 
 
@@ -649,7 +649,7 @@ sampling considerably:
         images=MemmapTensor(shape=torch.Size([128, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
         labels=MemmapTensor(shape=torch.Size([128]), device=cpu, dtype=torch.int64, is_shared=False),
         batch_size=torch.Size([128]),
-        device=None,
+        device=cpu,
         is_shared=False)
 
 
@@ -689,7 +689,7 @@ dataloader, as long as the batch-size is predefined:
         images=MemmapTensor(shape=torch.Size([128, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
         labels=MemmapTensor(shape=torch.Size([128]), device=cpu, dtype=torch.int64, is_shared=False),
         batch_size=torch.Size([128]),
-        device=None,
+        device=cpu,
         is_shared=False)
 
 
@@ -793,10 +793,10 @@ argument can be omitted and passed directly to the `sample` method:
                 fields={
                     c: MemmapTensor(shape=torch.Size([3, 8]), device=cpu, dtype=torch.int64, is_shared=False)},
                 batch_size=torch.Size([3]),
-                device=None,
+                device=cpu,
                 is_shared=False)},
         batch_size=torch.Size([3]),
-        device=None,
+        device=cpu,
         is_shared=False)
     sampling 5 elements: <class 'tensordict.memmap.MemmapTensor'>
     <class 'tensordict.memmap.MemmapTensor'>
@@ -807,10 +807,10 @@ argument can be omitted and passed directly to the `sample` method:
                 fields={
                     c: MemmapTensor(shape=torch.Size([5, 8]), device=cpu, dtype=torch.int64, is_shared=False)},
                 batch_size=torch.Size([5]),
-                device=None,
+                device=cpu,
                 is_shared=False)},
         batch_size=torch.Size([5]),
-        device=None,
+        device=cpu,
         is_shared=False)
 
 
@@ -1062,8 +1062,8 @@ higher indices should occur more frequently:
  .. code-block:: none
 
 
-    (array([ 16.,  44.,  62.,  70., 109., 114., 139., 115., 184., 171.]), array([  2. ,  14.5,  27. ,  39.5,  52. ,  64.5,  77. ,  89.5, 102. ,
-           114.5, 127. ]), <BarContainer object of 10 artists>)
+    (array([ 33.,  34.,  71.,  75., 100., 119., 141., 132., 150., 169.]), array([  3. ,  15.4,  27.8,  40.2,  52.6,  65. ,  77.4,  89.8, 102.2,
+           114.6, 127. ]), <BarContainer object of 10 artists>)
 
 
 
@@ -1119,7 +1119,7 @@ Now, higher indices should occur less frequently:
  .. code-block:: none
 
 
-    (array([149., 188., 155., 116., 125.,  92.,  83.,  65.,  34.,  17.]), array([  2. ,  14.4,  26.8,  39.2,  51.6,  64. ,  76.4,  88.8, 101.2,
+    (array([166., 159., 146.,  89., 123., 114.,  97.,  62.,  41.,  27.]), array([  2. ,  14.4,  26.8,  39.2,  51.6,  64. ,  76.4,  88.8, 101.2,
            113.6, 126. ]), <BarContainer object of 10 artists>)
 
 
@@ -1628,9 +1628,9 @@ You should now be able to:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 37.636 seconds)
+   **Total running time of the script:** (2 minutes 37.952 seconds)
 
-**Estimated memory usage:**  390 MB
+**Estimated memory usage:**  384 MB
 
 
 .. _sphx_glr_download_tutorials_rb_tutorial.py:
