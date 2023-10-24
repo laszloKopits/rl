@@ -672,7 +672,7 @@
         <span class="n">transforms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resize</span><span class="p">)</span>
 
         <span class="c1"># R3M</span>
-        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">out_keys</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[]):</span>
             <span class="k">if</span> <span class="n">stack_images</span><span class="p">:</span>
                 <span class="n">out_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;r3m_vec&quot;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>

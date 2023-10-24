@@ -768,7 +768,7 @@ every 50 data collection, and plot the results after training.
         batch_size=torch.Size([50]),
         device=cpu,
         is_shared=False)
-      0%|          | 50/1000000 [00:00<2:47:30, 99.50it/s]      0%|          | 50/1000000 [00:20<2:47:30, 99.50it/s]    steps: 12, loss_val:  0.0007, action_spread: tensor([45,  5]):   0%|          | 50/1000000 [00:36<2:47:30, 99.50it/s]    steps: 12, loss_val:  0.0007, action_spread: tensor([45,  5]):   0%|          | 100/1000000 [00:36<119:28:56,  2.32it/s]    steps: 14, loss_val:  0.0009, action_spread: tensor([42,  8]):   0%|          | 100/1000000 [01:12<119:28:56,  2.32it/s]    steps: 14, loss_val:  0.0009, action_spread: tensor([42,  8]):   0%|          | 150/1000000 [01:12<156:26:21,  1.78it/s]    steps: 23, loss_val:  0.0007, action_spread: tensor([15, 35]):   0%|          | 150/1000000 [01:48<156:26:21,  1.78it/s]    steps: 23, loss_val:  0.0007, action_spread: tensor([15, 35]):   0%|          | 200/1000000 [01:48<173:47:20,  1.60it/s]    steps: 24, loss_val:  0.0008, action_spread: tensor([13, 37]):   0%|          | 200/1000000 [02:24<173:47:20,  1.60it/s]
+      0%|          | 50/1000000 [00:00<2:39:59, 104.17it/s]      0%|          | 50/1000000 [00:17<2:39:59, 104.17it/s]    steps: 11, loss_val:  0.0007, action_spread: tensor([ 6, 44]):   0%|          | 50/1000000 [00:36<2:39:59, 104.17it/s]    steps: 11, loss_val:  0.0007, action_spread: tensor([ 6, 44]):   0%|          | 100/1000000 [00:36<119:43:57,  2.32it/s]    steps: 18, loss_val:  0.0009, action_spread: tensor([38, 12]):   0%|          | 100/1000000 [01:12<119:43:57,  2.32it/s]    steps: 18, loss_val:  0.0009, action_spread: tensor([38, 12]):   0%|          | 150/1000000 [01:12<156:48:15,  1.77it/s]    steps: 18, loss_val:  0.0009, action_spread: tensor([ 5, 45]):   0%|          | 150/1000000 [01:48<156:48:15,  1.77it/s]    steps: 18, loss_val:  0.0009, action_spread: tensor([ 5, 45]):   0%|          | 200/1000000 [01:49<174:15:59,  1.59it/s]    steps: 18, loss_val:  0.0008, action_spread: tensor([37, 13]):   0%|          | 200/1000000 [02:24<174:15:59,  1.59it/s]
 
 
 
@@ -820,9 +820,9 @@ You should now be able:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (3 minutes 28.694 seconds)
+   **Total running time of the script:** (3 minutes 32.045 seconds)
 
-**Estimated memory usage:**  1908 MB
+**Estimated memory usage:**  1789 MB
 
 
 .. _sphx_glr_download_tutorials_dqn_with_rnn.py:

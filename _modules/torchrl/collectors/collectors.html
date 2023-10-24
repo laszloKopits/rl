@@ -937,7 +937,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">policy_weights</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">({},</span> <span class="p">[])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">:</span> <span class="n">EnvBase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_frames_per_traj</span> <span class="o">=</span> <span class="n">max_frames_per_traj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_frames_per_traj</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">max_frames_per_traj</span><span class="p">)</span> <span class="k">if</span> <span class="n">max_frames_per_traj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_frames_per_traj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_frames_per_traj</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># let&#39;s check that there is no StepCounter yet</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
@@ -965,9 +967,13 @@
                     <span class="sa">f</span><span class="s2">&quot;This means </span><span class="si">{</span><span class="n">frames_per_batch</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">remainder</span><span class="si">}</span><span class="s2"> additional frames will be collected.&quot;</span>
                     <span class="s2">&quot;To silence this message, set the environment variable RL_WARNINGS to False.&quot;</span>
                 <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_frames</span> <span class="o">=</span> <span class="n">total_frames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_frames</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">total_frames</span><span class="p">)</span> <span class="k">if</span> <span class="n">total_frames</span> <span class="o">!=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">total_frames</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_at_each_iter</span> <span class="o">=</span> <span class="n">reset_at_each_iter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">init_random_frames</span> <span class="o">=</span> <span class="n">init_random_frames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_random_frames</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">init_random_frames</span><span class="p">)</span> <span class="k">if</span> <span class="n">init_random_frames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">init_random_frames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="n">init_random_frames</span> <span class="o">%</span> <span class="n">frames_per_batch</span> <span class="o">!=</span> <span class="mi">0</span>
@@ -990,7 +996,7 @@
                 <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="n">frames_per_batch</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">n_env</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">n_env</span><span class="si">}</span><span class="s2">).&quot;</span>
                 <span class="s2">&quot;To silence this message, set the environment variable RL_WARNINGS to False.&quot;</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">requested_frames_per_batch</span> <span class="o">=</span> <span class="n">frames_per_batch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requested_frames_per_batch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">frames_per_batch</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frames_per_batch</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="n">frames_per_batch</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_env</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exploration_type</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">exploration_type</span> <span class="k">if</span> <span class="n">exploration_type</span> <span class="k">else</span> <span class="n">DEFAULT_EXPLORATION_TYPE</span>
@@ -1604,11 +1610,15 @@
                     <span class="sa">f</span><span class="s2">&quot;This means </span><span class="si">{</span><span class="n">frames_per_batch</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">remainder</span><span class="si">}</span><span class="s2"> additional frames will be collected.&quot;</span>
                     <span class="s2">&quot;To silence this message, set the environment variable RL_WARNINGS to False.&quot;</span>
                 <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total_frames</span> <span class="o">=</span> <span class="n">total_frames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_frames</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">total_frames</span><span class="p">)</span> <span class="k">if</span> <span class="n">total_frames</span> <span class="o">!=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">total_frames</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_at_each_iter</span> <span class="o">=</span> <span class="n">reset_at_each_iter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">postprocs</span> <span class="o">=</span> <span class="n">postproc</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_frames_per_traj</span> <span class="o">=</span> <span class="n">max_frames_per_traj</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">requested_frames_per_batch</span> <span class="o">=</span> <span class="n">frames_per_batch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_frames_per_traj</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">max_frames_per_traj</span><span class="p">)</span> <span class="k">if</span> <span class="n">max_frames_per_traj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requested_frames_per_batch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">frames_per_batch</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_when_done</span> <span class="o">=</span> <span class="n">reset_when_done</span>
         <span class="k">if</span> <span class="n">split_trajs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">split_trajs</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1617,7 +1627,9 @@
                 <span class="s2">&quot;Cannot split trajectories when reset_when_done is False.&quot;</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">split_trajs</span> <span class="o">=</span> <span class="n">split_trajs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">init_random_frames</span> <span class="o">=</span> <span class="n">init_random_frames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_random_frames</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">init_random_frames</span><span class="p">)</span> <span class="k">if</span> <span class="n">init_random_frames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_at_each_batch</span> <span class="o">=</span> <span class="n">update_at_each_batch</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exploration_type</span> <span class="o">=</span> <span class="n">exploration_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frames_per_worker</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
