@@ -201,7 +201,7 @@ change the ``collate_fn`` since the default expects numerical data):
 
  .. code-block:: none
 
-    ['a', 'b', 'a']
+    [0, 'a', 'a']
 
 
 
@@ -320,14 +320,14 @@ Let us sample from the buffer, and print the data:
 
  .. code-block:: none
 
-    samples tensor([[ 4,  5,  6,  7],
+    samples tensor([[ 8,  9, 10, 11],
             [ 8,  9, 10, 11],
-            [ 4,  5,  6,  7],
-            [ 4,  5,  6,  7],
-            [ 0,  1,  2,  3]]) tensor([[ 5,  6,  7,  8,  9],
+            [ 8,  9, 10, 11],
+            [ 8,  9, 10, 11],
+            [ 0,  1,  2,  3]]) tensor([[10, 11, 12, 13, 14],
             [10, 11, 12, 13, 14],
-            [ 5,  6,  7,  8,  9],
-            [ 5,  6,  7,  8,  9],
+            [10, 11, 12, 13, 14],
+            [10, 11, 12, 13, 14],
             [ 0,  1,  2,  3,  4]])
 
 
@@ -358,16 +358,16 @@ A :class:`torchrl.data.LazyMemmapStorage` is created in the same manner:
  .. code-block:: none
 
     The buffer has 3 elements
-    samples: a= tensor([[ 0,  1,  2,  3],
+    samples: a= tensor([[ 8,  9, 10, 11],
+            [ 8,  9, 10, 11],
             [ 8,  9, 10, 11],
             [ 0,  1,  2,  3],
-            [ 0,  1,  2,  3],
-            [ 8,  9, 10, 11]]) 
-    ('b', 'c'): tensor([[ 0,  1,  2,  3,  4],
+            [ 0,  1,  2,  3]]) 
+    ('b', 'c'): tensor([[10, 11, 12, 13, 14],
+            [10, 11, 12, 13, 14],
             [10, 11, 12, 13, 14],
             [ 0,  1,  2,  3,  4],
-            [ 0,  1,  2,  3,  4],
-            [10, 11, 12, 13, 14]])
+            [ 0,  1,  2,  3,  4]])
 
 
 
@@ -451,14 +451,12 @@ generally be used interchangeably.
  .. code-block:: none
 
     The buffer has 3 elements
-    sample: <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    TensorDict(
+    sample: TensorDict(
         fields={
-            a: MemmapTensor(shape=torch.Size([12, 4]), device=cpu, dtype=torch.int64, is_shared=False),
+            a: Tensor(shape=torch.Size([12, 4]), device=cpu, dtype=torch.int64, is_shared=False),
             b: TensorDict(
                 fields={
-                    c: MemmapTensor(shape=torch.Size([12, 5]), device=cpu, dtype=torch.int64, is_shared=False)},
+                    c: Tensor(shape=torch.Size([12, 5]), device=cpu, dtype=torch.int64, is_shared=False)},
                 batch_size=torch.Size([12]),
                 device=cpu,
                 is_shared=False),
@@ -491,7 +489,7 @@ Let us have a look at these indices:
 
  .. code-block:: none
 
-    tensor([2, 1, 2, 0, 0, 2, 0, 1, 0, 1, 1, 2])
+    tensor([2, 2, 0, 1, 1, 0, 1, 0, 2, 1, 1, 1])
 
 
 
@@ -546,11 +544,9 @@ encode datasets in a more explicit manner:
  .. code-block:: none
 
     The buffer has 1000 elements
-    sample: <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    MyData(
-        images=MemmapTensor(shape=torch.Size([12, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
-        labels=MemmapTensor(shape=torch.Size([12]), device=cpu, dtype=torch.int64, is_shared=False),
+    sample: MyData(
+        images=Tensor(shape=torch.Size([12, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
+        labels=Tensor(shape=torch.Size([12]), device=cpu, dtype=torch.int64, is_shared=False),
         batch_size=torch.Size([12]),
         device=cpu,
         is_shared=False)
@@ -606,8 +602,8 @@ sampling:
 
 
     MyData(
-        images=MemmapTensor(shape=torch.Size([128, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
-        labels=MemmapTensor(shape=torch.Size([128]), device=cpu, dtype=torch.int64, is_shared=False),
+        images=Tensor(shape=torch.Size([128, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
+        labels=Tensor(shape=torch.Size([128]), device=cpu, dtype=torch.int64, is_shared=False),
         batch_size=torch.Size([128]),
         device=cpu,
         is_shared=False)
@@ -643,11 +639,9 @@ sampling considerably:
 
  .. code-block:: none
 
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
     MyData(
-        images=MemmapTensor(shape=torch.Size([128, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
-        labels=MemmapTensor(shape=torch.Size([128]), device=cpu, dtype=torch.int64, is_shared=False),
+        images=Tensor(shape=torch.Size([128, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
+        labels=Tensor(shape=torch.Size([128]), device=cpu, dtype=torch.int64, is_shared=False),
         batch_size=torch.Size([128]),
         device=cpu,
         is_shared=False)
@@ -683,11 +677,9 @@ dataloader, as long as the batch-size is predefined:
 
  .. code-block:: none
 
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
     MyData(
-        images=MemmapTensor(shape=torch.Size([128, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
-        labels=MemmapTensor(shape=torch.Size([128]), device=cpu, dtype=torch.int64, is_shared=False),
+        images=Tensor(shape=torch.Size([128, 64, 64, 3]), device=cpu, dtype=torch.int64, is_shared=False),
+        labels=Tensor(shape=torch.Size([128]), device=cpu, dtype=torch.int64, is_shared=False),
         batch_size=torch.Size([128]),
         device=cpu,
         is_shared=False)
@@ -784,28 +776,24 @@ argument can be omitted and passed directly to the `sample` method:
 
  .. code-block:: none
 
-    sampling 3 elements: <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    TensorDict(
+    sampling 3 elements: TensorDict(
         fields={
-            a: MemmapTensor(shape=torch.Size([3, 4]), device=cpu, dtype=torch.int64, is_shared=False),
+            a: Tensor(shape=torch.Size([3, 4]), device=cpu, dtype=torch.int64, is_shared=False),
             b: TensorDict(
                 fields={
-                    c: MemmapTensor(shape=torch.Size([3, 8]), device=cpu, dtype=torch.int64, is_shared=False)},
+                    c: Tensor(shape=torch.Size([3, 8]), device=cpu, dtype=torch.int64, is_shared=False)},
                 batch_size=torch.Size([3]),
                 device=cpu,
                 is_shared=False)},
         batch_size=torch.Size([3]),
         device=cpu,
         is_shared=False)
-    sampling 5 elements: <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    TensorDict(
+    sampling 5 elements: TensorDict(
         fields={
-            a: MemmapTensor(shape=torch.Size([5, 4]), device=cpu, dtype=torch.int64, is_shared=False),
+            a: Tensor(shape=torch.Size([5, 4]), device=cpu, dtype=torch.int64, is_shared=False),
             b: TensorDict(
                 fields={
-                    c: MemmapTensor(shape=torch.Size([5, 8]), device=cpu, dtype=torch.int64, is_shared=False)},
+                    c: Tensor(shape=torch.Size([5, 8]), device=cpu, dtype=torch.int64, is_shared=False)},
                 batch_size=torch.Size([5]),
                 device=cpu,
                 is_shared=False)},
@@ -1062,8 +1050,8 @@ higher indices should occur more frequently:
  .. code-block:: none
 
 
-    (array([ 26.,  39.,  68.,  81., 115.,  98., 148., 122., 147., 180.]), array([  4. ,  16.3,  28.6,  40.9,  53.2,  65.5,  77.8,  90.1, 102.4,
-           114.7, 127. ]), <BarContainer object of 10 artists>)
+    (array([ 22.,  43.,  66.,  71., 106.,  95., 132., 164., 157., 168.]), array([  2. ,  14.5,  27. ,  39.5,  52. ,  64.5,  77. ,  89.5, 102. ,
+           114.5, 127. ]), <BarContainer object of 10 artists>)
 
 
 
@@ -1119,8 +1107,8 @@ Now, higher indices should occur less frequently:
  .. code-block:: none
 
 
-    (array([154., 129., 168., 133., 116., 124.,  77.,  61.,  43.,  19.]), array([  1. ,  13.4,  25.8,  38.2,  50.6,  63. ,  75.4,  87.8, 100.2,
-           112.6, 125. ]), <BarContainer object of 10 artists>)
+    (array([130., 149., 157., 133., 120., 113.,  88.,  60.,  57.,  17.]), array([  2. ,  14.5,  27. ,  39.5,  52. ,  64.5,  77. ,  89.5, 102. ,
+           114.5, 127. ]), <BarContainer object of 10 artists>)
 
 
 
@@ -1364,36 +1352,26 @@ We can check that a ``sample`` method sees the transformed images reappear:
 
  .. code-block:: none
 
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
-    <class 'tensordict.memmap.MemmapTensor'>
     TensorDict(
         fields={
-            action: MemmapTensor(shape=torch.Size([16, 2]), device=cpu, dtype=torch.int64, is_shared=False),
-            done: MemmapTensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False),
+            action: Tensor(shape=torch.Size([16, 2]), device=cpu, dtype=torch.int64, is_shared=False),
+            done: Tensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False),
             index: Tensor(shape=torch.Size([16]), device=cpu, dtype=torch.int64, is_shared=False),
             next: TensorDict(
                 fields={
-                    done: MemmapTensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False),
-                    pixels: MemmapTensor(shape=torch.Size([16, 400, 600, 3]), device=cpu, dtype=torch.uint8, is_shared=False),
+                    done: Tensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False),
+                    pixels: Tensor(shape=torch.Size([16, 400, 600, 3]), device=cpu, dtype=torch.uint8, is_shared=False),
                     pixels_trsf: Tensor(shape=torch.Size([16, 1, 64, 64]), device=cpu, dtype=torch.float32, is_shared=False),
-                    reward: MemmapTensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                    terminated: MemmapTensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False),
-                    truncated: MemmapTensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
+                    reward: Tensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.float32, is_shared=False),
+                    terminated: Tensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False),
+                    truncated: Tensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
                 batch_size=torch.Size([16]),
                 device=cpu,
                 is_shared=False),
-            pixels: MemmapTensor(shape=torch.Size([16, 400, 600, 3]), device=cpu, dtype=torch.uint8, is_shared=False),
+            pixels: Tensor(shape=torch.Size([16, 400, 600, 3]), device=cpu, dtype=torch.uint8, is_shared=False),
             pixels_trsf: Tensor(shape=torch.Size([16, 1, 64, 64]), device=cpu, dtype=torch.float32, is_shared=False),
-            terminated: MemmapTensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False),
-            truncated: MemmapTensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
+            terminated: Tensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False),
+            truncated: Tensor(shape=torch.Size([16, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
         batch_size=torch.Size([16]),
         device=cpu,
         is_shared=False)
@@ -1552,41 +1530,26 @@ the end:
 
 
 
-
-
 .. rst-class:: sphx-glr-script-out
 
- .. code-block:: none
+.. code-block:: pytb
 
-    TensorDict(
-        fields={
-            action: Tensor(shape=torch.Size([1, 10, 2]), device=cpu, dtype=torch.int64, is_shared=False),
-            collector: TensorDict(
-                fields={
-                    traj_ids: Tensor(shape=torch.Size([1, 10]), device=cpu, dtype=torch.int64, is_shared=False)},
-                batch_size=torch.Size([1, 10]),
-                device=cpu,
-                is_shared=False),
-            done: Tensor(shape=torch.Size([1, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),
-            index: Tensor(shape=torch.Size([1, 10]), device=cpu, dtype=torch.int64, is_shared=False),
-            next: TensorDict(
-                fields={
-                    done: Tensor(shape=torch.Size([1, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),
-                    pixels: Tensor(shape=torch.Size([1, 10, 400, 600, 3]), device=cpu, dtype=torch.uint8, is_shared=False),
-                    pixels_trsf: Tensor(shape=torch.Size([1, 10, 4, 1, 64, 64]), device=cpu, dtype=torch.float32, is_shared=False),
-                    reward: Tensor(shape=torch.Size([1, 10, 1]), device=cpu, dtype=torch.float32, is_shared=False),
-                    terminated: Tensor(shape=torch.Size([1, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),
-                    truncated: Tensor(shape=torch.Size([1, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
-                batch_size=torch.Size([1, 10]),
-                device=cpu,
-                is_shared=False),
-            pixels: Tensor(shape=torch.Size([1, 10, 400, 600, 3]), device=cpu, dtype=torch.uint8, is_shared=False),
-            pixels_trsf: Tensor(shape=torch.Size([1, 10, 4, 1, 64, 64]), device=cpu, dtype=torch.float32, is_shared=False),
-            terminated: Tensor(shape=torch.Size([1, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False),
-            truncated: Tensor(shape=torch.Size([1, 10, 1]), device=cpu, dtype=torch.bool, is_shared=False)},
-        batch_size=torch.Size([1, 10]),
-        device=cpu,
-        is_shared=False)
+    Traceback (most recent call last):
+      File "/__w/rl/rl/docs/source/reference/generated/tutorials/rb_tutorial.py", line 668, in <module>
+        s = rb.sample(1)  # the buffer has only one element
+      File "/__w/rl/rl/torchrl/data/replay_buffers/replay_buffers.py", line 809, in sample
+        data, info = super().sample(batch_size, return_info=True)
+      File "/__w/rl/rl/torchrl/data/replay_buffers/replay_buffers.py", line 365, in sample
+        ret = self._sample(batch_size)
+      File "/__w/rl/rl/torchrl/data/replay_buffers/utils.py", line 46, in decorated_fun
+        output = fun(self, *args, **kwargs)
+      File "/__w/rl/rl/torchrl/data/replay_buffers/replay_buffers.py", line 302, in _sample
+        data = self._collate_fn(data)
+      File "/__w/rl/rl/torchrl/data/replay_buffers/storages.py", line 743, in _collate_as_tensor
+        return x.as_tensor()
+      File "/usr/local/lib/python3.8/dist-packages/tensordict/tensordict.py", line 1817, in as_tensor
+        raise AttributeError(
+    AttributeError: TensorDict does not have an 'as_tensor' method because at least one of its tensors does not support this method.
 
 
 
@@ -1602,12 +1565,6 @@ data generated online and offline match!
 
 
     assert (data.exclude("collector") == s.squeeze(0).exclude("index", "collector")).all()
-
-
-
-
-
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 679-691
@@ -1628,9 +1585,9 @@ You should now be able to:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (2 minutes 48.327 seconds)
+   **Total running time of the script:** (2 minutes 41.046 seconds)
 
-**Estimated memory usage:**  290 MB
+**Estimated memory usage:**  4229 MB
 
 
 .. _sphx_glr_download_tutorials_rb_tutorial.py:
