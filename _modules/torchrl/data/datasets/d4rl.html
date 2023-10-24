@@ -374,6 +374,7 @@
 <span class="c1"># LICENSE file in the root directory of this source tree.</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">urllib</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -439,7 +440,7 @@
 
 <span class="sd">            .. note::</span>
 
-<span class="sd">              Using ``from_env=False`` will provide less data than ``from_env=True``.</span>
+<span class="sd">              Using ``from_env=False`` will provide fewer data than ``from_env=True``.</span>
 <span class="sd">              For instance, the info keys will be left out.</span>
 <span class="sd">              Usually, ``from_env=False`` with ``terminate_on_end=True`` will</span>
 <span class="sd">              lead to the same result as ``from_env=True``, with the latter</span>
@@ -481,13 +482,14 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_import_d4rl</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_has_d4rl</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;d4rl&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">d4rl</span>  <span class="c1"># noqa</span>
 
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_has_d4rl</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">ModuleNotFoundError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_has_d4rl</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">D4RL_ERR</span> <span class="o">=</span> <span class="n">err</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -506,17 +508,6 @@
         <span class="n">terminate_on_end</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">env_kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="k">if</span> <span class="n">from_env</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;from_env will soon default to ``False``, ie the data will be &quot;</span>
-                <span class="s2">&quot;downloaded without relying on d4rl by default. &quot;</span>
-                <span class="s2">&quot;For now, ``True`` will still be the default. &quot;</span>
-                <span class="s2">&quot;To disable this warning, explicitly pass the ``from_env`` argument &quot;</span>
-                <span class="s2">&quot;during construction of the dataset.&quot;</span><span class="p">,</span>
-                <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">from_env</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">from_env</span> <span class="o">=</span> <span class="n">from_env</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_truncated_as_done</span> <span class="o">=</span> <span class="n">use_truncated_as_done</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">from_env</span> <span class="ow">and</span> <span class="n">direct_download</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -524,6 +515,17 @@
             <span class="n">direct_download</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_d4rl</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">direct_download</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">from_env</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;from_env will soon default to ``False``, ie the data will be &quot;</span>
+                    <span class="s2">&quot;downloaded without relying on d4rl by default. &quot;</span>
+                    <span class="s2">&quot;For now, ``True`` will still be the default. &quot;</span>
+                    <span class="s2">&quot;To disable this warning, explicitly pass the ``from_env`` argument &quot;</span>
+                    <span class="s2">&quot;during construction of the dataset.&quot;</span><span class="p">,</span>
+                    <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">from_env</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_env</span> <span class="o">=</span> <span class="n">from_env</span>
             <span class="k">if</span> <span class="n">terminate_on_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># we use the default of d4rl</span>
                 <span class="n">terminate_on_end</span> <span class="o">=</span> <span class="kc">False</span>
@@ -545,6 +547,9 @@
                 <span class="n">env_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;terminate_on_end&quot;</span><span class="p">:</span> <span class="n">terminate_on_end</span><span class="p">})</span>
                 <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dataset_direct</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">env_kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">from_env</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">from_env</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">from_env</span> <span class="o">=</span> <span class="n">from_env</span>
             <span class="k">if</span> <span class="n">terminate_on_end</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;Using terminate_on_end=False is not compatible with direct_download=True.&quot;</span>
@@ -643,7 +648,6 @@
         <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;terminated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;terminated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;truncated&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;truncated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;truncated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># dataset.rename_key_(&quot;next_observations&quot;, &quot;next/observation&quot;)</span>
         <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;next&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="n">dataset</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;reward&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="s2">&quot;terminated&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -724,10 +728,17 @@
             <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;truncated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;truncated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;reward&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-            <span class="s2">&quot;next&quot;</span><span class="p">,</span>
-            <span class="n">dataset</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">1</span><span class="p">:],</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;next_observations&quot;</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="s2">&quot;next&quot;</span><span class="p">,</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;info&quot;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">1</span><span class="p">:],</span>
+            <span class="p">)</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">rename_key_</span><span class="p">(</span><span class="s2">&quot;next_observations&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="s2">&quot;observation&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="s2">&quot;next&quot;</span><span class="p">,</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">1</span><span class="p">:],</span>
+            <span class="p">)</span>
         <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;next&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="n">dataset</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;reward&quot;</span><span class="p">,</span> <span class="s2">&quot;done&quot;</span><span class="p">,</span> <span class="s2">&quot;terminated&quot;</span><span class="p">,</span> <span class="s2">&quot;truncated&quot;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="p">)</span>

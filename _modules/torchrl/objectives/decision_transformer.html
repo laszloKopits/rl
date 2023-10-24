@@ -423,12 +423,18 @@
 <span class="sd">        default values.</span>
 
 <span class="sd">        Attributes:</span>
-<span class="sd">            action (NestedKey): The input tensordict key where the action is expected.</span>
+<span class="sd">            action_target (NestedKey): The input tensordict key where the action is expected.</span>
+<span class="sd">                Defaults to ``&quot;action&quot;``.</span>
+<span class="sd">            action_pred (NestedKey): The tensordict key where the output action (from the model) is expected.</span>
+<span class="sd">                Used to compute the target entropy.</span>
 <span class="sd">                Defaults to ``&quot;action&quot;``.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">action</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
+        <span class="c1"># the &quot;action&quot; contained in the dataset</span>
+        <span class="n">action_target</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
+        <span class="c1"># the &quot;action&quot; output from the model</span>
+        <span class="n">action_pred</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
 
     <span class="n">default_keys</span> <span class="o">=</span> <span class="n">_AcceptedKeys</span><span class="p">()</span>
 
@@ -495,17 +501,14 @@
                     <span class="s2">&quot;the target entropy explicitely or provide the spec of the &quot;</span>
                     <span class="s2">&quot;action tensor in the actor network.&quot;</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
-            <span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action_pred</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                 <span class="n">action_container_shape</span> <span class="o">=</span> <span class="n">actor_network</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action_pred</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 <span class="p">]</span><span class="o">.</span><span class="n">shape</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">action_container_shape</span> <span class="o">=</span> <span class="n">actor_network</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">shape</span>
             <span class="n">target_entropy</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span>
-                <span class="n">actor_network</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">]</span>
+                <span class="n">actor_network</span><span class="o">.</span><span class="n">spec</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action_pred</span><span class="p">]</span>
                 <span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">action_container_shape</span><span class="p">)</span> <span class="p">:]</span>
                 <span class="o">.</span><span class="n">numel</span><span class="p">()</span>
             <span class="p">)</span>
@@ -519,7 +522,7 @@
     <span class="k">def</span> <span class="nf">_set_in_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="o">.</span><span class="n">in_keys</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
-        <span class="n">keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action_target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_forward_value_estimator_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -570,7 +573,10 @@
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the loss for the Online Decision Transformer.&quot;&quot;&quot;</span>
         <span class="c1"># extract action targets</span>
-        <span class="n">target_actions</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="n">tensordict</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">target_actions</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action_target</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target_actions</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;target action cannot be part of a graph.&quot;</span><span class="p">)</span>
 
         <span class="n">action_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="o">.</span><span class="n">get_dist</span><span class="p">(</span>
             <span class="n">tensordict</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_network_params</span>
@@ -613,11 +619,16 @@
 <span class="sd">        default values.</span>
 
 <span class="sd">        Attributes:</span>
-<span class="sd">            action (NestedKey): The input tensordict key where the action is expected.</span>
+<span class="sd">            action_target (NestedKey): The input tensordict key where the action is expected.</span>
+<span class="sd">                Defaults to ``&quot;action&quot;``.</span>
+<span class="sd">            action_pred (NestedKey): The tensordict key where the output action (from the model) is expected.</span>
 <span class="sd">                Defaults to ``&quot;action&quot;``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">action</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
+        <span class="c1"># the &quot;action&quot; contained in the dataset</span>
+        <span class="n">action_target</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
+        <span class="c1"># the &quot;action&quot; output from the model</span>
+        <span class="n">action_pred</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
 
     <span class="n">default_keys</span> <span class="o">=</span> <span class="n">_AcceptedKeys</span><span class="p">()</span>
 
@@ -643,7 +654,8 @@
     <span class="k">def</span> <span class="nf">_set_in_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="o">.</span><span class="n">in_keys</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
-        <span class="n">keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action_pred</span><span class="p">)</span>
+        <span class="n">keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action_target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_in_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_forward_value_estimator_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -674,11 +686,12 @@
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the loss for the Online Decision Transformer.&quot;&quot;&quot;</span>
         <span class="c1"># extract action targets</span>
-        <span class="n">target_actions</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+        <span class="n">tensordict</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">target_actions</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action_target</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
 
         <span class="n">pred_actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor_network</span><span class="p">(</span>
             <span class="n">tensordict</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">actor_network_params</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tensor_keys</span><span class="o">.</span><span class="n">action_pred</span><span class="p">)</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="n">distance_loss</span><span class="p">(</span>
             <span class="n">pred_actions</span><span class="p">,</span>
             <span class="n">target_actions</span><span class="p">,</span>

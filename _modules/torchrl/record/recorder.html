@@ -504,7 +504,13 @@
         <span class="k">del</span> <span class="n">obs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">iter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="p">[]</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">tensordict_reset</span><span class="p">:</span> <span class="n">TensorDictBase</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">tensordict_reset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensordict_reset</span></div>
 
 
 <div class="viewcode-block" id="TensorDictRecorder"><a class="viewcode-back" href="../../../reference/generated/torchrl.record.TensorDictRecorder.html#torchrl.record.TensorDictRecorder">[docs]</a><span class="k">class</span> <span class="nc">TensorDictRecorder</span><span class="p">(</span><span class="n">Transform</span><span class="p">):</span>
@@ -541,14 +547,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">skip</span> <span class="o">=</span> <span class="n">skip</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">td</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">_td</span> <span class="o">=</span> <span class="n">td</span>
+            <span class="n">_td</span> <span class="o">=</span> <span class="n">tensordict</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">:</span>
-                <span class="n">_td</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span><span class="o">.</span><span class="n">to_tensordict</span><span class="p">()</span>
+                <span class="n">_td</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">in_keys</span><span class="p">)</span><span class="o">.</span><span class="n">to_tensordict</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">td</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_td</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">td</span>
+        <span class="k">return</span> <span class="n">tensordict</span>
 
     <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -566,7 +572,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">iter</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">td</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">td</span> <span class="o">=</span> <span class="p">[]</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">td</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">tensordict_reset</span><span class="p">:</span> <span class="n">TensorDictBase</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">tensordict_reset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensordict_reset</span></div>
 </pre></div>
 
              </article>

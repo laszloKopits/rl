@@ -376,8 +376,9 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
@@ -396,9 +397,11 @@
 <span class="kn">from</span> <span class="nn">torchrl.data.utils</span> <span class="kn">import</span> <span class="n">DEVICE_TYPING</span>
 <span class="kn">from</span> <span class="nn">torchrl.envs.utils</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_replace_last</span><span class="p">,</span>
+    <span class="n">_repr_by_depth</span><span class="p">,</span>
+    <span class="n">_terminated_or_truncated</span><span class="p">,</span>
+    <span class="n">_update_during_reset</span><span class="p">,</span>
     <span class="n">get_available_libraries</span><span class="p">,</span>
     <span class="n">step_mdp</span><span class="p">,</span>
-    <span class="n">terminated_or_truncated</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">LIBRARIES</span> <span class="o">=</span> <span class="n">get_available_libraries</span><span class="p">()</span>
@@ -613,9 +616,6 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;_done_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;_reward_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;_action_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;_batch_size&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_device&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
@@ -855,25 +855,23 @@
     <span class="k">def</span> <span class="nf">output_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">TensorSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;output_spec is protected.&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Action spec</span>
-    <span class="k">def</span> <span class="nf">_get_action_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Could not find action spec&quot;</span><span class="p">)</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_action_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys</span>
-        <span class="k">return</span> <span class="n">keys</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">action_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The action keys of an environment.</span>
 
 <span class="sd">        By default, there will only be one key named &quot;action&quot;.</span>
+
+<span class="sd">        Keys are sorted by depth in the data tree.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_keys</span>
-        <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_action_keys</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">out</span>
+        <span class="n">action_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_action_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">action_keys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">action_keys</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Could not find action spec&quot;</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">_repr_by_depth</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_action_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys</span>
+        <span class="k">return</span> <span class="n">keys</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">action_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedKey</span><span class="p">:</span>
@@ -1018,7 +1016,6 @@
                 <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_action_keys</span><span class="p">()</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
 
@@ -1053,22 +1050,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">action_spec</span> <span class="o">=</span> <span class="n">spec</span>
 
     <span class="c1"># Reward spec</span>
-    <span class="k">def</span> <span class="nf">_get_reward_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Could not find reward spec&quot;</span><span class="p">)</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_reward_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys</span>
-        <span class="k">return</span> <span class="n">keys</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reward_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The reward keys of an environment.</span>
 
 <span class="sd">        By default, there will only be one key named &quot;reward&quot;.</span>
+
+<span class="sd">        Keys are sorted by depth in the data tree.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_reward_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="n">reward_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_reward_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reward_keys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">reward_keys</span>
+
+        <span class="n">reward_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_reward_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">_repr_by_depth</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_reward_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reward_keys</span>
+        <span class="k">return</span> <span class="n">reward_keys</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reward_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1215,7 +1211,6 @@
                         <span class="s2">&quot; spec instead, for instance with a singleton dimension at the tail).&quot;</span>
                     <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_reward_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_reward_keys</span><span class="p">()</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
 
@@ -1251,31 +1246,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reward_spec</span> <span class="o">=</span> <span class="n">spec</span>
 
     <span class="c1"># done spec</span>
-    <span class="k">def</span> <span class="nf">_get_done_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s2">&quot;full_done_spec&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="c1"># populate the &quot;done&quot; entry</span>
-            <span class="c1"># this will be raised if there is not full_done_spec (unlikely) or no done_key</span>
-            <span class="c1"># Since output_spec is lazily populated with an empty composite spec for</span>
-            <span class="c1"># done_spec, the second case is much more likely to occur.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">done_spec</span> <span class="o">=</span> <span class="n">DiscreteTensorSpec</span><span class="p">(</span>
-                <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>
-            <span class="p">)</span>
-
-        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Could not find done spec&quot;</span><span class="p">)</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_done_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">keys</span>
-        <span class="k">return</span> <span class="n">keys</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">done_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The done keys of an environment.</span>
 
 <span class="sd">        By default, there will only be one key named &quot;done&quot;.</span>
+
+<span class="sd">        Keys are sorted by depth in the data tree.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_done_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="n">done_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_done_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">done_keys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">done_keys</span>
+        <span class="n">done_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_done_spec</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">_repr_by_depth</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_done_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">done_keys</span>
+        <span class="k">return</span> <span class="n">done_keys</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">done_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1509,7 +1493,6 @@
                     <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_create_done_specs</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_done_keys</span><span class="p">()</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="o">.</span><span class="n">lock_</span><span class="p">()</span>
 
@@ -1701,7 +1684,11 @@
         <span class="n">next_tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_proc_data</span><span class="p">(</span><span class="n">next_tensordict</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">next_preset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># tensordict could already have a &quot;next&quot; key</span>
-            <span class="n">next_tensordict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">next_preset</span><span class="p">)</span>
+            <span class="c1"># this could be done more efficiently by not excluding but just passing</span>
+            <span class="c1"># the necessary keys</span>
+            <span class="n">next_tensordict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">next_preset</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="o">*</span><span class="n">next_tensordict</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+            <span class="p">)</span>
         <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">next_tensordict</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tensordict</span></div>
 
@@ -1766,10 +1753,6 @@
         <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">def</span> <span class="nf">_step_proc_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">next_tensordict_out</span><span class="p">):</span>
-        <span class="c1"># TODO: Refactor this using reward spec</span>
-        <span class="c1"># unsqueeze rewards if needed</span>
-        <span class="c1"># the input tensordict may have more leading dimensions than the batch_size</span>
-        <span class="c1"># e.g. in model-based contexts.</span>
         <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="n">dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
         <span class="n">leading_batch_size</span> <span class="o">=</span> <span class="p">(</span>
@@ -1879,39 +1862,61 @@
                 <span class="sa">f</span><span class="s2">&quot;env._reset returned an object of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">tensordict_reset</span><span class="p">)</span><span class="si">}</span><span class="s2"> but a TensorDict was expected.&quot;</span>
             <span class="p">)</span>
 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_proc_data</span><span class="p">(</span><span class="n">tensordict</span><span class="p">,</span> <span class="n">tensordict_reset</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_reset_proc_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">,</span> <span class="n">tensordict_reset</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_complete_done</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">full_done_spec</span><span class="p">,</span> <span class="n">tensordict_reset</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_done_after_reset</span><span class="p">:</span>
-            <span class="c1"># we iterate over (reset_key, (done_key, truncated_key)) and check that all</span>
-            <span class="c1"># values where reset was true now have a done set to False.</span>
-            <span class="c1"># If no reset was present, all done and truncated must be False</span>
-            <span class="k">for</span> <span class="n">reset_key</span><span class="p">,</span> <span class="n">done_key_group</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys_groups</span>
-            <span class="p">):</span>
-                <span class="n">reset_value</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reset_key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="k">else</span> <span class="kc">None</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">reset_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="n">done_key_group</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)[</span><span class="n">reset_value</span><span class="p">]</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-                            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                                <span class="sa">f</span><span class="s2">&quot;Env done entry &#39;</span><span class="si">{</span><span class="n">done_key</span><span class="si">}</span><span class="s2">&#39; was (partially) True after reset on specified &#39;_reset&#39; dimensions. This is not allowed.&quot;</span>
-                            <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="n">done_key_group</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-                            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                                <span class="sa">f</span><span class="s2">&quot;Env done entry &#39;</span><span class="si">{</span><span class="n">done_key</span><span class="si">}</span><span class="s2">&#39; was (partially) True after a call to reset(). This is not allowed.&quot;</span>
-                            <span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_check_done</span><span class="p">(</span><span class="n">tensordict</span><span class="p">,</span> <span class="n">tensordict_reset</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">tensordict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tensordict_reset</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">tensordict</span> <span class="o">=</span> <span class="n">tensordict_reset</span>
-        <span class="n">tensordict</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">tensordict</span></div>
+            <span class="k">return</span> <span class="n">_update_during_reset</span><span class="p">(</span><span class="n">tensordict_reset</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensordict_reset</span>
+
+    <span class="k">def</span> <span class="nf">_reset_check_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">,</span> <span class="n">tensordict_reset</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks the done status after reset.</span>
+
+<span class="sd">        If _reset signals were passed, we check that the env is not done for these</span>
+<span class="sd">        indices.</span>
+
+<span class="sd">        We also check that the input tensordict contained ``&quot;done&quot;``s if the</span>
+<span class="sd">        reset is partial and incomplete.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># we iterate over (reset_key, (done_key, truncated_key)) and check that all</span>
+        <span class="c1"># values where reset was true now have a done set to False.</span>
+        <span class="c1"># If no reset was present, all done and truncated must be False</span>
+        <span class="k">for</span> <span class="n">reset_key</span><span class="p">,</span> <span class="n">done_key_group</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys_groups</span><span class="p">):</span>
+            <span class="n">reset_value</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reset_key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">reset_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="n">done_key_group</span><span class="p">:</span>
+                    <span class="n">done_val</span> <span class="o">=</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">done_val</span><span class="p">[</span><span class="n">reset_value</span><span class="p">]</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_done_after_reset</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Env done entry &#39;</span><span class="si">{</span><span class="n">done_key</span><span class="si">}</span><span class="s2">&#39; was (partially) True after reset on specified &#39;_reset&#39; dimensions. This is not allowed.&quot;</span>
+                        <span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">done_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="n">done_val</span><span class="p">[</span><span class="o">~</span><span class="n">reset_value</span><span class="p">]</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
+                    <span class="p">):</span>
+                        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;A partial `&#39;_reset&#39;` key has been passed to `reset` (</span><span class="si">{</span><span class="n">reset_key</span><span class="si">}</span><span class="s2">), &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;but the corresponding done_key (</span><span class="si">{</span><span class="n">done_key</span><span class="si">}</span><span class="s2">) was not present in the input &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;tensordict. &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;This is discouraged, since the input tensordict should contain &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;all the data not being reset.&quot;</span>
+                        <span class="p">)</span>
+                        <span class="c1"># we set the done val to tensordict, to make sure that</span>
+                        <span class="c1"># _update_during_reset does not pad the value</span>
+                        <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="n">done_val</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_done_after_reset</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="n">done_key_group</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">tensordict_reset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;The done entry &#39;</span><span class="si">{</span><span class="n">done_key</span><span class="si">}</span><span class="s2">&#39; was (partially) True after a call to reset() in env </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">numel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
@@ -1967,17 +1972,22 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([])</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_locked</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="ow">and</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">shape</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">shape</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_locked</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:</span>
-            <span class="n">shape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([])</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_locked</span> <span class="ow">and</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;The input tensordict and the env have a different batch size: &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;env.batch_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="si">}</span><span class="s2"> and tensordict.batch_size=</span><span class="si">{</span><span class="n">tensordict</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Non batch-locked environment require the env batch-size to be either empty or to&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; match the tensordict one.&quot;</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_locked</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="ow">and</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># if we can&#39;t infer the batch-size from the env, take it from tensordict</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:</span>
+                <span class="c1"># if tensordict wasn&#39;t provided, we assume empty batch size</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([])</span>
+            <span class="k">elif</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:</span>
+                <span class="c1"># if tensordict is not None and the env has a batch size, their shape must match</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;The input tensordict and the env have a different batch size: &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;env.batch_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="si">}</span><span class="s2"> and tensordict.batch_size=</span><span class="si">{</span><span class="n">tensordict</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Non batch-locked environment require the env batch-size to be either empty or to&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; match the tensordict one.&quot;</span>
+                <span class="p">)</span>
+        <span class="c1"># We generate the action from the full_action_spec</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="s2">&quot;full_action_spec&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">r</span>
@@ -2022,6 +2032,7 @@
         <span class="n">break_when_any_done</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">return_contiguous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">tensordict</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TensorDictBase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes a rollout in the environment.</span>
 
@@ -2158,10 +2169,39 @@
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;tensordict must be provided when auto_reset is False&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">policy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
-            <span class="k">def</span> <span class="nf">policy</span><span class="p">(</span><span class="n">td</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">rand_action</span><span class="p">(</span><span class="n">td</span><span class="p">)</span>
-                <span class="k">return</span> <span class="n">td</span>
+            <span class="n">policy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rand_action</span>
 
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;tensordict&quot;</span><span class="p">:</span> <span class="n">tensordict</span><span class="p">,</span>
+            <span class="s2">&quot;auto_cast_to_device&quot;</span><span class="p">:</span> <span class="n">auto_cast_to_device</span><span class="p">,</span>
+            <span class="s2">&quot;max_steps&quot;</span><span class="p">:</span> <span class="n">max_steps</span><span class="p">,</span>
+            <span class="s2">&quot;policy&quot;</span><span class="p">:</span> <span class="n">policy</span><span class="p">,</span>
+            <span class="s2">&quot;policy_device&quot;</span><span class="p">:</span> <span class="n">policy_device</span><span class="p">,</span>
+            <span class="s2">&quot;env_device&quot;</span><span class="p">:</span> <span class="n">env_device</span><span class="p">,</span>
+            <span class="s2">&quot;callback&quot;</span><span class="p">:</span> <span class="n">callback</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">break_when_any_done</span><span class="p">:</span>
+            <span class="n">tensordicts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rollout_stop_early</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tensordicts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rollout_nonstop</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">batch_size</span>
+        <span class="n">out_td</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">tensordicts</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">return_contiguous</span><span class="p">:</span>
+            <span class="n">out_td</span> <span class="o">=</span> <span class="n">out_td</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">out_td</span><span class="o">.</span><span class="n">refine_names</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out_td</span></div>
+
+    <span class="k">def</span> <span class="nf">_rollout_stop_early</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">tensordict</span><span class="p">,</span>
+        <span class="n">auto_cast_to_device</span><span class="p">,</span>
+        <span class="n">max_steps</span><span class="p">,</span>
+        <span class="n">policy</span><span class="p">,</span>
+        <span class="n">policy_device</span><span class="p">,</span>
+        <span class="n">env_device</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="n">tensordicts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_steps</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">auto_cast_to_device</span><span class="p">:</span>
@@ -2186,25 +2226,121 @@
             <span class="p">)</span>
             <span class="c1"># done and truncated are in done_keys</span>
             <span class="c1"># We read if any key is done.</span>
-            <span class="n">any_done</span> <span class="o">=</span> <span class="n">terminated_or_truncated</span><span class="p">(</span>
+            <span class="n">any_done</span> <span class="o">=</span> <span class="n">_terminated_or_truncated</span><span class="p">(</span>
                 <span class="n">tensordict</span><span class="p">,</span>
                 <span class="n">full_done_spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">],</span>
-                <span class="n">key</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">break_when_any_done</span> <span class="k">else</span> <span class="s2">&quot;_reset&quot;</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">break_when_any_done</span> <span class="ow">and</span> <span class="n">any_done</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">any_done</span><span class="p">:</span>
                 <span class="k">break</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">break_when_any_done</span> <span class="ow">and</span> <span class="n">any_done</span><span class="p">:</span>
-                <span class="n">tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensordicts</span>
 
-        <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">batch_size</span>
-        <span class="n">out_td</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">tensordicts</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_size</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">return_contiguous</span><span class="p">:</span>
-            <span class="n">out_td</span> <span class="o">=</span> <span class="n">out_td</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
-        <span class="n">out_td</span><span class="o">.</span><span class="n">refine_names</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">out_td</span></div>
+    <span class="k">def</span> <span class="nf">_rollout_nonstop</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">tensordict</span><span class="p">,</span>
+        <span class="n">auto_cast_to_device</span><span class="p">,</span>
+        <span class="n">max_steps</span><span class="p">,</span>
+        <span class="n">policy</span><span class="p">,</span>
+        <span class="n">policy_device</span><span class="p">,</span>
+        <span class="n">env_device</span><span class="p">,</span>
+        <span class="n">callback</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">tensordicts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tensordict_</span> <span class="o">=</span> <span class="n">tensordict</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_steps</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">auto_cast_to_device</span><span class="p">:</span>
+                <span class="n">tensordict_</span> <span class="o">=</span> <span class="n">tensordict_</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">policy_device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">tensordict_</span> <span class="o">=</span> <span class="n">policy</span><span class="p">(</span><span class="n">tensordict_</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">auto_cast_to_device</span><span class="p">:</span>
+                <span class="n">tensordict_</span> <span class="o">=</span> <span class="n">tensordict_</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">env_device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">tensordict</span><span class="p">,</span> <span class="n">tensordict_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_and_maybe_reset</span><span class="p">(</span><span class="n">tensordict_</span><span class="p">)</span>
+            <span class="n">tensordicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">max_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># we don&#39;t truncated as one could potentially continue the run</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tensordicts</span>
+
+<div class="viewcode-block" id="EnvBase.step_and_maybe_reset"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.EnvBase.html#torchrl.envs.EnvBase.step_and_maybe_reset">[docs]</a>    <span class="k">def</span> <span class="nf">step_and_maybe_reset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">TensorDictBase</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs a step in the environment and (partially) resets it if needed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tensordict (TensorDictBase): an input data structure for the :meth:`~.step`</span>
+<span class="sd">                method.</span>
+
+<span class="sd">        This method allows to easily code non-stopping rollout functions.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from torchrl.envs import ParallelEnv, GymEnv</span>
+<span class="sd">            &gt;&gt;&gt; def rollout(env, n):</span>
+<span class="sd">            ...     data_ = env.reset()</span>
+<span class="sd">            ...     result = []</span>
+<span class="sd">            ...     for i in range(n):</span>
+<span class="sd">            ...         data, data_ = env.step_and_maybe_reset(data_)</span>
+<span class="sd">            ...         result.append(data)</span>
+<span class="sd">            ...     return torch.stack(result).contiguous()</span>
+<span class="sd">            &gt;&gt;&gt; env = ParallelEnv(2, lambda: GymEnv(&quot;CartPole-v1&quot;))</span>
+<span class="sd">            &gt;&gt;&gt; print(rollout(env, 2))</span>
+<span class="sd">            TensorDict(</span>
+<span class="sd">                fields={</span>
+<span class="sd">                    done: Tensor(shape=torch.Size([2, 2, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                    next: TensorDict(</span>
+<span class="sd">                        fields={</span>
+<span class="sd">                            done: Tensor(shape=torch.Size([2, 2, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                            observation: Tensor(shape=torch.Size([2, 2, 4]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                            reward: Tensor(shape=torch.Size([2, 2, 1]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                            terminated: Tensor(shape=torch.Size([2, 2, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                            truncated: Tensor(shape=torch.Size([2, 2, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
+<span class="sd">                        batch_size=torch.Size([2, 2]),</span>
+<span class="sd">                        device=cpu,</span>
+<span class="sd">                        is_shared=False),</span>
+<span class="sd">                    observation: Tensor(shape=torch.Size([2, 2, 4]), device=cpu, dtype=torch.float32, is_shared=False),</span>
+<span class="sd">                    terminated: Tensor(shape=torch.Size([2, 2, 1]), device=cpu, dtype=torch.bool, is_shared=False),</span>
+<span class="sd">                    truncated: Tensor(shape=torch.Size([2, 2, 1]), device=cpu, dtype=torch.bool, is_shared=False)},</span>
+<span class="sd">                batch_size=torch.Size([2, 2]),</span>
+<span class="sd">                device=cpu,</span>
+<span class="sd">                is_shared=False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
+        <span class="c1"># done and truncated are in done_keys</span>
+        <span class="c1"># We read if any key is done.</span>
+        <span class="n">tensordict_</span> <span class="o">=</span> <span class="n">step_mdp</span><span class="p">(</span>
+            <span class="n">tensordict</span><span class="p">,</span>
+            <span class="n">keep_other</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">exclude_action</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">exclude_reward</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">reward_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reward_keys</span><span class="p">,</span>
+            <span class="n">action_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">action_keys</span><span class="p">,</span>
+            <span class="n">done_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">any_done</span> <span class="o">=</span> <span class="n">_terminated_or_truncated</span><span class="p">(</span>
+            <span class="n">tensordict_</span><span class="p">,</span>
+            <span class="n">full_done_spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_spec</span><span class="p">[</span><span class="s2">&quot;full_done_spec&quot;</span><span class="p">],</span>
+            <span class="n">key</span><span class="o">=</span><span class="s2">&quot;_reset&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">any_done</span><span class="p">:</span>
+            <span class="n">tensordict_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">tensordict_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensordict</span><span class="p">,</span> <span class="n">tensordict_</span></div>
+
+<div class="viewcode-block" id="EnvBase.empty_cache"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.EnvBase.html#torchrl.envs.EnvBase.empty_cache">[docs]</a>    <span class="k">def</span> <span class="nf">empty_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Erases all the cached values.</span>
+
+<span class="sd">        For regular envs, the key lists (reward, done etc) are cached, but in some cases</span>
+<span class="sd">        they may change during the execution of the code (eg, when adding a transform).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_reward_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_done_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_action_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_done_keys_group&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reset_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">NestedKey</span><span class="p">]:</span>
@@ -2215,32 +2351,43 @@
 <span class="sd">        a (possibly empty) tuple of strings pointing to a tensordict location</span>
 <span class="sd">        where a done state can be found.</span>
 
-<span class="sd">        The value of reset_keys is cached.</span>
+<span class="sd">        Keys are sorted by depth in the data tree.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">reset_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_reset_keys&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">reset_keys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">reset_keys</span>
-        <span class="n">prefixes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="n">reset_keys</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">def</span> <span class="nf">prefix</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">NestedKey</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">None</span>
-            <span class="k">return</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="n">prefix_key</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">prefix_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">key</span>
-            <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">prefix_key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">:</span>
-            <span class="n">prefix_key</span> <span class="o">=</span> <span class="n">prefix</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">prefix_key</span> <span class="ow">in</span> <span class="n">prefixes</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="n">prefixes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prefix_key</span><span class="p">)</span>
-            <span class="n">reset_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">combine</span><span class="p">(</span><span class="n">prefix_key</span><span class="p">,</span> <span class="s2">&quot;_reset&quot;</span><span class="p">))</span>
+        <span class="n">reset_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">_replace_last</span><span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="s2">&quot;_reset&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys_groups</span>
+            <span class="p">),</span>
+            <span class="n">key</span><span class="o">=</span><span class="n">_repr_by_depth</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_reset_keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reset_keys</span>
         <span class="k">return</span> <span class="n">reset_keys</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_filtered_reset_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the only the effective reset keys, discarding nested resets if they&#39;re not being used.&quot;&quot;&quot;</span>
+        <span class="n">reset_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">def</span> <span class="nf">_root</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">()</span>
+            <span class="k">return</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">roots</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">reset_key</span> <span class="ow">in</span> <span class="n">reset_keys</span><span class="p">:</span>
+            <span class="n">cur_root</span> <span class="o">=</span> <span class="n">_root</span><span class="p">(</span><span class="n">reset_key</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">roots</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cur_root</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">root</span><span class="p">)]</span> <span class="o">==</span> <span class="n">root</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">roots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cur_root</span><span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reset_key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">done_keys_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2249,33 +2396,29 @@
 <span class="sd">        This is a list of lists. The outer list has the length of reset keys, the</span>
 <span class="sd">        inner lists contain the done keys (eg, done and truncated) that can</span>
 <span class="sd">        be read to determine a reset when it is absent.</span>
-
-<span class="sd">        The value of ``done_keys_groups`` is cached.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">done_keys_sorted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_done_keys_groups&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">done_keys_sorted</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">done_keys_sorted</span>
-        <span class="c1"># done keys, sorted as reset keys</span>
-        <span class="n">reset_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span>
-        <span class="n">done_keys</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reset_keys</span><span class="p">))]</span>
-        <span class="n">reset_keys_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">reset_keys</span><span class="p">)</span>
-        <span class="n">done_keys_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">done_keys</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">curr_reset_key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">reset_keys_iter</span><span class="p">)</span>
-            <span class="n">curr_done_key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">done_keys_iter</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">done_keys</span>
+        <span class="n">done_keys_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_done_keys_group&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">done_keys_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">done_keys_group</span>
 
+        <span class="c1"># done keys, sorted as reset keys</span>
+        <span class="n">done_keys_group</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">roots</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">fds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_done_spec</span>
         <span class="k">for</span> <span class="n">done_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span><span class="p">:</span>
-            <span class="k">while</span> <span class="nb">type</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">curr_reset_key</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
-                <span class="nb">isinstance</span><span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="n">done_key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">curr_reset_key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="p">):</span>  <span class="c1"># if they are string, they are at the same level</span>
-                <span class="n">curr_reset_key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">reset_keys_iter</span><span class="p">)</span>
-                <span class="n">curr_done_key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">done_keys_iter</span><span class="p">)</span>
-            <span class="n">curr_done_key</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">done_key</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_done_keys_groups&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">done_keys</span>
-        <span class="k">return</span> <span class="n">done_keys</span>
+            <span class="n">root_name</span> <span class="o">=</span> <span class="n">done_key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">done_key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="p">()</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">fds</span><span class="p">[</span><span class="n">root_name</span><span class="p">]</span> <span class="k">if</span> <span class="n">root_name</span> <span class="k">else</span> <span class="n">fds</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">roots</span><span class="p">)</span>
+            <span class="n">roots</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">root_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">roots</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">:</span>
+                <span class="n">done_keys_group</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">unravel_key</span><span class="p">(</span><span class="n">root_name</span> <span class="o">+</span> <span class="p">(</span><span class="n">key</span><span class="p">,))</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">include_nested</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">leaves_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_done_keys_group&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">done_keys_group</span>
+        <span class="k">return</span> <span class="n">done_keys_group</span>
 
     <span class="k">def</span> <span class="nf">_select_observation_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>

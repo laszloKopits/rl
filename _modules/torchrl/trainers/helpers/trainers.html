@@ -628,6 +628,7 @@
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">recorder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># create recorder object</span>
         <span class="n">recorder_obj</span> <span class="o">=</span> <span class="n">Recorder</span><span class="p">(</span>
             <span class="n">record_frames</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">record_frames</span><span class="p">,</span>
             <span class="n">frame_skip</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">frame_skip</span><span class="p">,</span>
@@ -636,11 +637,14 @@
             <span class="n">record_interval</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">record_interval</span><span class="p">,</span>
             <span class="n">log_keys</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">recorder_log_keys</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># register recorder</span>
         <span class="n">trainer</span><span class="o">.</span><span class="n">register_op</span><span class="p">(</span>
             <span class="s2">&quot;post_steps_log&quot;</span><span class="p">,</span>
             <span class="n">recorder_obj</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># call recorder - could be removed</span>
         <span class="n">recorder_obj</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># create explorative recorder - could be optional</span>
         <span class="n">recorder_obj_explore</span> <span class="o">=</span> <span class="n">Recorder</span><span class="p">(</span>
             <span class="n">record_frames</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">record_frames</span><span class="p">,</span>
             <span class="n">frame_skip</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">frame_skip</span><span class="p">,</span>
@@ -651,10 +655,12 @@
             <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;exploration&quot;</span><span class="p">,</span>
             <span class="n">out_keys</span><span class="o">=</span><span class="p">{(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="s2">&quot;reward&quot;</span><span class="p">):</span> <span class="s2">&quot;r_evaluation_exploration&quot;</span><span class="p">},</span>
         <span class="p">)</span>
+        <span class="c1"># register recorder</span>
         <span class="n">trainer</span><span class="o">.</span><span class="n">register_op</span><span class="p">(</span>
             <span class="s2">&quot;post_steps_log&quot;</span><span class="p">,</span>
             <span class="n">recorder_obj_explore</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># call recorder - could be removed</span>
         <span class="n">recorder_obj_explore</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
     <span class="n">trainer</span><span class="o">.</span><span class="n">register_op</span><span class="p">(</span>

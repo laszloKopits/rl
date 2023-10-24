@@ -421,7 +421,7 @@ an environment with <code class="xref py py-obj docutils literal notranslate"><s
 an <code class="xref py py-obj docutils literal notranslate"><span class="pre">env.action_spec</span></code> with shape <code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.Size([4,</span> <span class="pre">action_size])</span></code>.
 This is helpful when preallocation tensors, checking shape consistency etc.</p>
 <p>With these, the following methods are implemented:</p>
-<ul class="simple">
+<ul>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">env.reset()</span></code>: a reset method that may (but not necessarily requires to) take
 a <a class="reference external" href="https://pytorch.org/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+785d11f ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> input. It return the first tensordict of a rollout, usually
 containing a <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;done&quot;</span></code> state and a set of observations. If not present,
@@ -429,6 +429,24 @@ a <cite>“reward”</cite> key will be instantiated with 0s and the appropriate
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">env.step()</span></code>: a step method that takes a <a class="reference external" href="https://pytorch.org/tensordict/reference/generated/tensordict.TensorDict.html#tensordict.TensorDict" title="(in tensordict vmain (0.1.2+785d11f ))"><code class="xref py py-class docutils literal notranslate"><span class="pre">tensordict.TensorDict</span></code></a> input
 containing an input action as well as other inputs (for model-based or stateless
 environments, for instance).</p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">env.step_and_maybe_reset()</span></code>: executes a step, and (partially) resets the
+environments if it needs to. It returns the updated input with a <code class="docutils literal notranslate"><span class="pre">&quot;next&quot;</span></code>
+key containing the data of the next step, as well as a tensordict containing
+the input data for the next step (ie, reset or result or
+<a class="reference internal" href="generated/torchrl.envs.utils.step_mdp.html#torchrl.envs.utils.step_mdp" title="torchrl.envs.utils.step_mdp"><code class="xref py py-func docutils literal notranslate"><span class="pre">step_mdp()</span></code></a>)
+This is done by reading the <code class="docutils literal notranslate"><span class="pre">done_keys</span></code> and
+assigning a <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> signal to each done state. This method allows
+to code non-stopping rollout functions with little effort:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">data</span><span class="p">,</span> <span class="n">data_</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step_and_maybe_reset</span><span class="p">(</span><span class="n">data_</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
 <li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">env.set_seed()</span></code>: a seeding method that will return the next seed
 to be used in a multi-env setting. This next seed is deterministically computed
 from the preceding one, such that one can seed multiple environments with a different
@@ -542,7 +560,95 @@ one can simply call:</p>
 </pre></div>
 </div>
 </div>
-<p>It is also possible to reset some but not all of the environments:</p>
+<p>TorchRL uses a private <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> key to indicate to the environment which
+component (sub-environments or agents) should be reset.
+This allows to reset some but not all of the components.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> key has two distinct functionalities:
+1. During a call to <code class="xref py py-meth docutils literal notranslate"><span class="pre">_reset()</span></code>, the <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> key may or may</p>
+<blockquote>
+<div><p>not be present in the input tensordict. TorchRL’s convention is that the
+absence of the <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> key at a given <code class="docutils literal notranslate"><span class="pre">&quot;done&quot;</span></code> level indicates
+a total reset of that level (unless a <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> key was found at a level
+above, see details below).
+If it is present, it is expected that those entries and only those components
+where the <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> entry is <code class="docutils literal notranslate"><span class="pre">True</span></code> (along key and shape dimension) will be reset.</p>
+<p>The way an environment deals with the <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> keys in its <code class="xref py py-meth docutils literal notranslate"><span class="pre">_reset()</span></code>
+method is proper to its class.
+Designing an environment that behaves according to <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> inputs is the
+developer’s responsibility, as TorchRL has no control over the inner logic
+of <code class="xref py py-meth docutils literal notranslate"><span class="pre">_reset()</span></code>. Nevertheless, the following point should be
+kept in mind when desiging that method.</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>After a call to <code class="xref py py-meth docutils literal notranslate"><span class="pre">_reset()</span></code>, the output will be masked with the
+<code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> entries and the output of the previous <a class="reference internal" href="generated/torchrl.envs.EnvBase.html#id4" title="torchrl.envs.EnvBase.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">step()</span></code></a>
+will be written wherever the <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> was <code class="docutils literal notranslate"><span class="pre">False</span></code>. In practice, this
+means that if a <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> modifies data that isn’t exposed by it, this
+modification will be lost. After this masking operation, the <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code>
+entries will be erased from the <a class="reference internal" href="generated/torchrl.envs.EnvBase.html#id1" title="torchrl.envs.EnvBase.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reset()</span></code></a> outputs.</p></li>
+</ol>
+<p>It must be pointed that <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> is a private key, and it should only be
+used when coding specific environment features that are internal facing.
+In other words, this should NOT be used outside of the library, and developers
+will keep the right to modify the logic of partial resets through <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code>
+setting without preliminary warranty, as long as they don’t affect TorchRL
+internal tests.</p>
+<p>Finally, the following assumptions are made and should be kept in mind when
+designing reset functionalities:</p>
+<ul class="simple">
+<li><p>Each <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> is paired with a <code class="docutils literal notranslate"><span class="pre">&quot;done&quot;</span></code> entry (+ <code class="docutils literal notranslate"><span class="pre">&quot;terminated&quot;</span></code> and,
+possibly, <code class="docutils literal notranslate"><span class="pre">&quot;truncated&quot;</span></code>). This means that the following structure is not
+allowed: <code class="docutils literal notranslate"><span class="pre">TensorDict({&quot;done&quot;:</span> <span class="pre">done,</span> <span class="pre">&quot;nested&quot;:</span> <span class="pre">{&quot;_reset&quot;:</span> <span class="pre">reset}},</span> <span class="pre">[])</span></code>, as
+the <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> lives at a different nesting level than the <code class="docutils literal notranslate"><span class="pre">&quot;done&quot;</span></code>.</p></li>
+<li><p>A reset at one level does not preclude the presence of a <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> at lower
+levels, but it annihilates its effects. The reason is simply that
+whether the <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> at the root level corresponds to an <code class="docutils literal notranslate"><span class="pre">all()</span></code>, <code class="docutils literal notranslate"><span class="pre">any()</span></code>
+or custom call to the nested <code class="docutils literal notranslate"><span class="pre">&quot;done&quot;</span></code> entries cannot be known in advance,
+and it is explicitly assumed that the <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> at the root was placed
+there to superseed the nested values (for an example, have a look at
+<code class="xref py py-class docutils literal notranslate"><span class="pre">PettingZooWrapper</span></code> implementation where each group has one or more
+<code class="docutils literal notranslate"><span class="pre">&quot;done&quot;</span></code> entries associated which is aggregated at the root level with a
+<code class="docutils literal notranslate"><span class="pre">any</span></code> or <code class="docutils literal notranslate"><span class="pre">all</span></code> logic depending on the task).</p></li>
+<li><p>When calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">env.reset(tensordict)()</span></code> with a partial <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> entry
+that will reset some but not all the done sub-environments, the input data
+should contain the data of the sub-environemtns that are __not__ being reset.
+The reason for this constrain lies in the fact that the output of the
+<code class="docutils literal notranslate"><span class="pre">env._reset(data)</span></code> can only be predicted for the entries that are reset.
+For the others, TorchRL cannot know in advance if they will be meaningful or
+not. For instance, one could perfectly just pad the values of the non-reset
+components, in which case the non-reset data will be meaningless and should
+be discarded.</p></li>
+</ul>
+<p>Below, we give some examples of the expected effect that <code class="docutils literal notranslate"><span class="pre">&quot;_reset&quot;</span></code> keys will
+have on an environment returning zeros after reset:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># single reset at the root</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">({</span><span class="s2">&quot;val&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;_reset&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]},</span> <span class="p">[])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;val&quot;</span><span class="p">))</span>  <span class="c1"># only the second value is 0</span>
+<span class="go">tensor([1, 0])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># nested resets</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s2">&quot;agent0&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">):</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="s2">&quot;agent0&quot;</span><span class="p">,</span> <span class="s2">&quot;_reset&quot;</span><span class="p">):</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s2">&quot;agent1&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">):</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">(</span><span class="s2">&quot;agent1&quot;</span><span class="p">,</span> <span class="s2">&quot;_reset&quot;</span><span class="p">):</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">},</span> <span class="p">[])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="s2">&quot;agent0&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">)))</span>  <span class="c1"># only the second value is 0</span>
+<span class="go">tensor([1, 0])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="s2">&quot;agent1&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">)))</span>  <span class="c1"># only the second value is 0</span>
+<span class="go">tensor([0, 2])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># nested resets are overridden by a &quot;_reset&quot; at the root</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s2">&quot;_reset&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s2">&quot;agent0&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">):</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="s2">&quot;agent0&quot;</span><span class="p">,</span> <span class="s2">&quot;_reset&quot;</span><span class="p">):</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="s2">&quot;agent1&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">):</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">(</span><span class="s2">&quot;agent1&quot;</span><span class="p">,</span> <span class="s2">&quot;_reset&quot;</span><span class="p">):</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">},</span> <span class="p">[])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="s2">&quot;agent0&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">)))</span>  <span class="c1"># reset at the root overrides nested</span>
+<span class="go">tensor([0, 0])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="s2">&quot;agent1&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">)))</span>  <span class="c1"># reset at the root overrides nested</span>
+<span class="go">tensor([0, 0])</span>
+</pre></div>
+</div>
 <div class="literal-block-wrapper docutils container" id="id6">
 <div class="code-block-caption"><span class="caption-text">Parallel environment reset</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>     <span class="o">&gt;&gt;&gt;</span> <span class="n">tensordict</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">({</span><span class="s2">&quot;_reset&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="kc">True</span><span class="p">],</span> <span class="p">[</span><span class="kc">False</span><span class="p">],</span> <span class="p">[</span><span class="kc">True</span><span class="p">],</span> <span class="p">[</span><span class="kc">True</span><span class="p">]]},</span> <span class="p">[</span><span class="mi">4</span><span class="p">])</span>
@@ -942,7 +1048,7 @@ to be able to create this other composition:</p>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.TensorDictPrimer.html#torchrl.envs.transforms.TensorDictPrimer" title="torchrl.envs.transforms.TensorDictPrimer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TensorDictPrimer</span></code></a>([primers, random, ...])</p></td>
 <td><p>A primer for TensorDict initialization at reset time.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.TimeMaxPool.html#torchrl.envs.transforms.TimeMaxPool" title="torchrl.envs.transforms.TimeMaxPool"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMaxPool</span></code></a>([in_keys, out_keys, T])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.TimeMaxPool.html#torchrl.envs.transforms.TimeMaxPool" title="torchrl.envs.transforms.TimeMaxPool"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeMaxPool</span></code></a>([in_keys, out_keys, T, reset_key])</p></td>
 <td><p>Take the maximum value in each position over the last T observations.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/torchrl.envs.transforms.ToTensorImage.html#torchrl.envs.transforms.ToTensorImage" title="torchrl.envs.transforms.ToTensorImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ToTensorImage</span></code></a>([from_int, unsqueeze, dtype, ...])</p></td>

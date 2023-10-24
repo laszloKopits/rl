@@ -386,6 +386,7 @@
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
 <span class="kn">from</span> <span class="nn">torchrl.data.tensor_specs</span> <span class="kn">import</span> <span class="n">CompositeSpec</span><span class="p">,</span> <span class="n">UnboundedContinuousTensorSpec</span>
 <span class="kn">from</span> <span class="nn">torchrl.envs.transforms.transforms</span> <span class="kn">import</span> <span class="n">Transform</span>
+<span class="kn">from</span> <span class="nn">torchrl.envs.transforms.utils</span> <span class="kn">import</span> <span class="n">_set_missing_tolerance</span>
 
 
 <div class="viewcode-block" id="KLRewardTransform"><a class="viewcode-back" href="../../../../reference/generated/torchrl.envs.transforms.KLRewardTransform.html#torchrl.envs.transforms.KLRewardTransform">[docs]</a><span class="k">class</span> <span class="nc">KLRewardTransform</span><span class="p">(</span><span class="n">Transform</span><span class="p">):</span>
@@ -523,6 +524,13 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coef</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
             <span class="n">coef</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;coef&quot;</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">tensordict_reset</span><span class="p">:</span> <span class="n">TensorDictBase</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">_set_missing_tolerance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="n">tensordict_reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">tensordict_reset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensordict_reset</span>
 
     <span class="k">def</span> <span class="nf">_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
         <span class="c1"># run the actor on the tensordict</span>

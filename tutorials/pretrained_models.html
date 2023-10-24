@@ -425,9 +425,9 @@ the corresponding action.</p>
 <div class="sphx-glr-script-out highlight-pytb notranslate"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;/__w/rl/rl/docs/source/reference/generated/tutorials/pretrained_models.py&quot;</span>, line <span class="m">40</span>, in <span class="n">&lt;module&gt;</span>
 <span class="w">    </span><span class="n">r3m</span> <span class="o">=</span> <a href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module" title="torch.nn.Module" class="sphx-glr-backref-module-torch-nn sphx-glr-backref-type-py-class"><span class="n">R3MTransform</span></a><span class="p">(</span>
-  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/transforms/r3m.py&quot;</span>, line <span class="m">250</span>, in <span class="n">__init__</span>
+  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/transforms/r3m.py&quot;</span>, line <span class="m">259</span>, in <span class="n">__init__</span>
 <span class="w">    </span><span class="bp">self</span><span class="o">.</span><span class="n">_init</span><span class="p">()</span>
-  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/transforms/r3m.py&quot;</span>, line <span class="m">303</span>, in <span class="n">_init</span>
+  File <span class="nb">&quot;/__w/rl/rl/torchrl/envs/transforms/r3m.py&quot;</span>, line <span class="m">312</span>, in <span class="n">_init</span>
 <span class="w">    </span><span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
 <span class="gr">ValueError</span>: <span class="n">out_key must be of length 1 if stack_images is True. Got out_keys=[]</span>
 </pre></div>
@@ -487,8 +487,8 @@ In this way, we can train an algorithm offline on a dataset made of images:</p>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;data after sampling:&quot;</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.814 seconds)</p>
-<p><strong>Estimated memory usage:</strong>  567 MB</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.801 seconds)</p>
+<p><strong>Estimated memory usage:</strong>  568 MB</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-tutorials-pretrained-models-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/ae7b3885bfc446e5c7ca2102306be4c2/pretrained_models.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">pretrained_models.py</span></code></a></p>

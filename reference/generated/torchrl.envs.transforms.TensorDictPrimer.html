@@ -380,7 +380,7 @@
 <h1>TensorDictPrimer<a class="headerlink" href="#tensordictprimer" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="torchrl.envs.transforms.TensorDictPrimer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchrl.envs.transforms.</span></span><span class="sig-name descname"><span class="pre">TensorDictPrimer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/transforms/transforms.html#TensorDictPrimer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.transforms.TensorDictPrimer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchrl.envs.transforms.</span></span><span class="sig-name descname"><span class="pre">TensorDictPrimer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NestedKey</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/transforms/transforms.html#TensorDictPrimer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.transforms.TensorDictPrimer" title="Permalink to this definition">¶</a></dt>
 <dd><p>A primer for TensorDict initialization at reset time.</p>
 <p>This transform will populate the tensordict at reset with values drawn from
 the relative tensorspecs provided at initialization.
@@ -397,6 +397,10 @@ the TensorSpec domain (or a unit Gaussian if unbounded). Otherwise a fixed value
 Defaults to <cite>False</cite>.</p></li>
 <li><p><strong>default_value</strong> (<em>float</em><em>, </em><em>optional</em>) – if non-random filling is chosen, this
 value will be used to populate the tensors. Defaults to <cite>0.0</cite>.</p></li>
+<li><p><strong>reset_key</strong> (<em>NestedKey</em><em>, </em><em>optional</em>) – the reset key to be used as partial
+reset indicator. Must be unique. If not provided, defaults to the
+only reset key of the parent environment (if it has only one)
+and raises an exception otherwise.</p></li>
 <li><p><strong>**kwargs</strong> – each keyword argument corresponds to a key in the tensordict.
 The corresponding value has to be a TensorSpec instance indicating
 what the value must be.</p></li>
@@ -453,17 +457,8 @@ in the <code class="docutils literal notranslate"><span class="pre">&quot;next&q
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="torchrl.envs.transforms.TensorDictPrimer.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensordict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TensorDictBase</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TensorDictBase</span></span></span><a class="reference internal" href="../../_modules/torchrl/envs/transforms/transforms.html#TensorDictPrimer.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.transforms.TensorDictPrimer.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the default values in the input tensordict.</p>
-<p>If the parent is batch-locked, we assume that the specs have the appropriate leading
-shape. We allow for execution when the parent is missing, in which case the
-spec shape is assumed to match the tensordict’s.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="torchrl.envs.transforms.TensorDictPrimer.to">
-<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype_or_device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/transforms/transforms.html#TensorDictPrimer.to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.transforms.TensorDictPrimer.to" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/transforms/transforms.html#TensorDictPrimer.to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.transforms.TensorDictPrimer.to" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves and/or casts the parameters and buffers.</p>
 <p>This can be called as</p>
 <dl class="py function">
@@ -560,6 +555,20 @@ only argument)</p></li>
 <span class="go">        [0.6122+0.j, 0.1150+0.j]], dtype=torch.complex128)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="torchrl.envs.transforms.TensorDictPrimer.transform_input_spec">
+<span class="sig-name descname"><span class="pre">transform_input_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.tensor_specs.TensorSpec"><span class="pre">TensorSpec</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.tensor_specs.TensorSpec"><span class="pre">TensorSpec</span></a></span></span><a class="reference internal" href="../../_modules/torchrl/envs/transforms/transforms.html#TensorDictPrimer.transform_input_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.transforms.TensorDictPrimer.transform_input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms the input spec such that the resulting spec matches transform mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_spec</strong> (<a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.TensorSpec"><em>TensorSpec</em></a>) – spec before the transform</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>expected spec after the transform</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

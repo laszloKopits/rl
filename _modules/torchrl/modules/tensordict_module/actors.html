@@ -2072,6 +2072,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">policy</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observation_key</span> <span class="o">=</span> <span class="s2">&quot;observation&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_key</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_action_key</span> <span class="o">=</span> <span class="s2">&quot;action&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">return_to_go_key</span> <span class="o">=</span> <span class="s2">&quot;return_to_go&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inference_context</span> <span class="o">=</span> <span class="n">inference_context</span>
         <span class="k">if</span> <span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2108,12 +2109,14 @@
 
 <span class="sd">        Keyword Args:</span>
 <span class="sd">            observation (NestedKey, optional): The observation key.</span>
-<span class="sd">            action (NestedKey, optional): The action key.</span>
+<span class="sd">            action (NestedKey, optional): The action key (input to the network).</span>
 <span class="sd">            return_to_go (NestedKey, optional): The return_to_go key.</span>
+<span class="sd">            out_action (NestedKey, optional): The action key (output of the network).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">observation_key</span> <span class="o">=</span> <span class="n">unravel_key</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_key</span><span class="p">))</span>
         <span class="n">action_key</span> <span class="o">=</span> <span class="n">unravel_key</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_key</span><span class="p">))</span>
+        <span class="n">out_action_key</span> <span class="o">=</span> <span class="n">unravel_key</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;out_action&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_action_key</span><span class="p">))</span>
         <span class="n">return_to_go_key</span> <span class="o">=</span> <span class="n">unravel_key</span><span class="p">(</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;return_to_go&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_to_go_key</span><span class="p">)</span>
         <span class="p">)</span>
@@ -2121,13 +2124,15 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Got unknown input(s) </span><span class="si">{</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">. Accepted keys are &#39;action&#39;, &#39;return_to_go&#39; and &#39;observation&#39;.&quot;</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">action_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">td_module</span><span class="o">.</span><span class="n">out_keys</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The action key </span><span class="si">{</span><span class="n">action_key</span><span class="si">}</span><span class="s2"> was not found in the policy out_keys </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">td_module</span><span class="o">.</span><span class="n">out_keys</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observation_key</span> <span class="o">=</span> <span class="n">observation_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">action_key</span> <span class="o">=</span> <span class="n">action_key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">return_to_go_key</span> <span class="o">=</span> <span class="n">return_to_go_key</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_to_go_key</span> <span class="o">=</span> <span class="n">return_to_go_key</span>
+        <span class="k">if</span> <span class="n">out_action_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">td_module</span><span class="o">.</span><span class="n">out_keys</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The value of out_action_key (</span><span class="si">{</span><span class="n">out_action_key</span><span class="si">}</span><span class="s2">) must be &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;within the actor output keys (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">td_module</span><span class="o">.</span><span class="n">out_keys</span><span class="si">}</span><span class="s2">).&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_action_key</span> <span class="o">=</span> <span class="n">out_action_key</span></div>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">pass</span>
@@ -2182,17 +2187,18 @@
         <span class="n">tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_context</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
         <span class="c1"># forward pass</span>
         <span class="n">tensordict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">td_module</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">tensordict</span><span class="p">)</span>
-        <span class="c1"># get last action predicton</span>
-        <span class="n">out_action</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_key</span><span class="p">)</span>
+        <span class="c1"># get last action prediction</span>
+        <span class="n">out_action</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_action_key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="n">out_action</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># then time dimension is in the TD&#39;s dimensions, and we must get rid of it</span>
             <span class="n">tensordict</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">batch_size</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">out_action</span> <span class="o">=</span> <span class="n">out_action</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_key</span><span class="p">,</span> <span class="n">out_action</span><span class="p">)</span>
-        <span class="c1"># out_rtg = tensordict.get(self.return_to_go_key)[:, -1]</span>
+        <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_action_key</span><span class="p">,</span> <span class="n">out_action</span><span class="p">)</span>
+
         <span class="n">out_rtg</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_to_go_key</span><span class="p">)</span>
         <span class="n">out_rtg</span> <span class="o">=</span> <span class="n">out_rtg</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_to_go_key</span><span class="p">,</span> <span class="n">out_rtg</span><span class="p">)</span>
+
         <span class="c1"># set unmasked observation</span>
         <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">observation_key</span><span class="p">,</span> <span class="n">obs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tensordict</span></div></div>

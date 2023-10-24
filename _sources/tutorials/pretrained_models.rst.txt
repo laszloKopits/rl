@@ -109,9 +109,9 @@ the corresponding action.
     Traceback (most recent call last):
       File "/__w/rl/rl/docs/source/reference/generated/tutorials/pretrained_models.py", line 40, in <module>
         r3m = R3MTransform(
-      File "/__w/rl/rl/torchrl/envs/transforms/r3m.py", line 250, in __init__
+      File "/__w/rl/rl/torchrl/envs/transforms/r3m.py", line 259, in __init__
         self._init()
-      File "/__w/rl/rl/torchrl/envs/transforms/r3m.py", line 303, in _init
+      File "/__w/rl/rl/torchrl/envs/transforms/r3m.py", line 312, in _init
         raise ValueError(
     ValueError: out_key must be of length 1 if stack_images is True. Got out_keys=[]
 
@@ -240,9 +240,9 @@ In this way, we can train an algorithm offline on a dataset made of images:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.814 seconds)
+   **Total running time of the script:** (0 minutes 3.801 seconds)
 
-**Estimated memory usage:**  567 MB
+**Estimated memory usage:**  568 MB
 
 
 .. _sphx_glr_download_tutorials_pretrained_models.py:

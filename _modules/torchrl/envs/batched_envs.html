@@ -381,13 +381,13 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">connection</span>
 <span class="kn">from</span> <span class="nn">multiprocessing.synchronize</span> <span class="kn">import</span> <span class="n">Lock</span> <span class="k">as</span> <span class="n">MpLock</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="kn">from</span> <span class="nn">tensordict</span> <span class="kn">import</span> <span class="n">TensorDict</span>
-<span class="kn">from</span> <span class="nn">tensordict._tensordict</span> <span class="kn">import</span> <span class="n">_unravel_key_to_tuple</span><span class="p">,</span> <span class="n">unravel_keys</span>
+<span class="kn">from</span> <span class="nn">tensordict._tensordict</span> <span class="kn">import</span> <span class="n">_unravel_key_to_tuple</span><span class="p">,</span> <span class="n">unravel_key</span>
 <span class="kn">from</span> <span class="nn">tensordict.tensordict</span> <span class="kn">import</span> <span class="n">LazyStackedTensorDict</span><span class="p">,</span> <span class="n">TensorDictBase</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">multiprocessing</span> <span class="k">as</span> <span class="n">mp</span>
 <span class="kn">from</span> <span class="nn">torchrl._utils</span> <span class="kn">import</span> <span class="n">_check_for_faulty_process</span><span class="p">,</span> <span class="n">_ProcessNoWarn</span><span class="p">,</span> <span class="n">VERBOSE</span>
@@ -396,9 +396,10 @@
 <span class="kn">from</span> <span class="nn">torchrl.envs.env_creator</span> <span class="kn">import</span> <span class="n">get_env_metadata</span>
 
 <span class="kn">from</span> <span class="nn">torchrl.envs.utils</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_aggregate_resets</span><span class="p">,</span>
+    <span class="n">_aggregate_end_of_traj</span><span class="p">,</span>
     <span class="n">_set_single_key</span><span class="p">,</span>
     <span class="n">_sort_keys</span><span class="p">,</span>
+    <span class="n">_update_during_reset</span><span class="p">,</span>
     <span class="n">clear_mpi_env_vars</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -769,7 +770,7 @@
         <span class="p">}</span>
         <span class="c1"># output keys after reset, filtered</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_selected_reset_keys_filt</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">unravel_keys</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env_obs_keys</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span>
+            <span class="n">unravel_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env_obs_keys</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_keys</span>
         <span class="p">}</span>
         <span class="c1"># output keys after step</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_selected_step_keys</span> <span class="o">=</span> <span class="p">{</span>
@@ -779,16 +780,18 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_task</span><span class="p">:</span>
             <span class="n">shared_tensordict_parent</span> <span class="o">=</span> <span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
                 <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_selected_keys</span><span class="p">,</span>
-                <span class="s2">&quot;next&quot;</span><span class="p">,</span>
+                <span class="o">*</span><span class="p">(</span><span class="n">unravel_key</span><span class="p">((</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env_output_keys</span><span class="p">),</span>
                 <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span> <span class="o">=</span> <span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Multi-task: we share tensordict that *may* have different keys</span>
             <span class="n">shared_tensordict_parent</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_selected_keys</span><span class="p">,</span> <span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">device</span>
-                <span class="p">)</span>
+                <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                    <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_selected_keys</span><span class="p">,</span>
+                    <span class="o">*</span><span class="p">(</span><span class="n">unravel_key</span><span class="p">((</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env_output_keys</span><span class="p">),</span>
+                    <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">tensordict</span> <span class="ow">in</span> <span class="n">shared_tensordict_parent</span>
             <span class="p">]</span>
             <span class="n">shared_tensordict_parent</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
@@ -824,6 +827,9 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">is_memmap</span><span class="p">():</span>
                     <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;memmap_() failed&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordicts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># we cache all the keys of the shared parent td for future use. This is</span>
+        <span class="c1"># safe since the td is locked.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache_shared_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_start_workers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Starts the various envs.&quot;&quot;&quot;</span>
@@ -927,6 +933,76 @@
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">env</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_envs</span><span class="p">):</span>
             <span class="n">env</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;worker</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span></div>
 
+    <span class="k">def</span> <span class="nf">_shutdown_workers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_closed</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">env</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_envs</span><span class="p">:</span>
+                <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_envs</span>
+
+<div class="viewcode-block" id="SerialEnv.set_seed"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.SerialEnv.html#torchrl.envs.SerialEnv.set_seed">[docs]</a>    <span class="nd">@_check_start</span>
+    <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">static_seed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">env</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_envs</span><span class="p">:</span>
+            <span class="n">new_seed</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">static_seed</span><span class="o">=</span><span class="n">static_seed</span><span class="p">)</span>
+            <span class="n">seed</span> <span class="o">=</span> <span class="n">new_seed</span>
+        <span class="k">return</span> <span class="n">seed</span></div>
+
+    <span class="nd">@_check_start</span>
+    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">_aggregate_end_of_traj</span><span class="p">(</span>
+                <span class="n">tensordict</span><span class="p">,</span> <span class="n">reset_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
+                <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">expand</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_env</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_envs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">needs_resetting</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tensordict_</span> <span class="o">=</span> <span class="n">tensordict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">tensordict_</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+                    <span class="n">tensordict_</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># reset will do modifications in-place. We want the original</span>
+                    <span class="c1"># tensorict to be unchaned, so we clone it</span>
+                    <span class="n">tensordict_</span> <span class="o">=</span> <span class="n">tensordict_</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tensordict_</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">_td</span> <span class="o">=</span> <span class="n">_env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tensordict_</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordicts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span>
+                <span class="n">_td</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_selected_reset_keys_filt</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">selected_output_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_reset_keys_filt</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_task</span><span class="p">:</span>
+            <span class="c1"># select + clone creates 2 tds, but we can create one only</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">(</span>
+                <span class="p">{},</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">selected_output_keys</span><span class="p">:</span>
+                <span class="n">_set_single_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">clone</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">out</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">selected_output_keys</span><span class="p">,</span>
+                <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_reset_proc_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">,</span> <span class="n">tensordict_reset</span><span class="p">):</span>
+        <span class="c1"># since we call `reset` directly, all the postproc has been completed</span>
+        <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_update_during_reset</span><span class="p">(</span><span class="n">tensordict_reset</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tensordict_reset</span>
+
     <span class="nd">@_check_start</span>
     <span class="k">def</span> <span class="nf">_step</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -951,81 +1027,6 @@
             <span class="c1"># strict=False ensures that non-homogeneous keys are still there</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">next_td</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_selected_step_keys</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">out</span>
-
-    <span class="k">def</span> <span class="nf">_shutdown_workers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_closed</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">env</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_envs</span><span class="p">:</span>
-                <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_envs</span>
-
-<div class="viewcode-block" id="SerialEnv.set_seed"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.SerialEnv.html#torchrl.envs.SerialEnv.set_seed">[docs]</a>    <span class="nd">@_check_start</span>
-    <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">static_seed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="k">for</span> <span class="n">env</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_envs</span><span class="p">:</span>
-            <span class="n">new_seed</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">static_seed</span><span class="o">=</span><span class="n">static_seed</span><span class="p">)</span>
-            <span class="n">seed</span> <span class="o">=</span> <span class="n">new_seed</span>
-        <span class="k">return</span> <span class="n">seed</span></div>
-
-    <span class="nd">@_check_start</span>
-    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
-
-        <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">_aggregate_resets</span><span class="p">(</span><span class="n">tensordict</span><span class="p">,</span> <span class="n">reset_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="ow">not</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
-                <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">expand</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
-                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span>
-            <span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_env</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_envs</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tensordict_</span> <span class="o">=</span> <span class="n">tensordict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">tensordict_</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
-                    <span class="n">tensordict_</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">tensordict_</span> <span class="o">=</span> <span class="kc">None</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">needs_resetting</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-                <span class="c1"># We update the stored tensordict with the value of the &quot;next&quot;</span>
-                <span class="c1"># key as one may be surprised to receive data that is not up-to-date</span>
-                <span class="c1"># If we don&#39;t do this, the result of calling reset and skipping one env</span>
-                <span class="c1"># will be that the env will have the data from the previous</span>
-                <span class="c1"># step at the root (since the shared_tensordict did not go through</span>
-                <span class="c1"># step_mdp).</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordicts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordicts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                    <span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">)</span>
-                    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_selected_reset_keys</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">tensordict_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordicts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span>
-                        <span class="n">tensordict_</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_selected_reset_keys</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="k">continue</span>
-            <span class="n">_td</span> <span class="o">=</span> <span class="n">_env</span><span class="o">.</span><span class="n">_reset</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">tensordict_</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordicts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span>
-                <span class="n">_td</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_selected_reset_keys</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="n">selected_output_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_reset_keys_filt</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_task</span><span class="p">:</span>
-            <span class="c1"># select + clone creates 2 tds, but we can create one only</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">TensorDict</span><span class="p">(</span>
-                <span class="p">{},</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">selected_output_keys</span><span class="p">:</span>
-                <span class="n">_set_single_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">clone</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">out</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-                <span class="o">*</span><span class="n">selected_output_keys</span><span class="p">,</span>
-                <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__dir__</span><span class="p">():</span>
@@ -1165,21 +1166,71 @@
             <span class="n">event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
             <span class="n">event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="ParallelEnv.step_and_maybe_reset"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.ParallelEnv.html#torchrl.envs.ParallelEnv.step_and_maybe_reset">[docs]</a>    <span class="nd">@_check_start</span>
+    <span class="k">def</span> <span class="nf">step_and_maybe_reset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TensorDictBase</span><span class="p">,</span> <span class="n">TensorDictBase</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_task</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_lazy_inputs</span><span class="p">:</span>
+            <span class="c1"># We must use the in_keys and nothing else for the following reasons:</span>
+            <span class="c1"># - efficiency: copying all the keys will in practice mean doing a lot</span>
+            <span class="c1">#   of writing operations since the input tensordict may (and often will)</span>
+            <span class="c1">#   contain all the previous output data.</span>
+            <span class="c1"># - value mismatch: if the batched env is placed within a transform</span>
+            <span class="c1">#   and this transform overrides an observation key (eg, CatFrames)</span>
+            <span class="c1">#   the shape, dtype or device may not necessarily match and writing</span>
+            <span class="c1">#   the value in-place will fail.</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="c1"># we copy the input keys as well as the keys in the &#39;next&#39; td, if any</span>
+                <span class="c1"># as this mechanism can be used by a policy to set anticipatively the</span>
+                <span class="c1"># keys of the next call (eg, with recurrent nets)</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env_input_keys</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;next&quot;</span>
+                <span class="p">):</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">set_</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span>
+                <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_env_input_keys</span><span class="p">,</span> <span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent_channels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">send</span><span class="p">((</span><span class="s2">&quot;step_and_maybe_reset&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">):</span>
+            <span class="n">event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="c1"># We must pass a clone of the tensordict, as the values of this tensordict</span>
+        <span class="c1"># will be modified in-place at further steps</span>
+        <span class="n">tensordict</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
+        <span class="n">tensordict_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span>
+            <span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">tensordict</span><span class="p">,</span> <span class="n">tensordict_</span></div>
+
     <span class="nd">@_check_start</span>
     <span class="k">def</span> <span class="nf">_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_task</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_lazy_inputs</span><span class="p">:</span>
-            <span class="c1"># this is faster than update_ but won&#39;t work for lazy stacks</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env_input_keys</span><span class="p">:</span>
-                <span class="n">key</span> <span class="o">=</span> <span class="n">_unravel_key_to_tuple</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">_set_tuple</span><span class="p">(</span>
-                    <span class="n">key</span><span class="p">,</span>
-                    <span class="n">tensordict</span><span class="o">.</span><span class="n">_get_tuple</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-                    <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">validated</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="c1"># We must use the in_keys and nothing else for the following reasons:</span>
+            <span class="c1"># - efficiency: copying all the keys will in practice mean doing a lot</span>
+            <span class="c1">#   of writing operations since the input tensordict may (and often will)</span>
+            <span class="c1">#   contain all the previous output data.</span>
+            <span class="c1"># - value mismatch: if the batched env is placed within a transform</span>
+            <span class="c1">#   and this transform overrides an observation key (eg, CatFrames)</span>
+            <span class="c1">#   the shape, dtype or device may not necessarily match and writing</span>
+            <span class="c1">#   the value in-place will fail.</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                <span class="c1"># we copy the input keys as well as the keys in the &#39;next&#39; td, if any</span>
+                <span class="c1"># as this mechanism can be used by a policy to set anticipatively the</span>
+                <span class="c1"># keys of the next call (eg, with recurrent nets)</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_env_input_keys</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;next&quot;</span>
+                <span class="p">):</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">set_</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">shared_tensordict_parent</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span>
-                <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_env_input_keys</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">tensordict</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_env_input_keys</span><span class="p">,</span> <span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
@@ -1209,7 +1260,9 @@
     <span class="nd">@_check_start</span>
     <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensordict</span><span class="p">:</span> <span class="n">TensorDictBase</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TensorDictBase</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">tensordict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">_aggregate_resets</span><span class="p">(</span><span class="n">tensordict</span><span class="p">,</span> <span class="n">reset_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span><span class="p">)</span>
+            <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">_aggregate_end_of_traj</span><span class="p">(</span>
+                <span class="n">tensordict</span><span class="p">,</span> <span class="n">reset_keys</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_keys</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">needs_resetting</span> <span class="o">=</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">needs_resetting</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -1292,6 +1345,8 @@
             <span class="n">proc</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workers</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cuda_events</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_events</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ParallelEnv.set_seed"><a class="viewcode-back" href="../../../reference/generated/torchrl.envs.ParallelEnv.html#torchrl.envs.ParallelEnv.set_seed">[docs]</a>    <span class="nd">@_check_start</span>
     <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span>
@@ -1428,8 +1483,8 @@
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;worker already initialized&quot;</span><span class="p">)</span>
             <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">next_shared_tensordict</span> <span class="o">=</span> <span class="n">shared_tensordict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">)</span>
+            <span class="n">root_shared_tensordict</span> <span class="o">=</span> <span class="n">shared_tensordict</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">)</span>
             <span class="n">shared_tensordict</span> <span class="o">=</span> <span class="n">shared_tensordict</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-            <span class="k">del</span> <span class="n">shared_tensordict</span><span class="p">[</span><span class="s2">&quot;next&quot;</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">shared_tensordict</span><span class="o">.</span><span class="n">is_shared</span><span class="p">()</span> <span class="ow">or</span> <span class="n">shared_tensordict</span><span class="o">.</span><span class="n">is_memmap</span><span class="p">()):</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
@@ -1442,8 +1497,10 @@
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;resetting worker </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">initialized</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;call &#39;init&#39; before resetting&quot;</span><span class="p">)</span>
-            <span class="n">cur_td</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">_reset</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
-            <span class="n">shared_tensordict</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span><span class="n">cur_td</span><span class="p">)</span>
+            <span class="n">cur_td</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">tensordict</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">shared_tensordict</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span>
+                <span class="n">cur_td</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="o">*</span><span class="n">_selected_reset_keys</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">event</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
                 <span class="n">event</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
@@ -1455,6 +1512,18 @@
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">next_td</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">_step</span><span class="p">(</span><span class="n">shared_tensordict</span><span class="p">)</span>
             <span class="n">next_shared_tensordict</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span><span class="n">next_td</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+            <span class="n">mp_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s2">&quot;step_and_maybe_reset&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">initialized</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;called &#39;init&#39; before step&quot;</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">td</span><span class="p">,</span> <span class="n">root_next_td</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step_and_maybe_reset</span><span class="p">(</span><span class="n">shared_tensordict</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
+            <span class="n">next_shared_tensordict</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span><span class="n">td</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">))</span>
+            <span class="n">root_shared_tensordict</span><span class="o">.</span><span class="n">update_</span><span class="p">(</span><span class="n">root_next_td</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">event</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">event</span><span class="o">.</span><span class="n">record</span><span class="p">()</span>
                 <span class="n">event</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
