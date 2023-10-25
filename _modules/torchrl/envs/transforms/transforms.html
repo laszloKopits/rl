@@ -4381,8 +4381,9 @@
 <span class="sd">    tensordict with the desired features.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        primers (dict, optional): a dictionary containing key-spec pairs which will</span>
-<span class="sd">            be used to populate the input tensordict.</span>
+<span class="sd">        primers (dict or CompositeSpec, optional): a dictionary containing</span>
+<span class="sd">            key-spec pairs which will be used to populate the input tensordict.</span>
+<span class="sd">            :class:`~torchrl.data.CompositeSpec` instances are supported too.</span>
 <span class="sd">        random (bool, optional): if ``True``, the values will be drawn randomly from</span>
 <span class="sd">            the TensorSpec domain (or a unit Gaussian if unbounded). Otherwise a fixed value will be assumed.</span>
 <span class="sd">            Defaults to `False`.</span>
@@ -4443,7 +4444,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">primers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">primers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">CompositeSpec</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">random</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">default_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="n">reset_key</span><span class="p">:</span> <span class="n">NestedKey</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -4457,7 +4458,9 @@
                     <span class="s2">&quot;as kwargs.&quot;</span>
                 <span class="p">)</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">primers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">primers</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">CompositeSpec</span><span class="p">):</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">CompositeSpec</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primers</span> <span class="o">=</span> <span class="n">kwargs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random</span> <span class="o">=</span> <span class="n">random</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_value</span> <span class="o">=</span> <span class="n">default_value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_key</span> <span class="o">=</span> <span class="n">reset_key</span>

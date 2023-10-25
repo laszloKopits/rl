@@ -372,8 +372,8 @@
 <span class="c1">#</span>
 <span class="c1"># This source code is licensed under the MIT license found in the</span>
 <span class="c1"># LICENSE file in the root directory of this source tree.</span>
-
 <span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
 
@@ -660,6 +660,10 @@
 <span class="sd">            is_shared=False)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s2">&quot;This helper function will be deprecated in v0.4. Consider using the local helper in the REDQ example.&quot;</span><span class="p">,</span>
+        <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">tanh_loc</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">tanh_loc</span>
     <span class="n">default_policy_scale</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">default_policy_scale</span>
     <span class="n">gSDE</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gSDE</span>
