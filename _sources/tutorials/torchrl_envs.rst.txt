@@ -213,7 +213,7 @@ uniformly distributed) numbers in that space:
  .. code-block:: none
 
     random action: 
-     tensor([-0.6559])
+     tensor([0.1652])
 
 
 
@@ -707,7 +707,7 @@ argument that allows the user to quickly ask for image-based environments:
  .. code-block:: none
 
 
-    <matplotlib.image.AxesImage object at 0x7fb7144560d0>
+    <matplotlib.image.AxesImage object at 0x7f6ab44858b0>
 
 
 
@@ -848,7 +848,7 @@ The ``available_envs`` now returns a dict of envs and possible tasks:
  .. code-block:: none
 
 
-    <generator object DMControlWrapper.available_envs at 0x7fb6c4029120>
+    <generator object DMControlWrapper.available_envs at 0x7f6ab4ddd120>
 
 
 
@@ -1506,7 +1506,7 @@ to access this attribute. Here's an example:
  .. code-block:: none
 
 
-    'bar_7423e45a-77f8-11ee-8573-0242ac120002'
+    'bar_7917b26a-798e-11ee-b0eb-0242ac120002'
 
 
 
@@ -1555,7 +1555,7 @@ to access this attribute. Here's an example:
  .. code-block:: none
 
 
-    <torchrl.envs.batched_envs._dispatch_caller_parallel object at 0x7fb63f891ca0>
+    <torchrl.envs.batched_envs._dispatch_caller_parallel object at 0x7f6ab542a670>
 
 
 
@@ -1575,7 +1575,7 @@ to access this attribute. Here's an example:
  .. code-block:: none
 
 
-    ['bar_7bdd9146-77f8-11ee-874c-0242ac120002', 'bar_7bd5e19e-77f8-11ee-ac68-0242ac120002', 'bar_7bdee8fc-77f8-11ee-8ecb-0242ac120002']
+    ['bar_81110ea8-798e-11ee-9884-0242ac120002', 'bar_81108dde-798e-11ee-8ef3-0242ac120002', 'bar_81108f0a-798e-11ee-9d22-0242ac120002']
 
 
 
@@ -1792,8 +1792,8 @@ In regular setting, using VecNorm is quite easy:
 
  .. code-block:: none
 
-    mean: : tensor([-0.2487,  0.1259, -0.4000])
-    std: : tensor([1.1510, 1.1511, 1.0397])
+    mean: : tensor([ 0.4470,  0.1136, -0.1557])
+    std: : tensor([1.2266, 1.2587, 1.2644])
 
 
 
@@ -1856,8 +1856,8 @@ once created:
         batch_size=torch.Size([3, 5]),
         device=cpu,
         is_shared=False)
-    mean: : tensor([-0.1733,  0.1252, -0.2305])
-    std: : tensor([1.1231, 1.2130, 1.2130])
+    mean: : tensor([-0.0228,  0.0465, -0.0632])
+    std: : tensor([1.1793, 1.1655, 1.2796])
 
 
 
@@ -1898,9 +1898,9 @@ This small difference will usually be absored throughout training.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (3 minutes 42.971 seconds)
+   **Total running time of the script:** (3 minutes 52.901 seconds)
 
-**Estimated memory usage:**  182 MB
+**Estimated memory usage:**  13 MB
 
 
 .. _sphx_glr_download_tutorials_torchrl_envs.py:
