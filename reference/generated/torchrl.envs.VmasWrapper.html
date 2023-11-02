@@ -382,6 +382,34 @@
 <dt class="sig sig-object py" id="torchrl.envs.VmasWrapper">
 <span class="sig-prename descclassname"><span class="pre">torchrl.envs.</span></span><span class="sig-name descname"><span class="pre">VmasWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/torchrl/envs/libs/vmas.html#VmasWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchrl.envs.VmasWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Vmas environment wrapper.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>env</strong> (<code class="docutils literal notranslate"><span class="pre">vmas.simulator.environment.environment.Environment</span></code>) – the vmas environment to wrap.</p></li>
+<li><p><strong>categorical_actions</strong> (<em>bool</em><em>, </em><em>optional</em>) – if the environment actions are discrete, whether to transform
+them to categorical or one-hot.</p></li>
+<li><p><strong>group_map</strong> (<em>MarlGroupMapType</em><em> or </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – how to group agents in tensordicts for
+input/output. By default, if the agent names follow the <code class="docutils literal notranslate"><span class="pre">&quot;&lt;name&gt;_&lt;int&gt;&quot;</span></code>
+convention, they will be grouped by <code class="docutils literal notranslate"><span class="pre">&quot;&lt;name&gt;&quot;</span></code>. If they do not follow this convention, they will be all put
+in one group named <code class="docutils literal notranslate"><span class="pre">&quot;agents&quot;</span></code>.
+Otherwise, a group map can be specified or selected from some premade options.
+See <code class="xref py py-class docutils literal notranslate"><span class="pre">MarlGroupMapType</span></code> for more info.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>group_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em>) – how to group agents in tensordicts for
+input/output. See <code class="xref py py-class docutils literal notranslate"><span class="pre">MarlGroupMapType</span></code> for more info.</p></li>
+<li><p><strong>agent_names</strong> (<em>list of str</em>) – names of the agent in the environment</p></li>
+<li><p><strong>agent_names_to_indices_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>int</em><em>]</em>) – dictionary mapping agent names to their index in the enviornment</p></li>
+<li><p><strong>unbatched_action_spec</strong> (<a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.TensorSpec"><em>TensorSpec</em></a>) – version of the spec without the vectorized dimension</p></li>
+<li><p><strong>unbatched_observation_spec</strong> (<a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.TensorSpec"><em>TensorSpec</em></a>) – version of the spec without the vectorized dimension</p></li>
+<li><p><strong>unbatched_reward_spec</strong> (<a class="reference internal" href="torchrl.data.TensorSpec.html#torchrl.data.TensorSpec" title="torchrl.data.TensorSpec"><em>TensorSpec</em></a>) – version of the spec without the vectorized dimension</p></li>
+<li><p><strong>het_specs</strong> (<em>bool</em>) – whether the enviornment has any lazy spec</p></li>
+<li><p><strong>het_specs_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>bool</em><em>]</em>) – dictionary mapping each group to a flag representing of the group has lazy specs</p></li>
+</ul>
+</dd>
+</dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="n">env</span> <span class="o">=</span> <span class="n">VmasWrapper</span><span class="p">(</span>
 <span class="gp">... </span>     <span class="n">vmas</span><span class="o">.</span><span class="n">make_env</span><span class="p">(</span>
